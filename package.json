@@ -1,0 +1,24 @@
+{
+  "name": "md-to-pdf",
+  "version": "1.0.0",
+  "description": "Minimal Markdown to PDF converter using Typst CLI",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/index.ts",
+    "test": "echo \"No tests\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "marked": "^16.1.2",
+    "typst": "^0.10.0-8"
+  },
+  "devDependencies": {
+    "@types/node": "^24.2.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
