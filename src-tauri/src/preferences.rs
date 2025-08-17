@@ -6,6 +6,7 @@ use std::path::PathBuf;
 use tauri::AppHandle;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(default)]
 pub struct Preferences {
     pub papersize: String,  // Changed from paper_size to papersize for Typst compatibility
     pub margin: Margins,    // Changed from margins to margin for Typst compatibility
