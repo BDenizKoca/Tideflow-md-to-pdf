@@ -7,10 +7,11 @@
 use crate::utils;
 use anyhow::{anyhow, Result};
 use serde_json::Value as JsonValue;
+use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
-use tauri::{AppHandle, Emitter};
+use tauri::{AppHandle, Emitter, Manager};
 
 #[cfg(target_os = "windows")]
 use std::os::windows::process::CommandExt;
@@ -29,18 +30,87 @@ pub struct PrefsSetupResult {
     pub prefs_json: JsonValue,
 }
 
-/// Ensures the cmarker asset exists (Windows-only workaround for incomplete package cache)
-pub fn ensure_cmarker_asset() {
+/// Collect Typst package roots that ship with the app or were copied into the user profile.
+/// Typst expects the directory structure `preview/<pkg>/<version>`.
+fn collect_typst_package_paths(config: &RenderConfig) -> Vec<PathBuf> {
+    let mut paths = Vec::new();
+    let mut dedupe = HashSet::new();
+
+    if let Ok(resource_dir) = config.app_handle.path().resource_dir() {
+        let packaged = resource_dir.join("content").join("typst").join("packages");
+        if packaged.exists() && dedupe.insert(packaged.clone()) {
+            paths.push(packaged);
+        }
+    }
+
+    let user_packages = config.content_dir.join("typst").join("packages");
+    if user_packages.exists() && dedupe.insert(user_packages.clone()) {
+        paths.push(user_packages);
+    }
+
+    if let Ok(current_dir) = std::env::current_dir() {
+        let dev_packages = current_dir
+            .join("src-tauri")
+            .join("content")
+            .join("typst")
+            .join("packages");
+        if dev_packages.exists() && dedupe.insert(dev_packages.clone()) {
+            paths.push(dev_packages);
+        }
+    }
+
+    paths
+}
+
+pub(crate) fn typst_package_env(config: &RenderConfig) -> Option<String> {
+    let paths = collect_typst_package_paths(config);
+    if paths.is_empty() {
+        None
+    } else {
+        let separator = if cfg!(target_os = "windows") { ";" } else { ":" };
+        let joined = paths
+            .iter()
+            .map(|p| p.to_string_lossy())
+            .collect::<Vec<_>>()
+            .join(separator);
+        Some(joined)
+    }
+}
+
+/// Ensure Windows users have a usable cmarker package when Typst relies on its LOCALAPPDATA cache.
+fn ensure_cmarker_assets(config: &RenderConfig) {
     #[cfg(target_os = "windows")]
     {
         if let Ok(local) = std::env::var("LOCALAPPDATA") {
-            let assets_dir = Path::new(&local)
+            let package_root = Path::new(&local)
                 .join("typst")
                 .join("packages")
                 .join("preview")
                 .join("cmarker")
-                .join("0.1.6")
-                .join("assets");
+                .join("0.1.6");
+
+            let manifest = package_root.join("typst.toml");
+            let wasm = package_root.join("plugin.wasm");
+            let lib = package_root.join("lib.typ");
+
+            if !(manifest.exists() && wasm.exists() && lib.exists()) {
+                if let Some(source_root) = collect_typst_package_paths(config)
+                    .into_iter()
+                    .find_map(|root| {
+                        let candidate = root.join("preview").join("cmarker").join("0.1.6");
+                        if candidate.exists() {
+                            Some(candidate)
+                        } else {
+                            None
+                        }
+                    })
+                {
+                    let _ = fs::create_dir_all(&package_root);
+                    let _ = copy_directory(&source_root, &package_root);
+                }
+            }
+
+            let assets_dir = package_root.join("assets");
             let target = assets_dir.join("camkale.png");
             if !target.exists() {
                 let _ = fs::create_dir_all(&assets_dir);
@@ -307,20 +377,27 @@ pub fn compile_typst(
     typst_path: &Path,
     output_file: &str,
 ) -> Result<()> {
-    ensure_cmarker_asset();
-    
+    ensure_cmarker_assets(config);
+    let package_env = typst_package_env(config);
+
     // Spawn process with timeout (30 seconds)
     use std::time::Duration;
     
-    let mut child = typst_command(typst_path)
-        .current_dir(&config.build_dir)
-        .args([
-            "compile",
-            "--root",
-            config.typst_root.to_string_lossy().as_ref(),
-            "tideflow.typ",
-            output_file,
-        ])
+    let mut command = typst_command(typst_path);
+    command.current_dir(&config.build_dir);
+    command.args([
+        "compile",
+        "--root",
+        config.typst_root.to_string_lossy().as_ref(),
+        "tideflow.typ",
+        output_file,
+    ]);
+
+    if let Some(package_env) = package_env {
+        command.env("TYPST_PACKAGE_PATH", package_env);
+    }
+
+    let mut child = command
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()?;

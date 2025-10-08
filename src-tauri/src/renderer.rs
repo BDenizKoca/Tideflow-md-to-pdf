@@ -44,6 +44,13 @@ fn build_source_map(
 
     let mut pdf_lookup: HashMap<String, PdfPosition> = HashMap::new();
     let root_arg = content_dir.to_string_lossy().to_string();
+    let render_config = RenderConfig {
+        app_handle,
+        build_dir: build_dir.to_path_buf(),
+        content_dir: content_dir.to_path_buf(),
+        typst_root: content_dir.to_path_buf(),
+    };
+    let package_env = render_pipeline::typst_package_env(&render_config);
     // If the Typst binary is an older 0.13.x release, its `query` selector
     // syntax differs from newer releases and several selector variants we
     // might try here will fail with errors such as "unknown variable:
@@ -53,7 +60,11 @@ fn build_source_map(
     //
     // We detect this by running `typst --version` and checking for
     // "0.13." in the output.
-    if let Ok(ver_out) = render_pipeline::typst_command(&typst_path).arg("--version").output() {
+    let mut version_cmd = render_pipeline::typst_command(&typst_path);
+    if let Some(env) = package_env.as_ref() {
+        version_cmd.env("TYPST_PACKAGE_PATH", env);
+    }
+    if let Ok(ver_out) = version_cmd.arg("--version").output() {
         if ver_out.status.success() {
             let ver_txt = String::from_utf8_lossy(&ver_out.stdout).to_string();
             if ver_txt.contains("0.13.") {
@@ -84,7 +95,11 @@ fn build_source_map(
             selector,
         ];
         println!("[renderer] running typst query args: {:?}", args);
-        let query_result = render_pipeline::typst_command(&typst_path)
+        let mut query_cmd = render_pipeline::typst_command(&typst_path);
+        if let Some(env) = package_env.as_ref() {
+            query_cmd.env("TYPST_PACKAGE_PATH", env);
+        }
+        let query_result = query_cmd
             .current_dir(build_dir)
             .args(&args)
             .output();
@@ -454,5 +469,4 @@ pub async fn render_typst(
         source_map,
     })
 }
-
 
