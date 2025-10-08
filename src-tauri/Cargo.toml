@@ -1,6 +1,6 @@
 [package]
 name = "tideflow"
-version = "1.1.1"
+version = "1.1.2"
 description = "Markdown to PDF editor with real-time preview"
 authors = ["Tideflow Team"]
 license = "MIT"
