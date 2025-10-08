@@ -1,9 +1,14 @@
 /**
  * Timing constants used throughout the application.
  * Centralized here for easy tuning and documentation.
+ * 
+ * All timing values are in milliseconds unless otherwise specified.
+ * Centralizing these values makes it easier to tune performance and
+ * maintain consistency across the application.
  */
 
 export const TIMING = {
+  // Scroll and sync timing
   /** Debounce delay for scroll event handlers to avoid excessive computations */
   SCROLL_DEBOUNCE_MS: 50,
   
@@ -45,6 +50,30 @@ export const TIMING = {
   
   /** One-shot timeout for pending scroll anchor registration */
   PENDING_SCROLL_ONE_SHOT_MS: 600,
+  
+  // Additional timing constants
+  /** Delay for startup render to ensure full initialization */
+  STARTUP_RENDER_DELAY_MS: 500,
+  
+  /** Delay for file switch render to avoid race conditions */
+  FILE_SWITCH_RENDER_DELAY_MS: 100,
+  
+  /** Debounce delay for session persistence to prevent high-frequency writes */
+  SESSION_SAVE_DEBOUNCE_MS: 500,
+  
+  // Retry timing
+  /** Base delay for retry attempts (exponential backoff) */
+  RETRY_DELAY_BASE_MS: 1000,
+  
+  /** Maximum number of retry attempts for critical operations */
+  MAX_RETRY_ATTEMPTS: 3,
+  
+  // Anchor computation debouncing
+  /** Debounce delay for anchor computation during scrolling */
+  ANCHOR_COMPUTATION_DEBOUNCE_MS: 150,
+  
+  /** Shorter debounce for scroll events to keep sync responsive */
+  ANCHOR_COMPUTATION_DEBOUNCE_SCROLL_MS: 50,
 } as const;
 
 /**
@@ -80,6 +109,18 @@ export const UI = {
 } as const;
 
 /**
+ * Layout constants (alias for easier access)
+ * Use LAYOUT instead of UI for layout-specific values
+ */
+export const LAYOUT = {
+  /** Visual gap between PDF pages in pixels */
+  PAGE_GAP_PX: UI.PAGE_GAP_PX,
+  
+  /** Minimum position offset to avoid top edge (better UX) */
+  MIN_POSITION_OFFSET_PX: UI.MIN_OFFSET_FROM_TOP_PX,
+} as const;
+
+/**
  * Anchor selection and positioning constants
  */
 export const ANCHOR = {
@@ -105,4 +146,15 @@ export const DEFAULTS = {
   
   /** Available image width presets */
   IMAGE_WIDTH_PRESETS: ['25%', '40%', '60%', '80%', '100%'] as const,
+} as const;
+
+/**
+ * Performance thresholds for monitoring and logging
+ */
+export const PERFORMANCE = {
+  /** Operations slower than this are logged as warnings (ms) */
+  SLOW_OPERATION_THRESHOLD_MS: 100,
+  
+  /** Maximum number of performance samples to keep per metric */
+  MAX_PERFORMANCE_SAMPLES: 100,
 } as const;

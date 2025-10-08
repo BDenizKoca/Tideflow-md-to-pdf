@@ -1,5 +1,6 @@
 import type { SourceMap } from '../types';
 import type * as pdfjsLib from 'pdfjs-dist';
+import { LAYOUT } from '../constants/timing';
 
 export interface ComputeResult {
   offsets: Map<string, number>;
@@ -17,7 +18,6 @@ export function computeAnchorOffsets(metrics: { page: number; height: number; sc
 
   const sorted = [...metrics].sort((a, b) => a.page - b.page);
   const pageOffsets = new Map<number, number>();
-  const PAGE_GAP = 8; // Visual gap between pages
   let cumulative = 0;
   for (let i = 0; i < sorted.length; i++) {
     const metric = sorted[i];
@@ -25,7 +25,7 @@ export function computeAnchorOffsets(metrics: { page: number; height: number; sc
     cumulative += metric.height;
     // Add gap between pages (but not after last page)
     if (i < sorted.length - 1) {
-      cumulative += PAGE_GAP;
+      cumulative += LAYOUT.PAGE_GAP_PX;
     }
   }
 
@@ -84,8 +84,8 @@ export function computeFallbackOffsets(
     let position = Math.round(fraction * available);
     
     // Avoid positions too close to zero for better UX (users can still see content)
-    if (available > 100 && position < 8) {
-      position = 8;
+    if (available > 100 && position < LAYOUT.MIN_POSITION_OFFSET_PX) {
+      position = LAYOUT.MIN_POSITION_OFFSET_PX;
     }
     
     fallback.set(anchors[i].id, position);
