@@ -12,6 +12,7 @@ import './App.css';
 import { INSTRUCTIONS_DOC } from './instructionsDoc';
 import { useAppInitialization } from './hooks/useAppInitialization';
 import { useWindowManagement } from './hooks/useWindowManagement';
+import { UI_CONSTANTS, SESSION_CONSTANTS } from './constants/editor';
 
 // Import components
 import TabBar from './components/TabBar';
@@ -74,7 +75,7 @@ function App() {
       } catch (error) {
         appLogger.warn('Failed to save session', error);
       }
-    }, 500); // 500ms debounce
+    }, SESSION_CONSTANTS.SAVE_DEBOUNCE_MS); // Debounced session save
     
     return () => clearTimeout(timeoutId);
   }, [openFiles, currentFile, previewVisibleState]);
@@ -89,8 +90,8 @@ function App() {
     );
   }
   // Compute default sizes: if collapsed -> editor 100%, else restored or fallback (55/45)
-  const defaultEditorSize = previewCollapsed ? 100 : 50;
-  const defaultPreviewSize = previewCollapsed ? 0 : 50;
+  const defaultEditorSize = previewCollapsed ? 100 : UI_CONSTANTS.DEFAULT_EDITOR_SIZE;
+  const defaultPreviewSize = previewCollapsed ? UI_CONSTANTS.COLLAPSED_PANEL_SIZE : UI_CONSTANTS.DEFAULT_PREVIEW_SIZE;
   const panelGroupKey = `pg-fixed-${previewCollapsed ? 'collapsed' : 'open'}`;
 
   return (
@@ -109,8 +110,8 @@ function App() {
         <PanelGroup key={panelGroupKey} direction="horizontal" style={{ height: '100%', overflow: 'hidden' }}>
           <Panel
             defaultSize={defaultEditorSize}
-            minSize={25}
-            maxSize={previewCollapsed ? 100 : 75}
+            minSize={UI_CONSTANTS.MIN_PANEL_SIZE}
+            maxSize={previewCollapsed ? 100 : UI_CONSTANTS.MAX_PANEL_SIZE}
             style={{ overflow: 'hidden', minWidth: 0 }}
           >
             <Editor />
@@ -119,8 +120,8 @@ function App() {
           <Panel
             // When collapsed, force a tiny size
             defaultSize={defaultPreviewSize}
-            minSize={previewCollapsed ? 0 : 20}
-            maxSize={previewCollapsed ? 0 : 75}
+            minSize={previewCollapsed ? UI_CONSTANTS.COLLAPSED_PANEL_SIZE : UI_CONSTANTS.MIN_PANEL_SIZE}
+            maxSize={previewCollapsed ? UI_CONSTANTS.COLLAPSED_PANEL_SIZE : UI_CONSTANTS.MAX_PANEL_SIZE}
             style={{ 
               overflow: 'hidden', 
               minWidth: 0, 

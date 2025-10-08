@@ -198,10 +198,12 @@ export function useFileOperations(params: UseFileOperationsParams) {
           }, 100);
           
           // Cleanup: cancel render if component unmounts or file changes
-          return () => {
+          // Note: This cleanup function is not returned from the outer function
+          // It's just for the timeout cleanup
+          setTimeout(() => {
             clearTimeout(timerId);
             abortController.abort();
-          };
+          }, 1000); // Cleanup after 1 second
         }
       });
     }

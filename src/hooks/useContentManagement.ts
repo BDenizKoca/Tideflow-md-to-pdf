@@ -8,6 +8,7 @@ import { renderTypst, cleanupTempPdfs } from '../api';
 import type { SourceMap, SyncMode } from '../types';
 import type { EditorStateRefs } from './useEditorState';
 import { logger } from '../utils/logger';
+import { FILE_CONSTANTS } from '../constants/editor';
 
 // Create scoped logger
 const useContentManagementLogger = logger.createScoped('useContentManagement');
@@ -81,7 +82,7 @@ export function useContentManagement(params: UseContentManagementParams) {
       
       // Clean up old temp PDFs after successful render
       try {
-        await cleanupTempPdfs(10); // Keep last 10 temp PDFs
+        await cleanupTempPdfs(FILE_CONSTANTS.TEMP_PDFS_TO_KEEP); // Keep last N temp PDFs
       } catch (err) {
         // Don't fail the render if cleanup fails
         useContentManagementLogger.warn('Failed to cleanup temp PDFs:', err);

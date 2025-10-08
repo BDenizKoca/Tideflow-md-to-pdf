@@ -14,7 +14,7 @@ export const TIMING = {
   PROGRAMMATIC_SCROLL_GUARD_MS: 150,
   
   /** Idle threshold after last keystroke before considering user stopped typing */
-  TYPING_IDLE_THRESHOLD_MS: 800,
+  TYPING_IDLE_THRESHOLD_MS: 1000,
   
   /** Default debounce for rendering Typst PDFs after content changes */
   RENDER_DEBOUNCE_DEFAULT_MS: 400,

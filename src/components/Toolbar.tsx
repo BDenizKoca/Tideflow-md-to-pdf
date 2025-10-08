@@ -32,7 +32,7 @@ const Toolbar: React.FC = () => {
   const [saveDropdownOpen, setSaveDropdownOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = React.useState(false);
 
-  // Close dropdown when clicking outside
+  // Close dropdown when clicking outside or pressing Escape
   React.useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -43,11 +43,24 @@ const Toolbar: React.FC = () => {
         setSaveDropdownOpen(false);
       }
     };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setRecentDropdownOpen(false);
+        setSaveDropdownOpen(false);
+      }
+    };
     
     if (recentDropdownOpen || saveDropdownOpen) {
       document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.removeEventListener('click', handleClickOutside);
+        document.removeEventListener('keydown', handleKeyDown);
+      };
     }
+    
+    return undefined;
   }, [recentDropdownOpen, saveDropdownOpen]);
 
   React.useEffect(() => {
@@ -262,13 +275,21 @@ const Toolbar: React.FC = () => {
         <div className="toolbar-section">
           {recentFiles.length > 0 ? (
             <div className="file-control-group">
-              <button onClick={handleOpenFile} title="Open File (Ctrl+O)" className="file-open-btn">
-                📂 Open
-              </button>
+          <button 
+            onClick={handleOpenFile} 
+            title="Open File (Ctrl+O)" 
+            className="file-open-btn"
+            aria-label="Open file"
+          >
+            📂 Open
+          </button>
               <div className="dropdown">
                 <button 
                   className="dropdown-toggle" 
                   title="Recent Files"
+                  aria-label="Show recent files"
+                  aria-expanded={recentDropdownOpen}
+                  aria-haspopup="true"
                   onClick={(e) => {
                     e.stopPropagation();
                     setRecentDropdownOpen(!recentDropdownOpen);
@@ -277,12 +298,14 @@ const Toolbar: React.FC = () => {
                   ▼
                 </button>
                 {recentDropdownOpen && (
-                  <div className="dropdown-menu">
+                  <div className="dropdown-menu" role="menu" aria-label="Recent files menu">
                     <div className="dropdown-header">Recent Files</div>
                     {recentFiles.map((file) => (
                       <button
                         key={file}
                         className="dropdown-item"
+                        role="menuitem"
+                        aria-label={`Open recent file: ${file}`}
                         onClick={async () => {
                           try {
                             const content = await readMarkdownFile(file);
@@ -305,6 +328,8 @@ const Toolbar: React.FC = () => {
                     <div className="dropdown-divider"></div>
                     <button
                       className="dropdown-item dropdown-clear"
+                      role="menuitem"
+                      aria-label="Clear recent files"
                       onClick={() => {
                         clearRecentFiles();
                         setRecentDropdownOpen(false);
@@ -318,16 +343,25 @@ const Toolbar: React.FC = () => {
               </div>
             </div>
           ) : (
-            <button onClick={handleOpenFile} title="Open File (Ctrl+O)">
+            <button 
+              onClick={handleOpenFile} 
+              title="Open File (Ctrl+O)"
+              aria-label="Open file"
+            >
               📂 Open
             </button>
           )}
-          <button onClick={handleNewFile} title="New File (Ctrl+N)">
+          <button 
+            onClick={handleNewFile} 
+            title="New File (Ctrl+N)"
+            aria-label="Create new file"
+          >
             📄 New
           </button>
           <button
             onClick={closeAllFiles}
             title="Close all tabs and return to instructions"
+            aria-label="Close all open files"
           >
             ✖ Close All
           </button>
@@ -341,6 +375,8 @@ const Toolbar: React.FC = () => {
             onClick={handleTogglePreview}
             className={previewVisible ? 'active' : 'inactive'}
             title={previewVisible ? 'Hide Preview (Ctrl+\\)' : 'Show Preview (Ctrl+\\'}
+            aria-label={previewVisible ? 'Hide PDF preview' : 'Show PDF preview'}
+            aria-pressed={previewVisible}
           >
             {previewVisible ? '👁️ Preview' : '👁️‍🗨️ Preview'}
           </button>
@@ -349,6 +385,7 @@ const Toolbar: React.FC = () => {
             onClick={toggleFullscreen}
             title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
             className="fullscreen-btn"
+            aria-label={isFullscreen ? 'Exit fullscreen mode' : 'Enter fullscreen mode'}
           >
             {isFullscreen ? '⊡ Exit' : '⛶ Fullscreen'}
           </button>
@@ -363,6 +400,8 @@ const Toolbar: React.FC = () => {
               disabled={!editor.modified}
               title="Save File (Ctrl+S)"
               className="file-open-btn btn-primary"
+              aria-label="Save current file"
+              aria-disabled={!editor.modified}
             >
               💾 Save
             </button>
@@ -370,6 +409,9 @@ const Toolbar: React.FC = () => {
               <button 
                 className="dropdown-toggle btn-primary" 
                 title="Save options"
+                aria-label="Show save options"
+                aria-expanded={saveDropdownOpen}
+                aria-haspopup="true"
                 onClick={(e) => {
                   e.stopPropagation();
                   setSaveDropdownOpen(!saveDropdownOpen);
@@ -378,18 +420,22 @@ const Toolbar: React.FC = () => {
                 ▼
               </button>
               {saveDropdownOpen && (
-                <div className="dropdown-menu">
+                <div className="dropdown-menu" role="menu" aria-label="Save options menu">
                   <button
                     className="dropdown-item"
+                    role="menuitem"
                     onClick={handleSaveAs}
                     title="Save to a different location or filename"
+                    aria-label="Save file as"
                   >
                     💾 Save As…
                   </button>
                   <button
                     className="dropdown-item"
+                    role="menuitem"
                     onClick={handleExportClean}
                     title="Export without Typst wrappers (pure Markdown)"
+                    aria-label="Export clean markdown"
                   >
                     ✨ Export Clean MD
                   </button>
@@ -402,6 +448,8 @@ const Toolbar: React.FC = () => {
             disabled={!editor.compileStatus.pdf_path}
             title="Export PDF (Ctrl+E)"
             className="btn-primary"
+            aria-label="Export PDF"
+            aria-disabled={!editor.compileStatus.pdf_path}
           >
             📄 Export
           </button>

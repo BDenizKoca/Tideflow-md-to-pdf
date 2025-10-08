@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Preferences } from '../types';
 import { logger } from '../utils/logger';
+import { EDITOR_CONSTANTS } from '../constants/editor';
 
 const prefsLogger = logger.createScoped('PreferencesStore');
 
@@ -38,7 +39,7 @@ export const defaultPreferences: Preferences = {
   page_numbers: false,
   header_title: false,
   header_text: '',
-  render_debounce_ms: 400,
+  render_debounce_ms: EDITOR_CONSTANTS.RENDER_DEBOUNCE_MS,
   focused_preview_enabled: false,
   preserve_scroll_position: true,
   confirm_exit_on_unsaved: true,

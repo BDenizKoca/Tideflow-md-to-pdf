@@ -20,12 +20,12 @@ export class ErrorBoundary extends React.Component<React.PropsWithChildren, Erro
     return { hasError: true, message: error instanceof Error ? error.message : String(error) };
   }
 
-  componentDidCatch(error: unknown, info: React.ErrorInfo) {
+  override componentDidCatch(error: unknown, info: React.ErrorInfo) {
     ErrorBoundaryLogger.error(`Caught error: ${error instanceof Error ? error.message : String(error)} | Component stack: ${info.componentStack || 'N/A'}`);
     this.setState({ stack: info.componentStack || undefined });
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       return (
         <div className="error-boundary">

@@ -260,38 +260,6 @@ const Editor: React.FC = () => {
     }
   }, [editorStateRefs.editorViewRef]);
 
-  // Global Ctrl+F handler - works even when editor doesn't have focus
-  React.useEffect(() => {
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      // Check for Ctrl+F (or Cmd+F on Mac)
-      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-        // Prevent default browser find
-        e.preventDefault();
-        e.stopPropagation();
-        
-        // Toggle search panel
-        handleSearchToggle();
-      }
-    };
-
-    // Add listener to window
-    window.addEventListener('keydown', handleGlobalKeyDown, true);
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('keydown', handleGlobalKeyDown, true);
-    };
-  }, [handleSearchToggle]);
-
-  // Handle font changes
-  const handleFontChange = async (font: string) => {
-    if (!editorStateRefs.editorViewRef.current) {
-      return;
-    }
-    setSelectedFont(font);
-    cmd.fontLocal(editorStateRefs.editorViewRef.current, font);
-  };
-
   // Handle opening a file from the no-file screen
   const handleOpenFile = async () => {
     try {
@@ -311,6 +279,53 @@ const Editor: React.FC = () => {
     } catch (err) {
       handleError(err, { operation: 'open file', component: 'Editor' });
     }
+  };
+
+  // Global keyboard shortcuts - works even when editor doesn't have focus
+  React.useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Check for Ctrl+F (or Cmd+F on Mac) - Search
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        // Prevent default browser find
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Toggle search panel
+        handleSearchToggle();
+      }
+      
+      // Check for Ctrl+O - Open file
+      if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
+        e.preventDefault();
+        e.stopPropagation();
+        handleOpenFile();
+      }
+      
+      // Check for Ctrl+N - New file
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+        e.preventDefault();
+        e.stopPropagation();
+        // This would need to be passed from parent or handled differently
+        // For now, just prevent default
+      }
+    };
+
+    // Add listener to window
+    window.addEventListener('keydown', handleGlobalKeyDown, true);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('keydown', handleGlobalKeyDown, true);
+    };
+  }, [handleSearchToggle, handleOpenFile]);
+
+  // Handle font changes
+  const handleFontChange = async (font: string) => {
+    if (!editorStateRefs.editorViewRef.current) {
+      return;
+    }
+    setSelectedFont(font);
+    cmd.fontLocal(editorStateRefs.editorViewRef.current, font);
   };
 
   // Handle opening instructions from the no-file screen

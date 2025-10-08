@@ -32,7 +32,7 @@ class PDFErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     logger.error('PDFErrorBoundary', 'PDF preview rendering failed', {
       error: error.message,
       stack: error.stack,
@@ -52,7 +52,7 @@ class PDFErrorBoundary extends Component<Props, State> {
     }
   };
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       return (
         <div className="pdf-error-boundary">
