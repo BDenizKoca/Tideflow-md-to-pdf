@@ -89,17 +89,28 @@ export async function renderPdfPages(
     }
     container.appendChild(frag);
     
+    const horizontalOverflow = (container.scrollWidth - container.clientWidth) > 1;
+    const targetLeftImmediate = horizontalOverflow ? scrollLeft : 0;
+    container.scrollLeft = targetLeftImmediate;
+    
     // CRITICAL: Restore scroll position after re-rendering
     // This prevents the "jump to top" issue during re-renders
     // Use requestAnimationFrame to ensure content is laid out first
     requestAnimationFrame(() => {
       if (container.isConnected) {
-        const before = container.scrollTop;
+        const beforeTop = container.scrollTop;
+        const rafHorizontalOverflow = (container.scrollWidth - container.clientWidth) > 1;
+        const targetLeft = rafHorizontalOverflow ? scrollLeft : 0;
+
         pdfLogger.debug('Restoring scroll position', { 
-          target: scrollTop,
-          before,
+          targetTop: scrollTop,
+          beforeTop,
+          targetLeft,
+          horizontalOverflow: rafHorizontalOverflow,
           scrollHeight: container.scrollHeight,
-          clientHeight: container.clientHeight
+          clientHeight: container.clientHeight,
+          scrollWidth: container.scrollWidth,
+          clientWidth: container.clientWidth
         });
         
         // Set programmatic scroll guard to prevent scroll events from triggering sync
@@ -108,12 +119,15 @@ export async function renderPdfPages(
         }
         
         container.scrollTop = scrollTop;
-        container.scrollLeft = scrollLeft;
+        container.scrollLeft = targetLeft;
         
         pdfLogger.debug('Restored scroll position', { 
-          target: scrollTop,
-          actual: container.scrollTop,
-          success: Math.abs(container.scrollTop - scrollTop) < 5
+          targetTop: scrollTop,
+          actualTop: container.scrollTop,
+          targetLeft,
+          actualLeft: container.scrollLeft,
+          horizontalOverflow: rafHorizontalOverflow,
+          topSuccess: Math.abs(container.scrollTop - scrollTop) < 5
         });
       }
     });

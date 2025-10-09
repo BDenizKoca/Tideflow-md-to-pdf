@@ -152,9 +152,12 @@ export function usePdfToEditorSync(params: UsePdfToEditorSyncParams): void {
     const handleScroll = () => {
       // CRITICAL: Save scroll position immediately on every scroll
       // This ensures we have the latest position before any re-render
+      const hasHorizontalOverflow = (el.scrollWidth - el.clientWidth) > 1;
       savedScrollPositionRef.current = {
         top: el.scrollTop,
-        left: el.scrollLeft
+        // Only preserve horizontal offset when content actually overflows.
+        // Otherwise force it back to 0 so the PDF stays visually centered.
+        left: hasHorizontalOverflow ? el.scrollLeft : 0
       };
       
       // Log FIRST before any guards

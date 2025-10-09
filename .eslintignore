@@ -1,5 +1,0 @@
-# Ignore built artifacts and generated files
-src-tauri/target/
-node_modules/
-.vscode/
-.DS_Store
