@@ -39,7 +39,7 @@ const AdvancedTab: React.FC<TabProps> = ({ local, mutate }) => {
     setSaving(true);
     try {
       const prefs = await api.getPreferences();
-      prefs.typst_path = typstPath;
+      prefs.typst_path = typstPath?.trim().replace(/[\\/]+$/, '');
       // Before persisting, validate the provided path (or at least run diagnostics)
       const diagRes = await api.typstDiagnostics();
       // Friendly result: prefer detected_binary from diagnostics; if user provided path doesn't match detected, warn

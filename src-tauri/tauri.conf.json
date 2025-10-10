@@ -21,10 +21,18 @@
       }
     ],
     "security": {
-      "csp": null,
+      "csp": "default-src 'self' 'unsafe-inline' 'unsafe-eval' ipc: http://ipc.localhost; img-src 'self' asset: http://asset.localhost blob: data: http://asset.localhost; font-src 'self' asset: http://localhost data:;",
       "assetProtocol": {
         "enable": true,
-        "scope": ["**"]
+        "scope": {
+          "allow": [
+            "$APPDATA/assets/**",
+            "$APPDATA/**",
+            "$DOWNLOAD/*",
+            "$HOME/**"
+          ],
+          "requireLiteralLeadingDot": false
+        }
       }
     },
     "withGlobalTauri": true
