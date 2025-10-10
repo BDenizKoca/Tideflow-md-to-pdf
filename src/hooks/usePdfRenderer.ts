@@ -107,7 +107,17 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
         // Ensure file paths are converted to a browser-loadable URL when
         // running inside Tauri; convertFileSrc handles file:// -> http(s)
         // served blob URLs required by pdf.js.
-        const fileUrl = convertFileSrc(compileStatus.pdf_path ?? '') + `?v=${Date.now()}`;
+        let fileUrl = convertFileSrc(compileStatus.pdf_path ?? '');
+
+        // HACK: Workaround for Tauri bug on Linux where convertFileSrc produces
+        // an incorrect URL for absolute paths (e.g. //localhost/%2Fpath...).
+        // We manually reconstruct it using the tauri protocol.
+        if (fileUrl.startsWith('//localhost/')) {
+          const fixedPath = (compileStatus.pdf_path ?? '').replace(/\\/g, '/');
+          fileUrl = `https://tauri.localhost/${fixedPath}`;
+        }
+        
+        fileUrl += `?v=${Date.now()}`;
         const renderScale = pdfZoom;
         const { doc, metrics } = await renderPdfPages(fileUrl, containerRef.current, renderScale, localCancel, savedPosition, programmaticScrollRef);
         if (localCancel.canceled) return;
