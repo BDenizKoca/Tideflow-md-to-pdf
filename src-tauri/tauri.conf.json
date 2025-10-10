@@ -21,7 +21,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' 'unsafe-inline' 'unsafe-eval' ipc: http://ipc.localhost; img-src 'self' asset: http://asset.localhost blob: data: http://asset.localhost; font-src 'self' asset: http://localhost data:;",
+      "csp": "default-src 'self' 'unsafe-inline' 'unsafe-eval' ipc: http://ipc.localhost https://tauri.localhost http://asset.localhost https://asset.localhost; connect-src 'self' ipc: http://ipc.localhost https://tauri.localhost http://asset.localhost https://asset.localhost; img-src 'self' asset: http://asset.localhost https://asset.localhost blob: data:; font-src 'self' asset: http://localhost data:;",
       "assetProtocol": {
         "enable": true,
         "scope": {
