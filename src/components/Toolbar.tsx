@@ -378,7 +378,7 @@ const Toolbar: React.FC = () => {
                 ▼
               </button>
               {saveDropdownOpen && (
-                <div className="dropdown-menu">
+                <div className="dropdown-menu save-dropdown">
                   <button
                     className="dropdown-item"
                     onClick={handleSaveAs}

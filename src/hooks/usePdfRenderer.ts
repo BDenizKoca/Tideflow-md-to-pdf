@@ -111,10 +111,22 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
 
         // HACK: Workaround for Tauri bug on Linux where convertFileSrc may produce
         // incorrect URLs for absolute paths. Detect and fix common problematic patterns.
-        // Patterns: //localhost/%2F..., asset://localhost/..., or other malformed URLs
+        // Patterns:
+        // - //localhost/%2F... (missing protocol)
+        // - asset://localhost/... (should be https://asset.localhost/)
         if (fileUrl.startsWith('//localhost/') || fileUrl.startsWith('asset://localhost/')) {
-          const fixedPath = (compileStatus.pdf_path ?? '').replace(/\\/g, '/');
-          fileUrl = `https://asset.localhost/${encodeURIComponent(fixedPath)}`;
+          // Extract the already-encoded path portion after localhost/
+          const encodedPath = fileUrl.replace(/^(\/\/localhost\/|asset:\/\/localhost\/)/, '');
+          try {
+            // convertFileSrc already encodes the path, so decode once and rebuild a proper URL
+            const decodedPath = decodeURIComponent(encodedPath);
+            const normalizedPath = decodedPath.startsWith('/') ? decodedPath : `/${decodedPath}`;
+            fileUrl = new URL(normalizedPath, 'https://asset.localhost').toString();
+          } catch {
+            // Fallback: trust the original encoded path but ensure a leading slash
+            const safePath = encodedPath.startsWith('/') ? encodedPath : `/${encodedPath}`;
+            fileUrl = `https://asset.localhost${safePath}`;
+          }
         }
         
         fileUrl += `?v=${Date.now()}`;
