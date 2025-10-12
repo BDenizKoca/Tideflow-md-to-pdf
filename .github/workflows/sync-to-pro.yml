@@ -12,7 +12,6 @@ jobs:
       - name: Checkout Public Repo
         uses: actions/checkout@v4
         with:
-          repository: 'BDenizKoca/tideflow'
           fetch-depth: 0 # Important: fetch all history for all branches and tags
           
       - name: Mirror to Private Repo
