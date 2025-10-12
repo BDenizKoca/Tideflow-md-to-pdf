@@ -109,24 +109,10 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
         // served blob URLs required by pdf.js.
         let fileUrl = convertFileSrc(compileStatus.pdf_path ?? '');
 
-        // HACK: Workaround for Tauri bug on Linux where convertFileSrc may produce
-        // incorrect URLs for absolute paths. Detect and fix common problematic patterns.
-        // Patterns:
-        // - //localhost/%2F... (missing protocol)
-        // - asset://localhost/... (should be https://asset.localhost/)
-        if (fileUrl.startsWith('//localhost/') || fileUrl.startsWith('asset://localhost/')) {
-          // Extract the already-encoded path portion after localhost/
-          const encodedPath = fileUrl.replace(/^(\/\/localhost\/|asset:\/\/localhost\/)/, '');
-          try {
-            // convertFileSrc already encodes the path, so decode once and rebuild a proper URL
-            const decodedPath = decodeURIComponent(encodedPath);
-            const normalizedPath = decodedPath.startsWith('/') ? decodedPath : `/${decodedPath}`;
-            fileUrl = new URL(normalizedPath, 'https://asset.localhost').toString();
-          } catch {
-            // Fallback: trust the original encoded path but ensure a leading slash
-            const safePath = encodedPath.startsWith('/') ? encodedPath : `/${encodedPath}`;
-            fileUrl = `https://asset.localhost${safePath}`;
-          }
+        // Linux workaround: convertFileSrc sometimes produces asset://localhost/...
+        // which needs to be https://asset.localhost/... for the browser to load it
+        if (fileUrl.startsWith('asset://localhost/')) {
+          fileUrl = fileUrl.replace('asset://localhost/', 'https://asset.localhost/');
         }
         
         fileUrl += `?v=${Date.now()}`;
