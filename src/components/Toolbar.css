@@ -627,3 +627,40 @@ body.light .toolbar-actions button:disabled { background:#94a3b8; border-color:#
   --dropdown-item-shadow: 0 10px 20px rgba(185, 28, 28, 0.35);
   font-weight: 600;
 }
+
+
+/* Locked button styling - appears locked but still clickable */
+.toolbar-actions button.btn-locked {
+  position: relative;
+  opacity: 0.85;
+}
+
+.toolbar-actions button.btn-locked::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 6px,
+    rgba(0, 0, 0, 0.15) 6px,
+    rgba(0, 0, 0, 0.15) 10px
+  );
+  pointer-events: none;
+  border-radius: 6px;
+}
+
+.toolbar-actions button.btn-locked:hover:not(:disabled) {
+  opacity: 1;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.6), 0 0 0 1px rgba(247,240,240,0.2) inset, 0 0 16px rgba(53, 144, 243, 0.6);
+}
+
+.toolbar-actions button.btn-locked:hover::after {
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 6px,
+    rgba(0, 0, 0, 0.12) 6px,
+    rgba(0, 0, 0, 0.12) 10px
+  );
+}

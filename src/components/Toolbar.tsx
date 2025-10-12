@@ -22,6 +22,8 @@ const Toolbar: React.FC = () => {
     previewVisible,
     setPreviewVisible,
     designModalOpen,
+    setDesignModalOpen,
+    setDesignModalActiveTab,
     addToast,
     recentFiles,
     addRecentFile,
@@ -397,7 +399,18 @@ const Toolbar: React.FC = () => {
               )}
             </div>
           </div>
-          <button 
+          <button
+            type="button"
+            onClick={() => {
+              setDesignModalActiveTab('about');
+              setDesignModalOpen(true);
+            }}
+            title="Batch Export (Pro Feature)"
+            className="btn-primary btn-locked"
+          >
+            🔒 Batch Export
+          </button>
+          <button
             onClick={handleExportPDF}
             disabled={!editor.compileStatus.pdf_path}
             title="Export PDF (Ctrl+E)"

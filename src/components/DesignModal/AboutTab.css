@@ -1,0 +1,165 @@
+.about-tab {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem;
+}
+
+.about-tab h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+}
+
+.about-tab h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.about-description {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0.65rem;
+}
+
+.features-list {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin: 1rem 0;
+}
+
+.features-list li {
+  padding: 0.5rem 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.features-list li::marker {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.features-list li strong {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.about-section {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.about-section h4 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.about-section p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 1rem;
+}
+
+.about-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.about-actions .btn-primary,
+.about-actions .btn-secondary {
+  text-align: center;
+  padding: 0.7rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  display: block;
+}
+
+.about-actions .btn-primary {
+  background: #3590F3;
+  color: #ffffff;
+  border: 2px solid #2563eb;
+}
+
+.about-actions .btn-primary:hover {
+  background: #2563eb;
+  border-color: #1e40af;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(53, 144, 243, 0.4);
+}
+
+.about-actions .btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.about-actions .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.about-footer {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.about-links {
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+
+.about-links a {
+  color: #60a5fa;
+  text-decoration: none;
+}
+
+.about-links a:hover {
+  text-decoration: underline;
+  color: #93c5fd;
+}
+
+.about-credits {
+  line-height: 1.6;
+}
+
+.about-credits a {
+  color: #60a5fa;
+  text-decoration: none;
+}
+
+.about-credits a:hover {
+  text-decoration: underline;
+  color: #93c5fd;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .about-tab {
+    padding: 0.5rem;
+  }
+
+  .about-tab h3 {
+    font-size: 1.2rem;
+  }
+
+  .about-section {
+    padding: 1rem;
+  }
+}

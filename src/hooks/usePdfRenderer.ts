@@ -109,10 +109,26 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
         // served blob URLs required by pdf.js.
         let fileUrl = convertFileSrc(compileStatus.pdf_path ?? '');
 
-        // Linux workaround: convertFileSrc sometimes produces asset://localhost/...
-        // which needs to be https://asset.localhost/... for the browser to load it
+        // Linux workaround: convertFileSrc on Linux can produce various problematic URLs
+        // Log the original URL for debugging
+        if (process.env.NODE_ENV !== 'production') {
+          console.debug('[usePdfRenderer] Original URL from convertFileSrc:', fileUrl);
+        }
+
+        // Handle various Linux URL patterns
         if (fileUrl.startsWith('asset://localhost/')) {
+          // Pattern 1: asset://localhost/ -> https://asset.localhost/
           fileUrl = fileUrl.replace('asset://localhost/', 'https://asset.localhost/');
+        } else if (fileUrl.startsWith('//localhost/')) {
+          // Pattern 2: //localhost/ (missing protocol) -> https://asset.localhost/
+          fileUrl = 'https://asset.localhost/' + fileUrl.substring('//localhost/'.length);
+        } else if (fileUrl.startsWith('asset:')) {
+          // Pattern 3: Other asset: URLs -> convert to https://asset.localhost/
+          fileUrl = fileUrl.replace(/^asset:\/*/g, 'https://asset.localhost/');
+        }
+
+        if (process.env.NODE_ENV !== 'production') {
+          console.debug('[usePdfRenderer] Final URL for PDF loading:', fileUrl);
         }
         
         fileUrl += `?v=${Date.now()}`;

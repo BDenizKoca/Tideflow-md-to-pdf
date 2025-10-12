@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { Toast } from '../types';
+import type { TabSection } from '../components/DesignModal/types';
 import { logger } from '../utils/logger';
 
 const uiLogger = logger.createScoped('UIStore');
@@ -9,26 +10,28 @@ interface UIStoreState {
   // Preview state
   previewVisible: boolean;
   setPreviewVisible: (visible: boolean) => void;
-  
+
   // PDF controls
   pdfZoom: number;
   setPdfZoom: (zoom: number) => void;
   thumbnailsVisible: boolean;
   setThumbnailsVisible: (visible: boolean) => void;
-  
+
   // Design modal
   designModalOpen: boolean;
   setDesignModalOpen: (open: boolean) => void;
-  
+  designModalActiveTab: TabSection | null;
+  setDesignModalActiveTab: (tab: TabSection | null) => void;
+
   // Toast notifications
   toasts: Toast[];
   addToast: (toast: Omit<Toast, 'id'>) => void;
   removeToast: (id: string) => void;
-  
+
   // Sample injection guard
   initialSampleInjected: boolean;
   setInitialSampleInjected: (v: boolean) => void;
-  
+
   // Recent files (persisted to localStorage)
   recentFiles: string[];
   addRecentFile: (path: string) => void;
@@ -51,7 +54,9 @@ export const useUIStore = create<UIStoreState>((set) => ({
   // Design modal
   designModalOpen: false,
   setDesignModalOpen: (open: boolean) => set({ designModalOpen: open }),
-  
+  designModalActiveTab: null,
+  setDesignModalActiveTab: (tab: TabSection | null) => set({ designModalActiveTab: tab }),
+
   // Toast notifications
   toasts: [],
   addToast: (toast: Omit<Toast, 'id'>) => set((state) => ({

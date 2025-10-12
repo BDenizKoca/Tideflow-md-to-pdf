@@ -9,15 +9,16 @@ import { logger } from '../utils/logger';
 import { handleError } from '../utils/errorHandler';
 import { useDragToScroll } from '../hooks/useDragToScroll';
 import './DesignModal.css';
-import { 
+import {
   ThemesTab,
-  DocumentTab, 
-  TypographyTab, 
-  SpacingTab, 
-  StructureTab, 
-  ImagesTab, 
-  PresetsTab, 
+  DocumentTab,
+  TypographyTab,
+  SpacingTab,
+  StructureTab,
+  ImagesTab,
+  PresetsTab,
   AdvancedTab,
+  AboutTab,
   type TabSection
 } from './DesignModal/index';
 
@@ -26,7 +27,7 @@ const designLogger = logger.createScoped('DesignModal');
 
 const DesignModal: React.FC = () => {
   const { preferences, setPreferences, themeSelection, setThemeSelection, customPresets, saveCustomPreset, deleteCustomPreset, renameCustomPreset } = usePreferencesStore();
-  const { designModalOpen, setDesignModalOpen, addToast } = useUIStore();
+  const { designModalOpen, setDesignModalOpen, designModalActiveTab, setDesignModalActiveTab, addToast } = useUIStore();
   const currentFile = useEditorStore(s => s.editor.currentFile);
   const setCompileStatus = useEditorStore(s => s.setCompileStatus);
   const [local, setLocal] = useState<Preferences>(preferences);
@@ -76,9 +77,15 @@ const DesignModal: React.FC = () => {
       setLocal(preferences);
       originalRef.current = preferences; // snapshot for cancel
       setDirty(false);
+
+      // If a specific tab was requested, switch to it
+      if (designModalActiveTab) {
+        setActiveTab(designModalActiveTab);
+        setDesignModalActiveTab(null); // Clear the forced tab state
+      }
     }
     prevOpenRef.current = designModalOpen;
-  }, [designModalOpen, preferences]);
+  }, [designModalOpen, preferences, designModalActiveTab, setDesignModalActiveTab]);
 
   const latestSeq = () => applySeq.current;
 
@@ -254,6 +261,7 @@ const DesignModal: React.FC = () => {
     { id: 'images', label: 'Images', icon: '🖼️' },
     { id: 'presets', label: 'Presets', icon: '💾' },
     { id: 'advanced', label: 'Advanced', icon: '⚙️' },
+    { id: 'about', label: 'About', icon: 'ℹ️' },
   ];
 
   return (
@@ -372,6 +380,11 @@ const DesignModal: React.FC = () => {
             {/* Advanced Tab */}
             {activeTab === 'advanced' && (
               <AdvancedTab local={local} mutate={mutate} />
+            )}
+
+            {/* About Tab */}
+            {activeTab === 'about' && (
+              <AboutTab />
             )}
           </div>
         </div>

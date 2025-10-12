@@ -6,4 +6,5 @@ export { default as StructureTab } from './StructureTab';
 export { default as ImagesTab } from './ImagesTab';
 export { default as PresetsTab } from './PresetsTab';
 export { default as AdvancedTab } from './AdvancedTab';
+export { default as AboutTab } from './AboutTab';
 export type { TabSection, TabProps } from './types';
