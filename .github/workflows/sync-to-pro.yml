@@ -18,4 +18,4 @@ jobs:
       - name: Push to Private Repo
         run: |
           git remote add pro https://x-access-token:${{ secrets.GH_PAT }}@github.com/BDenizKoca/tideflow-Pro.git
-          git push pro main
+          git push --force pro main
