@@ -1,0 +1,21 @@
+name: Sync to Pro Repository
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Public Repo
+        uses: actions/checkout@v3
+        with:
+          repository: 'BDenizKoca/Tideflow-md-to-pdf'
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Push to Private Repo
+        run: |
+          git remote add pro https://x-access-token:${{ secrets.GH_PAT }}@github.com/BDenizKoca/tideflow-Pro.git
+          git push pro main
