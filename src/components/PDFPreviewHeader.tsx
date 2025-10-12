@@ -31,6 +31,7 @@ const PDFPreviewHeader: React.FC<Props> = ({ pdfZoom, setPdfZoom }) => {
     themeSelection,
     setThemeSelection,
     setPreferences,
+    customPresets,
   } = usePreferencesStore();
   
   const zoomLevels = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
@@ -65,6 +66,22 @@ const PDFPreviewHeader: React.FC<Props> = ({ pdfZoom, setPdfZoom }) => {
       return;
     }
 
+    // Check if it's a custom preset
+    const customPreset = customPresets[value];
+    if (customPreset) {
+      try {
+        setCompileStatus({ status: 'running' });
+        setPreferences(customPreset.preferences);
+        await persistPreferences(customPreset.preferences);
+        await rerenderCurrent();
+      } catch (e) {
+        PDFPreviewHeaderLogger.warn('custom preset apply failed', e);
+        handleError(e, { operation: 'apply custom preset', component: 'PDFPreviewHeader' }, 'warning');
+      }
+      return;
+    }
+
+    // Otherwise it's a built-in theme
     const preset = themePresets[value];
     if (preset) {
       try {
@@ -139,6 +156,10 @@ const PDFPreviewHeader: React.FC<Props> = ({ pdfZoom, setPdfZoom }) => {
         >
           {Object.entries(themePresets).map(([id, theme]) => (
             <option key={id} value={id} title={theme.description}>{theme.name}</option>
+          ))}
+          {Object.keys(customPresets).length > 0 && <option disabled>──────────</option>}
+          {Object.entries(customPresets).map(([id, preset]) => (
+            <option key={id} value={id}>{preset.name} ⭐</option>
           ))}
           {themeSelection === 'custom' && <option value="custom">Custom</option>}
         </select>
