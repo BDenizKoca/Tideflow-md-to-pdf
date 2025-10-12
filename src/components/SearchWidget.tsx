@@ -1,4 +1,5 @@
 import React from 'react';
+import { UI } from '../constants/timing';
 import './SearchWidget.css';
 
 interface Props {
@@ -27,7 +28,7 @@ const SearchWidget: React.FC<Props> = ({ isOpen, onClose, onSearch, onReplace, o
 
   React.useEffect(() => {
     if (isOpen && inputRef.current) {
-      const timer = setTimeout(() => inputRef.current?.focus(), 50);
+      const timer = setTimeout(() => inputRef.current?.focus(), UI.MODAL_FOCUS_DELAY_MS);
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
