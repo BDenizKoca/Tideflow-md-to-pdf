@@ -14,8 +14,6 @@ export interface ScrollStateRefs {
   userInteractedRef: React.MutableRefObject<boolean>;
   userManuallyPositionedPdfRef: React.MutableRefObject<boolean>;
   initialForcedScrollDoneRef: React.MutableRefObject<boolean>;
-  startupOneShotAppliedRef: React.MutableRefObject<boolean>;
-  finalRefreshDoneRef: React.MutableRefObject<boolean>;
   savedScrollPositionRef: React.MutableRefObject<{ top: number; left: number } | null>;
   // Sync refs (kept in sync with props/state)
   syncModeRef: React.MutableRefObject<SyncMode>;
@@ -43,11 +41,9 @@ export function useScrollState(params: UseScrollStateParams): ScrollStateRefs {
   const userInteractedRef = useRef(false);
   const userManuallyPositionedPdfRef = useRef(false); // Tracks if user scrolled PDF away from synced position
 
-  // One-shot startup sync guards
+  // One-shot startup sync guard
   const initialForcedScrollDoneRef = useRef(false);
-  const startupOneShotAppliedRef = useRef(false);
-  const finalRefreshDoneRef = useRef(false);
-  
+
   // Saved scroll position for preservation during re-renders
   const savedScrollPositionRef = useRef<{ top: number; left: number } | null>(null);
 
@@ -79,8 +75,6 @@ export function useScrollState(params: UseScrollStateParams): ScrollStateRefs {
     userInteractedRef,
     userManuallyPositionedPdfRef,
     initialForcedScrollDoneRef,
-    startupOneShotAppliedRef,
-    finalRefreshDoneRef,
     savedScrollPositionRef,
     syncModeRef,
     activeAnchorRef,
