@@ -109,12 +109,12 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
         // served blob URLs required by pdf.js.
         let fileUrl = convertFileSrc(compileStatus.pdf_path ?? '');
 
-        // HACK: Workaround for Tauri bug on Linux where convertFileSrc produces
-        // an incorrect URL for absolute paths (e.g. //localhost/%2Fpath...).
-        // We manually reconstruct it using the tauri protocol.
-        if (fileUrl.startsWith('//localhost/')) {
+        // HACK: Workaround for Tauri bug on Linux where convertFileSrc may produce
+        // incorrect URLs for absolute paths. Detect and fix common problematic patterns.
+        // Patterns: //localhost/%2F..., asset://localhost/..., or other malformed URLs
+        if (fileUrl.startsWith('//localhost/') || fileUrl.startsWith('asset://localhost/')) {
           const fixedPath = (compileStatus.pdf_path ?? '').replace(/\\/g, '/');
-          fileUrl = `https://tauri.localhost/${fixedPath}`;
+          fileUrl = `https://asset.localhost/${encodeURIComponent(fixedPath)}`;
         }
         
         fileUrl += `?v=${Date.now()}`;
