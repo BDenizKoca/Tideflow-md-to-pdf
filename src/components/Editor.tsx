@@ -174,10 +174,13 @@ const Editor: React.FC = () => {
     const setupListener = async () => {
       console.log('[Editor] Setting up Tauri file drop listener');
       
-      unlisten = await listen<{ paths: string[]; position: { x: number; y: number } }>('tauri://drag-drop', async (event) => {
+      unlisten = await listen<{ paths: string[]; position: { x: number; y: number } } | string[]>('tauri://drag-drop', async (event) => {
         console.log('[Editor] Tauri file drop event:', event.payload);
-        
-        const paths = event.payload?.paths || event.payload as unknown as string[];
+
+        // Handle both payload formats: object with paths property, or array directly
+        const paths = (event.payload && typeof event.payload === 'object' && 'paths' in event.payload)
+          ? event.payload.paths
+          : Array.isArray(event.payload) ? event.payload : [];
         
         if (paths && paths.length > 0) {
           const filePath = paths[0];

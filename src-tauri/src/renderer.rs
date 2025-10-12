@@ -422,11 +422,13 @@ pub async fn render_typst(
     
     // Filter out content that cmarker/Typst can't handle to prevent compilation errors
     // Remove external image URLs that cmarker can't fetch (causes OS error 123)
-    let re_external_img = regex::Regex::new(r"!\[[^\]]*\]\(https?://[^)]+\)").unwrap();
+    let re_external_img = regex::Regex::new(r"!\[[^\]]*\]\(https?://[^)]+\)")
+        .expect("BUG: Invalid regex pattern for external markdown images");
     processed = re_external_img.replace_all(&processed, "").to_string();
-    
+
     // Also remove HTML img tags with external URLs
-    let re_external_html = regex::Regex::new(r#"<img[^>]*src=["']https?://[^"']+["'][^>]*>"#).unwrap();
+    let re_external_html = regex::Regex::new(r#"<img[^>]*src=["']https?://[^"']+["'][^>]*>"#)
+        .expect("BUG: Invalid regex pattern for external HTML images");
     processed = re_external_html.replace_all(&processed, "").to_string();
     
     fs::write(&temp_content_path, &processed)?;

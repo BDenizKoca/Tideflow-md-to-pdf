@@ -31,7 +31,7 @@ pub fn copy_file_with_retry(source: &Path, destination: &Path, max_retries: u32)
     Err(anyhow!(
         "Failed to copy file after {} attempts: {}",
         max_retries,
-        last_error.unwrap()
+        last_error.expect("BUG: last_error should be set after at least one attempt")
     ))
 }
 
@@ -80,7 +80,8 @@ pub fn copy_directory(from: &Path, to: &Path, force_overwrite: bool) -> Result<(
 /// Sanitize filename to be safe for file systems
 pub fn sanitize_filename(filename: &str) -> String {
     // Remove any potentially dangerous characters
-    let re = Regex::new(r"[^a-zA-Z0-9\-_.]+").unwrap();
+    let re = Regex::new(r"[^a-zA-Z0-9\-_.]+")
+        .expect("BUG: Invalid regex pattern for filename sanitization");
     let sanitized = re.replace_all(filename, "-").to_string();
     
     // Ensure the filename is not empty

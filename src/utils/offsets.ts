@@ -117,8 +117,9 @@ export async function extractOffsetsFromPdfText(doc: pdfjsLib.PDFDocumentProxy, 
           const tx = (item.transform && item.transform[4]) ?? 0;
           const ty = (item.transform && item.transform[5]) ?? 0;
           let vy = ty;
+          // PDF.js viewport may have convertToViewportPoint depending on version
           type ViewportLike = { scale?: number; convertToViewportPoint?: (x: number, y: number) => [number, number] };
-          const vp = viewport as unknown as ViewportLike;
+          const vp = viewport as ViewportLike;
           if (vp && typeof vp.convertToViewportPoint === 'function') {
             try { vy = vp.convertToViewportPoint(tx, ty)[1]; } catch { vy = ty * (vp?.scale ?? 1); }
           } else { vy = ty * (vp?.scale ?? 1); }

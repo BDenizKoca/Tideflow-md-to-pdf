@@ -186,7 +186,8 @@ pub fn rewrite_image_paths_in_markdown(
 
     // Replace Markdown image syntax: ![alt](path "title")
     // We'll conservatively capture inside the parentheses and split off a title if present.
-    let re_md_img = Regex::new(r"!\[[^\]]*\]\(([^)]+)\)").unwrap();
+    let re_md_img = Regex::new(r"!\[[^\]]*\]\(([^)]+)\)")
+        .expect("BUG: Invalid regex pattern for markdown images");
     let result = re_md_img.replace_all(input, |caps: &regex::Captures| {
         let inside = caps.get(1).map(|m| m.as_str()).unwrap_or("").trim();
         
@@ -224,7 +225,8 @@ pub fn rewrite_image_paths_in_markdown(
     });
 
     // Replace HTML <img ... src="..."> occurrences
-    let re_html_img = Regex::new(r#"<img([^>]*?)\s+src=([\"'])([^\"']+)([\"'])([^>]*)>"#).unwrap();
+    let re_html_img = Regex::new(r#"<img([^>]*?)\s+src=([\"'])([^\"']+)([\"'])([^>]*)>"#)
+        .expect("BUG: Invalid regex pattern for HTML images");
     let result = re_html_img.replace_all(&result, |caps: &regex::Captures| {
         let before = caps.get(1).map(|m| m.as_str()).unwrap_or("");
         let quote = caps.get(2).map(|m| m.as_str()).unwrap_or("\"");
@@ -238,7 +240,8 @@ pub fn rewrite_image_paths_in_markdown(
     });
 
     // Replace raw Typst calls: #fig("path" ...) and #image('path' ...)
-    let re_raw_typst = Regex::new(r#"#(fig|image)\(\s*([\"'])([^\"']+)([\"'])"#).unwrap();
+    let re_raw_typst = Regex::new(r#"#(fig|image)\(\s*([\"'])([^\"']+)([\"'])"#)
+        .expect("BUG: Invalid regex pattern for raw Typst calls");
     let result = re_raw_typst.replace_all(&result, |caps: &regex::Captures| {
         let func = caps.get(1).map(|m| m.as_str()).unwrap_or("fig");
         let quote = caps.get(2).map(|m| m.as_str()).unwrap_or("\"");

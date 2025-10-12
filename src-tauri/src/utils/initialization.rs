@@ -175,7 +175,8 @@ fn copy_style_files(resource_dir: &PathBuf, styles_dir: &PathBuf) -> Result<()> 
             let path = entry.path();
             
             if path.extension().map(|e| e == "typ").unwrap_or(false) {
-                let file_name = path.file_name().unwrap();
+                let file_name = path.file_name()
+                    .ok_or_else(|| anyhow!("Failed to get filename from path: {}", path.display()))?;
                 let dest = styles_dir.join(file_name);
                 
                 if !dest.exists() {

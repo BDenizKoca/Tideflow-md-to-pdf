@@ -4,25 +4,27 @@
 
 /**
  * Generate thumbnail images from PDF canvases
+ * Returns a cleanup function to cancel pending retry timers
  */
 export function generateThumbnailsFromCanvases(
   container: HTMLElement,
   onThumbnailsGenerated: (thumbnails: Map<number, string>, totalPages: number) => void,
   retryOnEmpty = true
-): void {
+): (() => void) | void {
   const canvases = container.querySelectorAll('canvas.pdfjs-page-canvas');
-  
+
   if (process.env.NODE_ENV !== 'production') {
     console.log('[PDFPreview] Generating thumbnails, found canvases:', canvases.length);
   }
-  
+
   if (canvases.length === 0 && retryOnEmpty) {
     // Retry if canvases not ready yet
     if (process.env.NODE_ENV !== 'production') {
       console.log('[PDFPreview] No canvases found, retrying in 500ms...');
     }
-    setTimeout(() => generateThumbnailsFromCanvases(container, onThumbnailsGenerated, false), 500);
-    return;
+    const timerId = setTimeout(() => generateThumbnailsFromCanvases(container, onThumbnailsGenerated, false), 500);
+    // Return cleanup function
+    return () => clearTimeout(timerId);
   }
 
   const newThumbnails = new Map<number, string>();

@@ -386,13 +386,15 @@ const PDFPreview: React.FC = () => {
     handleScroll(); // Initial page detection
 
     // Wait for rendering to complete before generating thumbnails
+    let cleanupThumbnails: (() => void) | void;
     const timer = setTimeout(() => {
-      generateThumbnailsFromCanvases(container, handleThumbnailsGenerated);
+      cleanupThumbnails = generateThumbnailsFromCanvases(container, handleThumbnailsGenerated);
     }, UI.THUMBNAIL_GENERATION_DELAY_MS);
 
     return () => {
       container.removeEventListener('scroll', handleScroll);
       clearTimeout(timer);
+      if (cleanupThumbnails) cleanupThumbnails();
     };
   }, [compileStatus.pdf_path, rendering, containerRef]);
 

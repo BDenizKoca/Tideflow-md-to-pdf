@@ -237,7 +237,7 @@ fn handle_cover_image(
                 // Detect actual image format and correct extension if needed
                 let detected_ext = detect_image_format(&img_path)?;
                 
-                let _original_fname = img_path.file_name().unwrap().to_string_lossy();
+                // Get filename stem, fallback to "image" if path has no filename
                 let stem = img_path
                     .file_stem()
                     .map(|s| s.to_string_lossy().to_string())

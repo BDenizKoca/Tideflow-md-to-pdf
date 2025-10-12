@@ -27,7 +27,8 @@ const SearchWidget: React.FC<Props> = ({ isOpen, onClose, onSearch, onReplace, o
 
   React.useEffect(() => {
     if (isOpen && inputRef.current) {
-      setTimeout(() => inputRef.current?.focus(), 50);
+      const timer = setTimeout(() => inputRef.current?.focus(), 50);
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
