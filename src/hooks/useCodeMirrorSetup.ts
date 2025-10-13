@@ -142,40 +142,43 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
 
     initializedRef.current = true;
 
-    // Create custom syntax highlighting for markdown with BRIGHT visible colors
-    // Using a fallback approach - everything gets a color
+    const rootStyles = typeof window !== 'undefined'
+      ? getComputedStyle(document.documentElement)
+      : undefined;
+    const resolveVar = (name: string, fallback: string) => {
+      if (!rootStyles) return fallback;
+      const value = rootStyles.getPropertyValue(name).trim();
+      return value.length > 0 ? value : fallback;
+    };
+
+    const baseTextColor = resolveVar('--cm-text', '#e2e8f0');
+    const headingColor = resolveVar('--cm-heading-color', resolveVar('--primary-color', '#60a5fa'));
+    const strongColor = resolveVar('--cm-strong-color', baseTextColor);
+    const linkColor = resolveVar('--cm-link-color', resolveVar('--link-color', '#60a5fa'));
+    const urlColor = resolveVar('--cm-url-color', resolveVar('--info-color', '#a78bfa'));
+    const codeColor = resolveVar('--cm-code-color', resolveVar('--warning-color', '#fbbf24'));
+    const listColor = baseTextColor;
+    const quoteColor = resolveVar('--cm-quote-color', resolveVar('--text-secondary', '#cbd5e1'));
+    const punctuationColor = resolveVar('--cm-punctuation-color', resolveVar('--info-color', '#60a5fa'));
+
+    // Create custom syntax highlighting that adapts to the active UI theme
     const markdownHighlighting = HighlightStyle.define([
-      // Default color for all text - WHITE
-      { tag: tags.standard(tags.content), color: '#e2e8f0' },
-
-      // Headings - BRIGHT BLUE with bold
-      { tag: tags.heading, color: '#60a5fa !important', fontWeight: 'bold' },
-
-      // Strong/Bold and Emphasis/Italic - white but styled
-      { tag: tags.strong, color: '#e2e8f0 !important', fontWeight: 'bold' },
-      { tag: tags.emphasis, color: '#e2e8f0 !important', fontStyle: 'italic' },
-
-      // Links - BRIGHT BLUE and PURPLE
-      { tag: tags.link, color: '#60a5fa !important' },
-      { tag: tags.url, color: '#a78bfa !important' },
-
-      // Code - BRIGHT YELLOW
-      { tag: tags.monospace, color: '#fbbf24 !important' },
-
-      // Lists - white text
-      { tag: tags.list, color: '#e2e8f0 !important' },
-
-      // Quotes - lighter white
-      { tag: tags.quote, color: '#cbd5e1 !important', fontStyle: 'italic' },
-
-      // ALL punctuation and separators - BRIGHT BLUE
-      { tag: tags.contentSeparator, color: '#60a5fa !important' },
-      { tag: tags.processingInstruction, color: '#60a5fa !important' },
-      { tag: tags.punctuation, color: '#60a5fa !important' },
-      { tag: tags.meta, color: '#60a5fa !important' },
-      { tag: tags.bracket, color: '#60a5fa !important' },
-      { tag: tags.brace, color: '#60a5fa !important' },
-    ], { all: { color: '#e2e8f0' } }); // Fallback color for everything else
+      { tag: tags.standard(tags.content), color: `${baseTextColor} !important` },
+      { tag: tags.heading, color: `${headingColor} !important`, fontWeight: 'bold' },
+      { tag: tags.strong, color: `${strongColor} !important`, fontWeight: 'bold' },
+      { tag: tags.emphasis, color: `${strongColor} !important`, fontStyle: 'italic' },
+      { tag: tags.link, color: `${linkColor} !important` },
+      { tag: tags.url, color: `${urlColor} !important` },
+      { tag: tags.monospace, color: `${codeColor} !important` },
+      { tag: tags.list, color: `${listColor} !important` },
+      { tag: tags.quote, color: `${quoteColor} !important`, fontStyle: 'italic' },
+      { tag: tags.contentSeparator, color: `${punctuationColor} !important` },
+      { tag: tags.processingInstruction, color: `${punctuationColor} !important` },
+      { tag: tags.punctuation, color: `${punctuationColor} !important` },
+      { tag: tags.meta, color: `${punctuationColor} !important` },
+      { tag: tags.bracket, color: `${punctuationColor} !important` },
+      { tag: tags.brace, color: `${punctuationColor} !important` },
+    ], { all: { color: baseTextColor } });
 
     const view = new EditorView({
       doc: content,
@@ -204,13 +207,12 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
         // ====================================================================
         // Using EditorView.theme() instead of baseTheme() for higher specificity
         EditorView.theme({
-          // Editor background and text - CRITICAL: Set default text color
           '&': {
             'background-color': 'var(--editor-bg)',
-            'color': '#e2e8f0'
+            'color': baseTextColor
           },
           '& *': {
-            'color': '#e2e8f0'
+            'color': baseTextColor
           },
           '.cm-content': {
             'white-space': 'pre-wrap',
@@ -607,4 +609,3 @@ export function createProgrammaticDispatch(changes: unknown, additionalSpec: Rec
     ...additionalSpec
   };
 }
-

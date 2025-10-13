@@ -408,7 +408,7 @@ const Toolbar: React.FC = () => {
             title="Batch Export (Pro Feature)"
             className="btn-primary btn-locked"
           >
-            🔒 Batch Export
+            <div className="pro-feature-text">Batch Export</div>
           </button>
           <button
             onClick={handleExportPDF}

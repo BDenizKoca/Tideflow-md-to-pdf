@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import type { TabProps } from './types';
 import * as api from '../../api';
+import { usePreferencesStore } from '../../stores/preferencesStore';
+import type { UIThemeId } from '../../styles/themes';
 import './AdvancedTab.css';
 
 const AdvancedTab: React.FC<TabProps> = ({ local, mutate }) => {
@@ -9,6 +11,8 @@ const AdvancedTab: React.FC<TabProps> = ({ local, mutate }) => {
   const [detected, setDetected] = useState<string | null>(null);
   const [status, setStatus] = useState<'ok' | 'warn' | 'error' | null>(null);
   const [saving, setSaving] = useState(false);
+  const uiTheme = usePreferencesStore((state) => state.uiTheme);
+  const setUITheme = usePreferencesStore((state) => state.setUITheme);
 
   const pickFile = async () => {
     const picked = await api.showOpenDialog([{ name: 'Executable', extensions: ['*'] }], false);
@@ -116,6 +120,29 @@ const AdvancedTab: React.FC<TabProps> = ({ local, mutate }) => {
           <input type="checkbox" checked={local.confirm_exit_on_unsaved} onChange={e => mutate({ confirm_exit_on_unsaved: (e.target as HTMLInputElement).checked })} />
           <span>Confirm Exit on Unsaved Changes</span>
         </label>
+
+        <div className="design-section">
+          <h3>Interface Theme</h3>
+          <div className="theme-toggle-group">
+            {(['dark', 'light'] as UIThemeId[]).map((themeId) => (
+              <label
+                key={themeId}
+                className="theme-toggle-option"
+                data-active={uiTheme === themeId}
+              >
+                <input
+                  type="radio"
+                  name="ui-theme-toggle"
+                  value={themeId}
+                  checked={uiTheme === themeId}
+                  onChange={() => setUITheme(themeId)}
+                />
+                <span>{themeId === 'dark' ? 'Dark' : 'Light'}</span>
+              </label>
+            ))}
+          </div>
+          <div className="helper-text">Toggle the Tideflow interface between dark and light modes. Document output themes remain configured separately.</div>
+        </div>
 
         <div className="design-section">
           <h3>Typst binary</h3>

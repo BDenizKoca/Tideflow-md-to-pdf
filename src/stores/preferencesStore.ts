@@ -1,8 +1,33 @@
 import { create } from 'zustand';
 import type { Preferences } from '../types';
 import { logger } from '../utils/logger';
+import { applyTheme, uiThemes, type UIThemeId } from '../styles/themes';
 
 const prefsLogger = logger.createScoped('PreferencesStore');
+
+const resolveInitialUITheme = (): UIThemeId => {
+  if (typeof window === 'undefined') {
+    return 'light';
+  }
+
+  try {
+    const stored = window.localStorage.getItem('uiTheme');
+    if (stored === 'light' || stored === 'dark') {
+      return stored;
+    }
+  } catch {
+    // Ignore persistence errors; fall back to default theme
+  }
+
+  return 'light';
+};
+
+const initialUITheme = resolveInitialUITheme();
+
+if (typeof document !== 'undefined') {
+  const initialTheme = uiThemes[initialUITheme] ?? uiThemes.dark;
+  applyTheme(initialTheme);
+}
 
 // Initial preferences
 export const defaultPreferences: Preferences = {
@@ -51,6 +76,8 @@ interface PreferencesStoreState {
   setPreferences: (preferences: Preferences) => void;
 
   // Theme selection & design
+  uiTheme: UIThemeId;
+  setUITheme: (theme: UIThemeId) => void;
   themeSelection: string;
   setThemeSelection: (theme: string) => void;
   lastCustomPreferences: Preferences;
@@ -80,6 +107,23 @@ export const usePreferencesStore = create<PreferencesStoreState>((set) => ({
       preferences,
       lastCustomPreferences: state.themeSelection === 'custom' ? snapshot : state.lastCustomPreferences,
     };
+  }),
+
+  uiTheme: initialUITheme,
+  setUITheme: (themeId: UIThemeId) => set(() => {
+    const theme = uiThemes[themeId] ?? uiThemes.dark;
+
+    try {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('uiTheme', theme.id);
+      }
+    } catch (error) {
+      prefsLogger.warn('Failed to persist UI theme selection', error);
+    }
+
+    applyTheme(theme);
+
+    return { uiTheme: theme.id };
   }),
 
   themeSelection: 'default',
