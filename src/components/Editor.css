@@ -62,14 +62,14 @@
 }
 
 .typing-indicator {
-  background: linear-gradient(135deg, #3b82f6, #60a5fa);
-  color: white;
+  background: var(--typing-indicator-gradient);
+  color: var(--text-on-primary);
   padding: 4px 10px;
   border-radius: 6px;
   font-weight: 600;
   font-size: 0.7rem;
   animation: typingPulse 1.5s ease-in-out infinite;
-  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+  box-shadow: 0 2px 6px var(--button-glow-primary), 0 0 0 1px var(--surface-highlight) inset;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -80,19 +80,19 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: white;
+  background: var(--text-on-primary);
   animation: typingBlink 1.4s ease-in-out infinite;
 }
 
 .debounce-info {
-  background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
-  color: #475569;
+  background: var(--bg-gradient-light);
+  color: var(--text-secondary);
   padding: 4px 10px;
   border-radius: 6px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-color);
   font-size: 0.7rem;
   font-weight: 600;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -137,6 +137,7 @@
   box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
+  outline: none;
 }
 
 .editor-actions button::before {
@@ -147,7 +148,7 @@
   width: 0;
   height: 0;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.08);
+  background: var(--surface-highlight);
   transform: translate(-50%, -50%);
   transition: width 0.5s, height 0.5s;
 }
@@ -166,33 +167,35 @@
 
 .editor-actions button:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-inset);
   background: var(--button-bg-active);
 }
 
 .editor-actions button:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
+  outline: none;
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-sm);
 }
 
 .editor-actions button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
   transform: none !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: var(--shadow-sm) !important;
 }
 
 .editor-actions button.active {
-  background: linear-gradient(to bottom, #cbd5e1, #94a3b8);
-  border-color: #64748b;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(to bottom, var(--select-bg), var(--select-bg-hover));
+  border-color: var(--border-color-hover);
+  box-shadow: var(--shadow-inset);
+  color: var(--text-primary);
 }
 
 .toggle-button.active {
-  background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
-  color: white !important;
-  border-color: #1d4ed8 !important;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2), 0 3px 6px rgba(59, 130, 246, 0.3) !important;
+  background: linear-gradient(135deg, var(--accent-color), var(--accent-color-strong)) !important;
+  color: var(--text-on-primary) !important;
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 0 0 2px var(--focus-ring), 0 3px 6px var(--button-glow-primary) !important;
   position: relative;
 }
 
@@ -201,13 +204,13 @@
   position: absolute;
   inset: 0;
   border-radius: 6px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+  background: linear-gradient(135deg, var(--surface-highlight), transparent);
   pointer-events: none;
 }
 
 .toggle-button.active:hover {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3), 0 4px 8px rgba(59, 130, 246, 0.4) !important;
+  background: linear-gradient(135deg, var(--accent-color-strong), var(--accent-color)) !important;
+  box-shadow: 0 0 0 2px var(--focus-ring), 0 4px 8px var(--button-glow-primary) !important;
 }
 
 .simple-markdown-toolbar {
@@ -239,6 +242,7 @@
   transition: all var(--transition-fast);
   position: relative;
   overflow: hidden;
+  outline: none;
 }
 
 .simple-markdown-toolbar button::before {
@@ -268,13 +272,14 @@
 
 .simple-markdown-toolbar button:active {
   transform: translateY(0);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-inset);
   background: var(--button-bg-active);
 }
 
 .simple-markdown-toolbar button:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
+  outline: none;
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-sm);
 }
 
 .simple-markdown-toolbar .toolbar-divider {
@@ -287,7 +292,7 @@
 .simple-markdown-toolbar .inline-label {
   margin-left: 8px;
   font-size: 0.7rem;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .simple-markdown-toolbar select.inline-select {
@@ -329,8 +334,8 @@
 }
 
 .simple-markdown-toolbar .toolbar-select:focus-visible {
-  border-color: var(--border-color-hover);
-  box-shadow: var(--shadow-md);
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-sm);
   outline: none;
 }
 
@@ -404,7 +409,7 @@
 .font-selector label {
   font-size: 0.65rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.025em;
 }
@@ -541,8 +546,69 @@
   color: var(--cm-text) !important;
 }
 
-/* Let CodeMirror's HighlightStyle handle all syntax coloring via inline styles */
-/* Don't override with CSS - it will conflict with JavaScript-generated styles */
+/* CodeMirror Markdown Syntax Highlighting - Using CSS Variables for Theme Support */
+/* These classes are added by CodeMirror's markdown mode */
+
+/* Headings */
+.cm-header,
+.cm-heading,
+.cm-heading1,
+.cm-heading2,
+.cm-heading3,
+.cm-heading4,
+.cm-heading5,
+.cm-heading6 {
+  color: var(--cm-heading-color) !important;
+  font-weight: bold !important;
+}
+
+/* Bold/Strong text */
+.cm-strong {
+  color: var(--cm-strong-color) !important;
+  font-weight: bold !important;
+}
+
+/* Italic/Emphasis text */
+.cm-em,
+.cm-emphasis {
+  color: var(--cm-strong-color) !important;
+  font-style: italic !important;
+}
+
+/* Links */
+.cm-link {
+  color: var(--cm-link-color) !important;
+}
+
+/* URLs */
+.cm-url {
+  color: var(--cm-url-color) !important;
+}
+
+/* Inline code and code blocks */
+.cm-monospace,
+.cm-code {
+  color: var(--cm-code-color) !important;
+}
+
+/* Lists */
+.cm-list {
+  color: var(--cm-text) !important;
+}
+
+/* Quotes */
+.cm-quote {
+  color: var(--cm-quote-color) !important;
+  font-style: italic !important;
+}
+
+/* Punctuation, meta characters, brackets */
+.cm-punctuation,
+.cm-meta,
+.cm-bracket,
+.cm-brace {
+  color: var(--cm-punctuation-color) !important;
+}
 
 .cm-cursor {
   border-left: 2px solid var(--cm-cursor) !important;
@@ -576,12 +642,12 @@
 }
 
 .cm-scroller::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.5);
+  background: var(--scrollbar-track-bg);
   border-radius: 5px;
 }
 
 .cm-scroller::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, rgba(100, 116, 139, 0.8), rgba(71, 85, 105, 0.8));
+  background: linear-gradient(to bottom, var(--text-secondary), var(--text-muted));
   border-radius: 5px;
   transition: all 200ms ease;
   border: 2px solid transparent;
@@ -589,19 +655,19 @@
 }
 
 .cm-scroller::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #3b82f6, #2563eb);
-  box-shadow: 0 0 6px rgba(59, 130, 246, 0.4);
+  background: linear-gradient(to bottom, var(--info-color), var(--info-color-strong));
+  box-shadow: 0 0 6px var(--button-glow-primary);
 }
 
 /* Global select dropdown styling for dark mode */
 select option,
 select optgroup {
-  background-color: rgba(30, 41, 59, 0.98) !important;
-  color: #e2e8f0 !important;
+  background-color: var(--panel-bg) !important;
+  color: var(--text-primary) !important;
 }
 
 /* Font selector group options */
 .font-control-group select option {
-  background-color: rgba(30, 41, 59, 0.98) !important;
-  color: #e2e8f0 !important;
+  background-color: var(--panel-bg) !important;
+  color: var(--text-primary) !important;
 }

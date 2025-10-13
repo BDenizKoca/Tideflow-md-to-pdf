@@ -1,4 +1,4 @@
-.error-boundary { padding: 1rem; font-family: system-ui, sans-serif; }
+.error-boundary { padding: 1rem; font-family: system-ui, sans-serif; color: var(--text-primary); }
 .error-boundary h2 { margin-top: 0; }
-.error-boundary-stack { white-space: pre-wrap; background: #222; color: #eee; padding: 0.75rem; border-radius: 4px; max-height: 300px; overflow: auto; }
+.error-boundary-stack { white-space: pre-wrap; background: var(--panel-bg); color: var(--text-secondary); padding: 0.75rem; border-radius: var(--border-radius); max-height: 300px; overflow: auto; border: var(--border-width) solid var(--border-color); }
 .error-boundary button { margin-top: 0.75rem; }

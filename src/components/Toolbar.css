@@ -6,7 +6,7 @@
   padding: 0.5rem 1rem;
   background: var(--toolbar-bg);
   border-bottom: 1px solid var(--border-color);
-  color: var(--text-primary);
+  color: var(--toolbar-text);
   box-shadow: var(--shadow-sm);
 }
 
@@ -15,7 +15,7 @@
   font-size: 1.05rem;
   font-weight: 600;
   letter-spacing: 0.4px;
-  color: var(--text-primary);
+  color: var(--toolbar-text);
 }
 
 .toolbar-actions,
@@ -55,6 +55,7 @@
   min-width: 160px;
   box-shadow: var(--shadow-sm);
   transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+  outline: none;
 }
 
 .toolbar-select:hover {
@@ -64,8 +65,9 @@
 }
 
 .toolbar-select:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
+  outline: none;
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-sm);
 }
 
 .toolbar-actions button,
@@ -78,17 +80,18 @@
   gap: 0.45rem;
   padding: 0.55rem 1rem;
   border-radius: 6px;
-  border: 1px solid var(--border-color);
-  background: var(--button-bg);
-  color: var(--text-primary);
+  border: 1px solid var(--toolbar-secondary-border);
+  background: var(--toolbar-secondary-bg);
+  color: var(--toolbar-secondary-text);
   font-size: 0.85rem;
   font-weight: 600;
   line-height: 1;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 8px 18px -12px var(--toolbar-secondary-shadow);
   transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  outline: none;
 }
 
 .toolbar-actions button::after,
@@ -98,7 +101,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.06));
+  background: linear-gradient(180deg, transparent, var(--surface-highlight));
   opacity: 0;
   transition: opacity var(--transition-fast);
   pointer-events: none;
@@ -108,9 +111,9 @@
 .file-control-group .file-open-btn:hover:not(:disabled),
 .file-control-group .dropdown-toggle:hover:not(:disabled),
 .toolbar-button-group > button:hover:not(:disabled) {
-  background: var(--button-bg-hover);
-  border-color: var(--border-color-hover);
-  box-shadow: var(--shadow-md);
+  background: var(--toolbar-secondary-hover);
+  border-color: var(--toolbar-secondary-border);
+  box-shadow: 0 12px 20px -14px var(--toolbar-secondary-shadow);
   transform: translateY(-1px);
 }
 
@@ -125,17 +128,19 @@
 .file-control-group .file-open-btn:active:not(:disabled),
 .file-control-group .dropdown-toggle:active:not(:disabled),
 .toolbar-button-group > button:active:not(:disabled) {
-  background: var(--button-bg-active);
+  background: var(--toolbar-secondary-active);
+  border-color: var(--toolbar-secondary-active);
   transform: translateY(0);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.28);
+  box-shadow: var(--shadow-inset);
 }
 
 .toolbar-actions button:focus-visible,
 .file-control-group .file-open-btn:focus-visible,
 .file-control-group .dropdown-toggle:focus-visible,
 .toolbar-button-group > button:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
+  outline: none;
+  border-color: var(--toolbar-secondary-border);
+  box-shadow: 0 8px 18px -12px var(--toolbar-secondary-shadow);
 }
 
 .toolbar-actions button:disabled,
@@ -206,16 +211,8 @@
 }
 
 .toolbar-actions button.btn-locked::before {
-  content: 'Pro';
-  position: absolute;
-  top: 6px;
-  right: 8px;
-  font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--toolbar-locked-text);
-  opacity: 0.85;
+  /* removed inline text badge; visual indicator provided by theme overrides */
+  content: '';
 }
 
 .toolbar-button-group {
@@ -297,6 +294,7 @@
   box-shadow: var(--shadow-lg);
   padding: 0.5rem 0;
   z-index: 1000;
+  -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
 }
 

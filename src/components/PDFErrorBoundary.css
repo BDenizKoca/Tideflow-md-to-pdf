@@ -5,27 +5,28 @@
   height: 100%;
   width: 100%;
   padding: 2rem;
-  background: #f9f9f9;
+  background: var(--app-background);
+  color: var(--text-primary);
 }
 
 .pdf-error-content {
   max-width: 600px;
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  background: var(--panel-elevated-bg);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
   padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg);
 }
 
 .pdf-error-content h3 {
   margin: 0 0 1rem 0;
-  color: #d32f2f;
+  color: var(--error-color);
   font-size: 1.5rem;
 }
 
 .pdf-error-content p {
   margin: 0 0 1.5rem 0;
-  color: #666;
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 
@@ -37,64 +38,79 @@
 
 .pdf-error-button {
   padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--border-radius);
   font-size: 0.9rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .pdf-error-button.primary {
-  background: #1976d2;
-  color: white;
+  background: linear-gradient(135deg, var(--accent-color), var(--accent-color-strong));
+  color: var(--text-on-primary);
+  border-color: var(--accent-color);
+  box-shadow: 0 6px 16px -10px var(--button-glow-primary);
 }
 
 .pdf-error-button.primary:hover {
-  background: #1565c0;
+  background: linear-gradient(135deg, var(--accent-color-strong), var(--accent-color));
+  border-color: var(--accent-color-strong);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px -12px var(--button-glow-primary);
+}
+
+.pdf-error-button.primary:active {
+  transform: translateY(0);
 }
 
 .pdf-error-details {
   margin-bottom: 1.5rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
   padding: 0.5rem;
+  background: var(--panel-bg);
 }
 
 .pdf-error-details summary {
   cursor: pointer;
   padding: 0.5rem;
   font-weight: 500;
-  color: #555;
+  color: var(--text-primary);
+  border-radius: var(--border-radius-sm);
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .pdf-error-details summary:hover {
-  background: #f5f5f5;
+  background: var(--panel-hover-bg);
 }
 
 .pdf-error-stack {
   padding: 1rem;
+  background: var(--muted-surface);
+  border-radius: var(--border-radius);
+  color: var(--text-secondary);
 }
 
 .pdf-error-stack strong {
   display: block;
   margin-top: 1rem;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .pdf-error-stack pre {
-  background: #f5f5f5;
+  background: var(--panel-bg);
   padding: 0.75rem;
-  border-radius: 4px;
+  border-radius: var(--border-radius);
   overflow-x: auto;
   font-size: 0.85rem;
-  color: #d32f2f;
+  color: var(--error-color);
   margin: 0;
 }
 
 .pdf-error-help {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .pdf-error-help ul {

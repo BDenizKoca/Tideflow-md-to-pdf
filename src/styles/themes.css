@@ -1,0 +1,344 @@
+/**
+ * Tideflow Theme System
+ * Single source of truth for all theme variables
+ * Uses :root for dark theme (default) and [data-ui-theme="light"] for light theme
+ */
+
+/* ============================================================================
+   Layout & Design Tokens (Theme-independent)
+   ============================================================================ */
+
+:root {
+  /* Borders & Radii */
+  --border-radius: 4px;
+  --border-radius-sm: 3px;
+  --border-width: 1px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow: 400ms ease;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.35rem;
+  --spacing-md: 0.5rem;
+  --spacing-lg: 0.75rem;
+
+  /* Control Heights */
+  --control-height-sm: 28px;
+  --control-height: 30px;
+  --control-height-lg: 32px;
+
+  /* Font Sizes */
+  --font-xs: 0.7rem;
+  --font-sm: 0.75rem;
+  --font-md: 0.8rem;
+  --font-base: 0.875rem;
+}
+
+/* ============================================================================
+   DARK THEME (Default)
+   ============================================================================ */
+
+:root {
+  /* Primary Colors */
+  --primary-color: #283746;
+  --primary-hover: #32475b;
+  --primary-active: #1f2b36;
+  --accent-color: #4d9ac7;
+  --accent-primary: #283746;
+  --accent-primary-hover: #32475b;
+  --accent-color-strong: #3e7fa9;
+
+  /* Text Colors */
+  --text-on-primary: #f5f7fa;
+  --text-color: #f4f6f8;
+  --text-primary: #f4f6f8;
+  --text-secondary: #c5d0dc;
+  --text-tertiary: #9aa7b6;
+  --text-muted: #8895a3;
+  --text-placeholder: #7a8796;
+
+  /* Background Colors */
+  --background-color: #0e161f;
+  --app-background: #0e161f;
+  --panel-bg: rgba(22, 32, 43, 0.95);
+  --panel-elevated-bg: rgba(28, 40, 52, 0.98);
+  --toolbar-bg: #293848;
+  --hover-bg: rgba(40, 55, 70, 0.35);
+  --active-bg: rgba(40, 55, 70, 0.5);
+  --editor-bg: #111a24;
+  --preview-bg: #0b121a;
+  --paper-bg: #ffffff;
+  --toolbar-text: #f7f0f0;
+  --secondary-bar-bg: linear-gradient(180deg, rgba(28, 40, 52, 0.96), rgba(14, 22, 30, 0.92));
+  --status-bar-bg: linear-gradient(to bottom, rgba(28, 40, 52, 0.9), rgba(14, 22, 30, 0.9));
+  --surface-highlight: rgba(255, 255, 255, 0.12);
+  --panel-hover-bg: rgba(15, 23, 42, 0.95);
+  --panel-active-bg: rgba(12, 20, 36, 0.9);
+  --sidebar-bg: linear-gradient(to bottom, rgba(24, 36, 64, 0.95), rgba(20, 30, 52, 0.9));
+  --scrollbar-track-bg: linear-gradient(to right, rgba(18, 28, 48, 0.92), rgba(148, 163, 184, 0.25));
+  --overlay-bg: linear-gradient(to bottom right, rgba(255, 255, 255, 0.85), rgba(248, 250, 252, 0.85));
+  --overlay-dark: rgba(0, 0, 0, 0.75);
+  --preview-page-color: var(--paper-bg);
+  --preview-font-color: var(--text-primary);
+  --preview-accent-color: var(--accent-color-strong);
+
+  /* Button Colors */
+  --button-bg: linear-gradient(180deg, rgba(32, 45, 58, 0.95), rgba(22, 32, 43, 0.95));
+  --button-bg-hover: linear-gradient(180deg, rgba(40, 55, 70, 0.98), rgba(28, 40, 52, 0.96));
+  --button-bg-active: linear-gradient(180deg, rgba(18, 27, 36, 0.95), rgba(14, 22, 30, 0.92));
+  --select-bg: rgba(28, 40, 52, 0.96);
+  --select-bg-hover: rgba(40, 55, 70, 0.98);
+
+  /* Toolbar Button Colors */
+  --toolbar-primary-bg: #3590F3;
+  --toolbar-primary-hover: #2a75d1;
+  --toolbar-primary-active: #1e5bb0;
+  --toolbar-primary-border: #1e5bb0;
+  --toolbar-primary-text: #F7F0F0;
+  --toolbar-primary-shadow: rgba(53, 144, 243, 0.45);
+
+  --toolbar-secondary-bg: #4e7660;
+  --toolbar-secondary-hover: #5f8d74;
+  --toolbar-secondary-active: #3d5f4d;
+  --toolbar-secondary-border: #324d3e;
+  --toolbar-secondary-text: #F7F0F0;
+  --toolbar-secondary-shadow: rgba(78, 118, 96, 0.4);
+
+  --toolbar-locked-bg: rgba(32, 45, 58, 0.6);
+  --toolbar-locked-border: rgba(89, 109, 129, 0.32);
+  --toolbar-locked-text: #8895a3;
+  --toolbar-locked-shadow: none;
+
+  /* Border Colors */
+  --border-color: rgba(89, 109, 129, 0.32);
+  --border-hover: rgba(122, 142, 162, 0.45);
+  --border-color-hover: rgba(122, 142, 162, 0.45);
+  --border-color-light: rgba(80, 98, 116, 0.18);
+  --border-color-separator: rgba(55, 70, 86, 0.6);
+  --panel-border-strong: rgba(122, 142, 162, 0.6);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(3, 7, 12, 0.55);
+  --shadow-md: 0 8px 20px -8px rgba(7, 12, 18, 0.7);
+  --shadow-lg: 0 20px 42px -18px rgba(3, 7, 14, 0.75);
+  --shadow-xl: 0 40px 70px -22px rgba(0, 4, 10, 0.8);
+  --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+
+  /* Status Colors */
+  --error-color: #f87171;
+  --error-color-hover: #ff6b6b;
+  --error-color-active: #d94646;
+  --error-bg: rgba(248, 113, 113, 0.12);
+  --error-shadow: rgba(239, 68, 68, 0.25);
+
+  --warning-color: #fbbf24;
+  --warning-color-strong: #facc15;
+  --warning-bg: rgba(251, 191, 36, 0.14);
+
+  --success-color: #34d399;
+  --success-color-hover: #40d7a6;
+  --success-color-active: #2da887;
+  --success-bg: rgba(52, 211, 153, 0.14);
+
+  --info-color: #38bdf8;
+  --info-color-strong: #5ac3ff;
+  --info-bg: rgba(56, 189, 248, 0.14);
+
+  /* CodeMirror Editor Colors */
+  --cm-content-bg: transparent;
+  --cm-line-bg: transparent;
+  --cm-cursor: #4d9ac7;
+  --cm-selection: rgba(77, 154, 199, 0.3);
+  --cm-gutter-bg: rgba(17, 27, 36, 0.65);
+  --cm-gutter-text: #748394;
+  --cm-text: #f4f6f8;
+  --cm-heading-color: #9cdcff;
+  --cm-strong-color: #ffd479;
+  --cm-link-color: #74f0ff;
+  --cm-url-color: #c9b5ff;
+  --cm-code-color: #ffb86c;
+  --cm-quote-color: #9fb1c7;
+  --cm-punctuation-color: #a5a7ff;
+
+  /* Search Panel Colors */
+  --search-panel-bg: rgba(18, 27, 36, 0.96);
+  --search-panel-border: rgba(89, 109, 129, 0.32);
+  --search-input-bg: rgba(28, 40, 52, 0.96);
+  --search-input-border: rgba(89, 109, 129, 0.32);
+  --search-input-border-focus: rgba(77, 154, 199, 0.55);
+  --search-input-text: #f4f6f8;
+  --search-button-bg: linear-gradient(180deg, rgba(32, 45, 58, 0.95), rgba(22, 32, 43, 0.95));
+  --search-button-bg-hover: linear-gradient(180deg, rgba(40, 55, 70, 0.98), rgba(28, 40, 52, 0.96));
+  --search-button-text: #d4dbe5;
+
+  /* Utility Colors */
+  --bg-white: rgba(22, 32, 43, 0.95);
+  --bg-light: rgba(24, 34, 45, 0.94);
+  --bg-lighter: rgba(20, 30, 41, 0.92);
+  --bg-lightest: rgba(16, 24, 33, 0.9);
+  --bg-gradient-light: linear-gradient(180deg, rgba(28, 40, 52, 0.96), rgba(18, 27, 36, 0.92));
+
+  --ripple-color: rgba(77, 154, 199, 0.25);
+  --focus-ring: rgba(255, 255, 255, 0.18);
+  --button-glow-primary: rgba(77, 154, 199, 0.45);
+  --link-color: #4d9ac7;
+  --link-hover-color: #6bb7dd;
+  --typing-indicator-gradient: linear-gradient(135deg, #4d9ac7, #7ab9d9);
+  --muted-surface: rgba(32, 45, 58, 0.6);
+}
+
+/* ============================================================================
+   LIGHT THEME
+   ============================================================================ */
+
+[data-ui-theme="light"] {
+  /* Primary Colors */
+  --primary-color: #0066cc;
+  --primary-hover: #0052a3;
+  --primary-active: #003d7a;
+  --accent-color: #2a9d8f;
+  --accent-primary: #283746;
+  --accent-primary-hover: #32475b;
+  --accent-color-strong: #207c71;
+
+  /* Text Colors */
+  --text-on-primary: #ffffff;
+  --text-color: #1f2937;
+  --text-primary: #1f2937;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --text-muted: #9ca3af;
+  --text-placeholder: #9ca3af;
+
+  /* Background Colors */
+  --background-color: #f8fafc;
+  --app-background: #f8fafc;
+  --panel-bg: #ffffff;
+  --panel-elevated-bg: #ffffff;
+  --toolbar-bg: #293848;
+  --hover-bg: #f1f5f9;
+  --active-bg: #e5e7eb;
+  --editor-bg: #fefefe;
+  --preview-bg: #f8fafc;
+  --paper-bg: #ffffff;
+  --toolbar-text: #f7f0f0;
+  --secondary-bar-bg: linear-gradient(to bottom, #fefefe, #f9f9f9);
+  --status-bar-bg: linear-gradient(to bottom, #ffffff, #f1f5f9);
+  --surface-highlight: rgba(15, 23, 42, 0.08);
+  --panel-hover-bg: #f1f5f9;
+  --panel-active-bg: #e2e8f0;
+  --sidebar-bg: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+  --scrollbar-track-bg: linear-gradient(to right, #f1f5f9, #e2e8f0);
+  --overlay-bg: linear-gradient(to bottom right, rgba(226, 232, 240, 0.92), rgba(241, 245, 249, 0.92));
+  --overlay-dark: rgba(15, 23, 42, 0.7);
+  --preview-page-color: var(--paper-bg);
+  --preview-font-color: var(--text-primary);
+  --preview-accent-color: var(--accent-color-strong);
+
+  /* Button Colors */
+  --button-bg: #ffffff;
+  --button-bg-hover: #f1f5f9;
+  --button-bg-active: #e5e7eb;
+  --select-bg: #ffffff;
+  --select-bg-hover: #f1f5f9;
+
+  /* Toolbar Button Colors */
+  --toolbar-primary-bg: #3590F3;
+  --toolbar-primary-hover: #2a75d1;
+  --toolbar-primary-active: #1e5bb0;
+  --toolbar-primary-border: #1e5bb0;
+  --toolbar-primary-text: #F7F0F0;
+  --toolbar-primary-shadow: rgba(53, 144, 243, 0.35);
+
+  --toolbar-secondary-bg: #4e7660;
+  --toolbar-secondary-hover: #5f8d74;
+  --toolbar-secondary-active: #3d5f4d;
+  --toolbar-secondary-border: #324d3e;
+  --toolbar-secondary-text: #F7F0F0;
+  --toolbar-secondary-shadow: rgba(78, 118, 96, 0.3);
+
+  --toolbar-locked-bg: #edf2f7;
+  --toolbar-locked-border: #cbd5e1;
+  --toolbar-locked-text: #64748b;
+  --toolbar-locked-shadow: none;
+
+  /* Border Colors */
+  --border-color: #e2e8f0;
+  --border-hover: #cbd5e1;
+  --border-color-hover: #cbd5e1;
+  --border-color-light: #e2e8f0;
+  --border-color-separator: #e2e8f0;
+  --panel-border-strong: #cbd5e1;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-inset: inset 0 2px 4px rgba(15, 23, 42, 0.08);
+
+  /* Status Colors */
+  --error-color: #dc2626;
+  --error-color-hover: #b91c1c;
+  --error-color-active: #991b1b;
+  --error-bg: #fef2f2;
+  --error-shadow: rgba(220, 38, 38, 0.16);
+
+  --warning-color: #d97706;
+  --warning-color-strong: #fbbf24;
+  --warning-bg: #fffbeb;
+
+  --success-color: #10b981;
+  --success-color-hover: #0ea472;
+  --success-color-active: #0b8158;
+  --success-bg: #ecfdf5;
+
+  --info-color: #3b82f6;
+  --info-color-strong: #2563eb;
+  --info-bg: #eff6ff;
+
+  /* CodeMirror Editor Colors */
+  --cm-content-bg: transparent;
+  --cm-line-bg: transparent;
+  --cm-cursor: #007acc;
+  --cm-selection: rgba(0, 122, 204, 0.15);
+  --cm-gutter-bg: #f8fafc;
+  --cm-gutter-text: #64748b;
+  --cm-text: #0f172a;
+  --cm-heading-color: #1d4d79;
+  --cm-strong-color: #9c4221;
+  --cm-link-color: #145c7f;
+  --cm-url-color: #5b3abf;
+  --cm-code-color: #a0431f;
+  --cm-quote-color: #475569;
+  --cm-punctuation-color: #1d4ed8;
+
+  /* Search Panel Colors */
+  --search-panel-bg: #ffffff;
+  --search-panel-border: #e2e8f0;
+  --search-input-bg: #ffffff;
+  --search-input-border: #e2e8f0;
+  --search-input-border-focus: #94a3b8;
+  --search-input-text: #1f2937;
+  --search-button-bg: linear-gradient(180deg, #ffffff, #f1f5f9);
+  --search-button-bg-hover: linear-gradient(180deg, #f1f5f9, #e5e7eb);
+  --search-button-text: #1f2937;
+
+  /* Utility Colors */
+  --bg-white: #ffffff;
+  --bg-light: #f8fafc;
+  --bg-lighter: #f1f5f9;
+  --bg-lightest: #e2e8f0;
+  --bg-gradient-light: linear-gradient(180deg, #ffffff, #f1f5f9);
+
+  --ripple-color: rgba(0, 102, 204, 0.15);
+  --focus-ring: rgba(15, 23, 42, 0.12);
+  --button-glow-primary: rgba(53, 144, 243, 0.3);
+  --link-color: #2563eb;
+  --link-hover-color: #1d4ed8;
+  --typing-indicator-gradient: linear-gradient(135deg, #2563eb, #60a5fa);
+  --muted-surface: #edf2f7;
+}

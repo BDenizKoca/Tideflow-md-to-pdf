@@ -1,100 +1,127 @@
-/* Styles for the Advanced preferences tab - specifically Typst path UI */
+/* Advanced preferences tab styling aligned with theme variables */
 .typst-path-row {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-sm);
   align-items: center;
-  margin-top: 8px;
+  margin-top: var(--spacing-sm);
 }
 
 .typst-path-input {
   flex: 1 1 auto;
   padding: 8px 12px;
-  border-radius: 6px;
+  border-radius: var(--border-radius);
   font-size: 0.875rem;
-  border: 1px solid var(--border-color, #cdd3db);
-  background: var(--input-bg, #fff);
-  color: var(--text-color, #111);
-  transition: all 150ms ease;
+  border: var(--border-width) solid var(--border-color);
+  background: var(--panel-bg);
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
 }
 
-/* Dark / tab-panel context (matching existing .tab-panel input styles) */
+.typst-path-input::placeholder {
+  color: var(--text-muted);
+}
+
 .tab-panel .typst-path-input {
-  border: 1px solid var(--border-color, #444);
-  background: var(--input-bg, #23272e);
-  color: var(--text-color, #fff);
-}
-.tab-panel .typst-path-input::placeholder {
-  color: var(--placeholder-color, #bfc7d5);
+  background: var(--editor-bg);
+  border-color: var(--border-color);
 }
 
-/* Light / design-section context (matching .design-section input styles) */
-.design-section .typst-path-input {
-  border: 1px solid var(--border-color, #cdd3db);
-  background: var(--input-bg, #fff);
-  color: var(--text-color, #111);
-  box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+.tab-panel .typst-path-input::placeholder {
+  color: var(--text-placeholder);
 }
+
+.design-section .typst-path-input {
+  background: var(--bg-white);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
 .design-section .typst-path-input::placeholder {
-  color: var(--placeholder-color, #9aa2af);
+  color: var(--text-muted);
 }
 
 .typst-diagnostics {
-  margin-top: 8px;
+  margin-top: var(--spacing-sm);
   padding: 8px 10px;
-  background: var(--muted-bg, #f7f7f8);
-  border: 1px solid var(--border-color, #eee);
-  border-radius: 6px;
-  font-size: 12px;
+  background: var(--muted-surface);
+  border: var(--border-width) solid var(--border-color-light);
+  border-radius: var(--border-radius);
+  font-size: 0.75rem;
   max-height: 220px;
   overflow: auto;
   white-space: pre-wrap;
   box-sizing: border-box;
+  color: var(--text-secondary);
 }
 
-/* Dark/tab-panel adjustments so diagnostics don't show as a white box */
 .tab-panel .typst-diagnostics {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
-  color: #e6eef8;
+  background: var(--panel-bg);
+  border-color: var(--border-color);
+  color: var(--text-primary);
 }
 
-.tab-panel .typst-diagnostics code, .tab-panel .typst-diagnostics pre { color: #e6eef8; }
+.tab-panel .typst-diagnostics code,
+.tab-panel .typst-diagnostics pre {
+  color: var(--text-primary);
+}
 
 .typst-status-badge {
   display: inline-block;
   padding: 4px 8px;
   border-radius: 999px;
-  font-size: 12px;
-  color: #fff;
+  font-size: 0.75rem;
+  color: var(--text-on-primary);
 }
-.typst-status-badge.ok { background: #16a34a; }
-.typst-status-badge.warn { background: #f59e0b; }
-.typst-status-badge.error { background: #dc2626; }
+
+.typst-status-badge.ok { background: var(--success-color); }
+.typst-status-badge.warn { background: var(--warning-color); }
+.typst-status-badge.error { background: var(--error-color); }
 
 .typst-path-actions button {
   padding: 6px 12px;
-  border-radius: 4px;
-  border: 1px solid var(--border-color, #ddd);
-  background: var(--btn-bg, #f7f7f8);
-  color: var(--btn-color, #222);
-  font-size: 1em;
+  border-radius: var(--border-radius-sm);
+  border: var(--border-width) solid var(--border-color);
+  background: var(--button-bg);
+  color: var(--text-primary);
+  font-size: 0.85rem;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  outline: none;
 }
+
 .tab-panel .typst-path-actions button {
-  background: var(--btn-bg, #23272e);
-  color: var(--btn-color, #fff);
+  background: var(--panel-bg);
 }
 
-.typst-path-actions button:active { transform: translateY(1px); }
-.typst-path-actions button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 12px rgba(0,0,0,0.12); }
-.typst-path-actions button:focus-visible { outline: 2px solid rgba(53,144,243,0.2); outline-offset: 2px; }
+.typst-path-actions button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  background: var(--button-bg-hover);
+  border-color: var(--border-hover);
+}
 
-.design-section { margin-top: 1rem; padding: 0.9rem; }
-.design-section h3 { margin: 0 0 8px 0; }
+.typst-path-actions button:active {
+  transform: translateY(1px);
+}
+
+.typst-path-actions button:focus-visible {
+  outline: none;
+  border-color: var(--border-color);
+  box-shadow: none;
+}
+
+.design-section {
+  margin-top: 1rem;
+  padding: 0.9rem;
+}
+
+.design-section h3 {
+  margin: 0 0 var(--spacing-sm) 0;
+}
 
 .typst-info {
-  margin-top: 8px;
+  margin-top: var(--spacing-sm);
 }
 
 .theme-toggle-group {
@@ -111,11 +138,11 @@
   gap: 0.4rem;
   padding: 0.45rem 0.85rem;
   border-radius: 999px;
-  background: var(--button-bg, rgba(32, 45, 58, 0.95));
-  border: 1px solid var(--border-color, rgba(89, 109, 129, 0.32));
-  color: var(--text-secondary, #cbd5e1);
+  background: var(--button-bg);
+  border: var(--border-width) solid var(--border-color);
+  color: var(--text-secondary);
   cursor: pointer;
-  transition: background var(--transition-normal, 200ms ease), border-color var(--transition-normal, 200ms ease), color var(--transition-normal, 200ms ease), box-shadow var(--transition-normal, 200ms ease);
+  transition: background var(--transition-normal), border-color var(--transition-normal), color var(--transition-normal), box-shadow var(--transition-normal);
 }
 
 .theme-toggle-option input {
@@ -123,19 +150,19 @@
 }
 
 .theme-toggle-option:hover {
-  background: var(--button-bg-hover, rgba(40, 55, 70, 0.98));
-  border-color: var(--border-color-hover, rgba(122, 142, 162, 0.45));
-  color: var(--text-primary, #f4f6f8);
+  background: var(--button-bg-hover);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
 }
 
 .theme-toggle-option[data-active="true"] {
-  background: var(--primary-color, #283746);
-  border-color: var(--primary-color, #283746);
-  color: var(--text-on-primary, #f5f7fa);
-  box-shadow: 0 6px 16px -8px var(--button-glow-primary, rgba(77, 154, 199, 0.45));
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--text-on-primary);
+  box-shadow: 0 6px 16px -8px var(--button-glow-primary);
 }
 
 .theme-toggle-option[data-active="true"]:hover {
-  background: var(--primary-hover, #32475b);
-  border-color: var(--primary-hover, #32475b);
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
 }

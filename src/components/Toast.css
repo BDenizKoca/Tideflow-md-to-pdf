@@ -1,12 +1,17 @@
+/* ============================================================================
+   Toast Notifications - Properly Themed with CSS Variables
+   All colors use CSS variables from themes.css
+   ============================================================================ */
+
 .toast {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.875rem 1rem;
   border-radius: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(7, 12, 24, 0.92));
-  box-shadow: 0 18px 40px -18px rgba(2, 6, 20, 0.8), 0 0 0 1px rgba(148, 163, 184, 0.15);
+  border: 1px solid var(--border-color);
+  background: var(--panel-elevated-bg);
+  box-shadow: var(--shadow-xl);
   min-width: 300px;
   max-width: 520px;
   animation: slideInRight 300ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -38,7 +43,7 @@
   font-weight: bold;
   font-size: 1rem;
   flex-shrink: 0;
-  box-shadow: 0 0 10px rgba(15, 23, 42, 0.5);
+  box-shadow: var(--shadow-md);
 }
 
 .toast-message {
@@ -70,72 +75,72 @@
 
 .toast-close:hover {
   opacity: 1;
-  background: rgba(148, 163, 184, 0.15);
+  background: var(--hover-bg);
 }
 
 /* Toast variants */
 .toast-success {
-  border-color: rgba(16, 185, 129, 0.45);
-  background: linear-gradient(135deg, rgba(6, 95, 70, 0.55), rgba(4, 120, 87, 0.4));
-  color: #34d399;
+  border-color: var(--success-color-hover);
+  background: var(--success-bg);
+  color: var(--success-color);
 }
 
 .toast-success::before {
-  background: linear-gradient(180deg, #22c55e, #0f9d58);
-  box-shadow: 0 0 12px rgba(34, 197, 94, 0.45);
+  background: linear-gradient(180deg, var(--success-color), var(--success-color-hover));
+  box-shadow: 0 0 12px var(--success-color);
 }
 
 .toast-success .toast-icon {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: #0b1120;
+  background: linear-gradient(135deg, var(--success-color), var(--success-color-hover));
+  color: var(--text-on-primary);
 }
 
 .toast-error {
-  border-color: rgba(248, 113, 113, 0.5);
-  background: linear-gradient(135deg, rgba(127, 29, 29, 0.55), rgba(185, 28, 28, 0.38));
-  color: #fca5a5;
+  border-color: var(--error-color-hover);
+  background: var(--error-bg);
+  color: var(--error-color);
 }
 
 .toast-error::before {
-  background: linear-gradient(180deg, #f87171, #dc2626);
-  box-shadow: 0 0 12px rgba(248, 113, 113, 0.45);
+  background: linear-gradient(180deg, var(--error-color), var(--error-color-hover));
+  box-shadow: 0 0 12px var(--error-color);
 }
 
 .toast-error .toast-icon {
-  background: linear-gradient(135deg, #f87171, #ef4444);
-  color: #0b1120;
+  background: linear-gradient(135deg, var(--error-color), var(--error-color-hover));
+  color: var(--text-on-primary);
 }
 
 .toast-warning {
-  border-color: rgba(251, 191, 36, 0.45);
-  background: linear-gradient(135deg, rgba(120, 53, 15, 0.55), rgba(180, 83, 9, 0.4));
-  color: #facc15;
+  border-color: var(--warning-color-strong);
+  background: var(--warning-bg);
+  color: var(--warning-color);
 }
 
 .toast-warning::before {
-  background: linear-gradient(180deg, #f59e0b, #d97706);
-  box-shadow: 0 0 12px rgba(251, 191, 36, 0.45);
+  background: linear-gradient(180deg, var(--warning-color), var(--warning-color-strong));
+  box-shadow: 0 0 12px var(--warning-color);
 }
 
 .toast-warning .toast-icon {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: #0b1120;
+  background: linear-gradient(135deg, var(--warning-color), var(--warning-color-strong));
+  color: var(--text-on-primary);
 }
 
 .toast-info {
-  border-color: rgba(96, 165, 250, 0.45);
-  background: linear-gradient(135deg, rgba(30, 64, 175, 0.55), rgba(29, 78, 216, 0.38));
-  color: #93c5fd;
+  border-color: var(--info-color-strong);
+  background: var(--info-bg);
+  color: var(--info-color);
 }
 
 .toast-info::before {
-  background: linear-gradient(180deg, #60a5fa, #2563eb);
-  box-shadow: 0 0 12px rgba(96, 165, 250, 0.45);
+  background: linear-gradient(180deg, var(--info-color), var(--info-color-strong));
+  box-shadow: 0 0 12px var(--info-color);
 }
 
 .toast-info .toast-icon {
-  background: linear-gradient(135deg, #60a5fa, #2563eb);
-  color: #0b1120;
+  background: linear-gradient(135deg, var(--info-color), var(--info-color-strong));
+  color: var(--text-on-primary);
 }
 
 /* Animations */

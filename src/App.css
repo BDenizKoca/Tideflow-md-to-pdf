@@ -28,11 +28,11 @@ input[type="checkbox"] {
   align-items: center;
   justify-content: space-between;
   padding: 0.35rem 1rem;
-  background: var(--toolbar-bg);
+  background: var(--secondary-bar-bg);
   border-bottom: 1px solid var(--border-color);
   min-height: 28px;
   font-size: 0.8rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-weight: 500;
   gap: 1rem;
 }
@@ -66,7 +66,7 @@ input[type="checkbox"] {
   width: 6px;
   background-color: var(--border-color);
   cursor: col-resize;
-  transition: background-color var(--transition-base), width var(--transition-base);
+  transition: background-color var(--transition-fast), width var(--transition-fast);
   position: relative;
   -webkit-user-select: none;
   user-select: none;
@@ -81,8 +81,8 @@ input[type="checkbox"] {
   width: 3px;
   height: 24px;
   background-color: var(--border-color);
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-base);
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-fast);
   opacity: 0.6;
 }
 
@@ -96,7 +96,7 @@ input[type="checkbox"] {
   height: 40px;
   width: 4px;
   opacity: 1;
-  box-shadow: 0 0 8px rgba(37, 99, 235, 0.45);
+  box-shadow: 0 0 8px var(--button-glow-primary);
 }
 
 .resize-handle:active {
@@ -197,11 +197,11 @@ input[type="checkbox"] {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  border-radius: var(--radius-md);
+  border-radius: var(--border-radius);
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: all var(--transition-fast);
   border: 1px solid var(--border-color);
   background-color: var(--panel-bg);
   color: var(--text-color);
@@ -242,13 +242,13 @@ input[type="checkbox"] {
 }
 
 .button:focus-visible {
-  outline: 2px solid var(--primary-color);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
 .button-primary {
   background-color: var(--primary-color);
-  color: white;
+  color: var(--text-on-primary);
   border-color: var(--primary-color);
 }
 
@@ -263,7 +263,7 @@ input[type="checkbox"] {
 
 .button-success {
   background-color: var(--success-color);
-  color: white;
+  color: var(--text-on-primary);
   border-color: var(--success-color);
 }
 
@@ -278,7 +278,7 @@ input[type="checkbox"] {
 
 .button-danger {
   background-color: var(--error-color);
-  color: white;
+  color: var(--text-on-primary);
   border-color: var(--error-color);
 }
 

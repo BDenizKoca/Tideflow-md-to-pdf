@@ -10,7 +10,6 @@ import { keymap } from '@codemirror/view';
 import { search, searchKeymap, closeSearchPanel, openSearchPanel } from '@codemirror/search';
 import { StateField, Annotation, Prec, Compartment } from '@codemirror/state';
 import { syntaxHighlighting, HighlightStyle } from '@codemirror/language';
-import { tags } from '@lezer/highlight';
 import { TIMING } from '../constants/timing';
 import { cmd } from '../components/commands';
 import { scrubRawTypstAnchors } from '../utils/scrubAnchors';
@@ -142,43 +141,14 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
 
     initializedRef.current = true;
 
-    const rootStyles = typeof window !== 'undefined'
-      ? getComputedStyle(document.documentElement)
-      : undefined;
-    const resolveVar = (name: string, fallback: string) => {
-      if (!rootStyles) return fallback;
-      const value = rootStyles.getPropertyValue(name).trim();
-      return value.length > 0 ? value : fallback;
-    };
+    // NOTE: We use CSS variables for all colors so they respond to theme changes dynamically.
+    // Do NOT read and bake CSS variables into hardcoded colors - that breaks theme switching!
 
-    const baseTextColor = resolveVar('--cm-text', '#e2e8f0');
-    const headingColor = resolveVar('--cm-heading-color', resolveVar('--primary-color', '#60a5fa'));
-    const strongColor = resolveVar('--cm-strong-color', baseTextColor);
-    const linkColor = resolveVar('--cm-link-color', resolveVar('--link-color', '#60a5fa'));
-    const urlColor = resolveVar('--cm-url-color', resolveVar('--info-color', '#a78bfa'));
-    const codeColor = resolveVar('--cm-code-color', resolveVar('--warning-color', '#fbbf24'));
-    const listColor = baseTextColor;
-    const quoteColor = resolveVar('--cm-quote-color', resolveVar('--text-secondary', '#cbd5e1'));
-    const punctuationColor = resolveVar('--cm-punctuation-color', resolveVar('--info-color', '#60a5fa'));
-
-    // Create custom syntax highlighting that adapts to the active UI theme
+    // Create custom syntax highlighting using CSS variables (not hardcoded colors!)
+    // Using var() in HighlightStyle doesn't work, so we use transparent and let CSS handle it
     const markdownHighlighting = HighlightStyle.define([
-      { tag: tags.standard(tags.content), color: `${baseTextColor} !important` },
-      { tag: tags.heading, color: `${headingColor} !important`, fontWeight: 'bold' },
-      { tag: tags.strong, color: `${strongColor} !important`, fontWeight: 'bold' },
-      { tag: tags.emphasis, color: `${strongColor} !important`, fontStyle: 'italic' },
-      { tag: tags.link, color: `${linkColor} !important` },
-      { tag: tags.url, color: `${urlColor} !important` },
-      { tag: tags.monospace, color: `${codeColor} !important` },
-      { tag: tags.list, color: `${listColor} !important` },
-      { tag: tags.quote, color: `${quoteColor} !important`, fontStyle: 'italic' },
-      { tag: tags.contentSeparator, color: `${punctuationColor} !important` },
-      { tag: tags.processingInstruction, color: `${punctuationColor} !important` },
-      { tag: tags.punctuation, color: `${punctuationColor} !important` },
-      { tag: tags.meta, color: `${punctuationColor} !important` },
-      { tag: tags.bracket, color: `${punctuationColor} !important` },
-      { tag: tags.brace, color: `${punctuationColor} !important` },
-    ], { all: { color: baseTextColor } });
+      // Don't define colors here - let CSS variables handle everything
+    ]);
 
     const view = new EditorView({
       doc: content,
@@ -209,10 +179,10 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
         EditorView.theme({
           '&': {
             'background-color': 'var(--editor-bg)',
-            'color': baseTextColor
+            'color': 'var(--cm-text)'
           },
           '& *': {
-            'color': baseTextColor
+            'color': 'var(--cm-text)'
           },
           '.cm-content': {
             'white-space': 'pre-wrap',
