@@ -10,7 +10,7 @@
   padding: 0.875rem 1rem;
   border-radius: 10px;
   border: 1px solid var(--border-color);
-  background: var(--panel-elevated-bg);
+  background: var(--toast-bg);
   box-shadow: var(--shadow-xl);
   min-width: 300px;
   max-width: 520px;
@@ -79,7 +79,7 @@
 /* Toast variants */
 .toast-success {
   border-color: var(--success-color-hover);
-  background: var(--success-bg);
+  background: var(--toast-bg);
   color: var(--success-color);
 }
 
@@ -95,7 +95,7 @@
 
 .toast-error {
   border-color: var(--error-color-hover);
-  background: var(--error-bg);
+  background: var(--toast-bg);
   color: var(--error-color);
 }
 
@@ -111,7 +111,7 @@
 
 .toast-warning {
   border-color: var(--warning-color-strong);
-  background: var(--warning-bg);
+  background: var(--toast-bg);
   color: var(--warning-color);
 }
 
@@ -127,7 +127,7 @@
 
 .toast-info {
   border-color: var(--info-color-strong);
-  background: var(--info-bg);
+  background: var(--toast-bg);
   color: var(--info-color);
 }
 

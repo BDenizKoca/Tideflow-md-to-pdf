@@ -102,6 +102,7 @@
   --preview-page-color: var(--paper-bg);
   --preview-font-color: var(--text-primary);
   --preview-accent-color: var(--accent-color-strong);
+  --toast-bg: #1c2834;
 
   /* Button Colors */
   --button-bg: var(--interactive-surface);
@@ -274,6 +275,7 @@
   --preview-page-color: var(--paper-bg);
   --preview-font-color: var(--text-primary);
   --preview-accent-color: var(--accent-color-strong);
+  --toast-bg: #ffffff;
 
   /* Button Colors */
   --button-bg: var(--interactive-surface);

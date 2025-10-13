@@ -176,13 +176,26 @@ export function useEditorToPdfSync(params: UseEditorToPdfSyncParams): void {
         return;
       }
 
-      // CRITICAL: Don't scroll PDF if we just stopped typing recently AND anchor hasn't changed
-      // This prevents the "jump to top" issue after typing, but allows scrolling when user moves cursor
-      const now = Date.now();
-      const timeSinceTypingStopped = now - lastTypingStoppedAtRef.current;
+      // CRITICAL: Don't scroll PDF if user is currently typing OR just stopped typing recently
+      // AND anchor hasn't changed. This prevents the "jump to top" issue.
       const anchorChanged = targetAnchor !== lastScrolledToAnchorRef.current;
 
-      if (timeSinceTypingStopped < 2000 && !anchorChanged) { // Only block if anchor is the same
+      // Block scrolling if:
+      // 1. User is actively typing right now, OR
+      // 2. User recently stopped typing (within 3s) AND anchor hasn't changed
+      if (isTyping) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.debug('[EditorToPdfSync] skipping post-render scroll - user is actively typing', {
+            targetAnchor,
+            lastScrolledTo: lastScrolledToAnchorRef.current
+          });
+        }
+        return;
+      }
+
+      const now = Date.now();
+      const timeSinceTypingStopped = now - lastTypingStoppedAtRef.current;
+      if (timeSinceTypingStopped < 3000 && !anchorChanged) {
         if (process.env.NODE_ENV !== 'production') {
           console.debug('[EditorToPdfSync] skipping post-render scroll - recently stopped typing at same anchor', {
             timeSinceTypingStopped,

@@ -88,41 +88,11 @@ const AdvancedTab: React.FC<TabProps> = ({ local, mutate }) => {
 
   return (
     <div className="tab-panel">
-      <h3>Advanced Settings</h3>
-      <div className="form-grid one-col">
-        <label>Render Debounce
-          <div className="slider-group">
-            <input
-              type="range"
-              min="100"
-              max="2000"
-              step="100"
-              value={local.render_debounce_ms}
-              onChange={e => mutate({ render_debounce_ms: parseInt((e.target as HTMLInputElement).value || '400', 10) })}
-            />
-            <input
-              type="number"
-              className="slider-value-input"
-              min="100"
-              max="2000"
-              step="100"
-              value={local.render_debounce_ms}
-              onChange={e => mutate({ render_debounce_ms: parseInt((e.target as HTMLInputElement).value || '400', 10) })}
-            />
-          </div>
-          <div className="helper-text">Delay (in milliseconds) before re-rendering PDF while typing</div>
-        </label>
-        <label className="checkbox-label">
-          <input type="checkbox" checked={local.preserve_scroll_position} onChange={e => mutate({ preserve_scroll_position: (e.target as HTMLInputElement).checked })} />
-          <span>Preserve Scroll Position</span>
-        </label>
-        <label className="checkbox-label">
-          <input type="checkbox" checked={local.confirm_exit_on_unsaved} onChange={e => mutate({ confirm_exit_on_unsaved: (e.target as HTMLInputElement).checked })} />
-          <span>Confirm Exit on Unsaved Changes</span>
-        </label>
+      <h3>General Settings</h3>
 
+      <div className="form-grid one-col">
         <div className="design-section">
-          <h3>Interface Theme</h3>
+          <h4>Appearance</h4>
           <div className="theme-toggle-group">
             {(['dark', 'light'] as UIThemeId[]).map((themeId) => (
               <label
@@ -141,13 +111,51 @@ const AdvancedTab: React.FC<TabProps> = ({ local, mutate }) => {
               </label>
             ))}
           </div>
-          <div className="helper-text">Toggle the Tideflow interface between dark and light modes. Document output themes remain configured separately.</div>
+          <div className="helper-text">Toggle the interface between dark and light modes</div>
         </div>
 
         <div className="design-section">
-          <h3>Typst binary</h3>
+          <h4>Editor Behavior</h4>
+          <label className="checkbox-label">
+            <input type="checkbox" checked={local.preserve_scroll_position} onChange={e => mutate({ preserve_scroll_position: (e.target as HTMLInputElement).checked })} />
+            <span>Preserve scroll position after re-render</span>
+          </label>
+          <label className="checkbox-label">
+            <input type="checkbox" checked={local.confirm_exit_on_unsaved} onChange={e => mutate({ confirm_exit_on_unsaved: (e.target as HTMLInputElement).checked })} />
+            <span>Confirm before closing with unsaved changes</span>
+          </label>
+        </div>
+
+        <div className="design-section">
+          <h4>Performance</h4>
+          <label>Render Delay
+            <div className="slider-group">
+              <input
+                type="range"
+                min="100"
+                max="2000"
+                step="100"
+                value={local.render_debounce_ms}
+                onChange={e => mutate({ render_debounce_ms: parseInt((e.target as HTMLInputElement).value || '400', 10) })}
+              />
+              <input
+                type="number"
+                className="slider-value-input"
+                min="100"
+                max="2000"
+                step="100"
+                value={local.render_debounce_ms}
+                onChange={e => mutate({ render_debounce_ms: parseInt((e.target as HTMLInputElement).value || '400', 10) })}
+              />
+            </div>
+            <div className="helper-text">Milliseconds to wait before re-rendering PDF while typing</div>
+          </label>
+        </div>
+
+        <div className="design-section">
+          <h4>Typst Compiler</h4>
           <label>
-            Typst binary (optional)
+            Typst Binary Path (optional)
             <div className="typst-path-row">
               <input
                 type="text"
@@ -162,7 +170,7 @@ const AdvancedTab: React.FC<TabProps> = ({ local, mutate }) => {
                 <button type="button" className="btn-primary" onClick={savePrefs} disabled={saving}>{saving ? 'Saving...' : 'Save'}</button>
               </div>
             </div>
-            <div className="helper-text">Optional: point to Typst binary as a fallback if automatic detection fails.</div>
+            <div className="helper-text">Optional fallback path if automatic detection fails</div>
 
             <div className="typst-info">
               <strong>Auto-detected:</strong>{' '}
@@ -171,16 +179,19 @@ const AdvancedTab: React.FC<TabProps> = ({ local, mutate }) => {
               ) : (
                 <span>None <span className="typst-status-badge warn">FALLBACK</span></span>
               )}
-              {local.typst_path ? (
-                <div className="helper-text">User fallback path is configured: <code>{local.typst_path}</code></div>
-              ) : null}
+              {local.typst_path && (
+                <div className="helper-text">Custom path: <code>{local.typst_path}</code></div>
+              )}
             </div>
           </label>
-        </div>
 
-        {diag && (
-          <pre className="typst-diagnostics">{diag}</pre>
-        )}
+          {diag && (
+            <details className="typst-diagnostics-details">
+              <summary>Diagnostics</summary>
+              <pre className="typst-diagnostics">{diag}</pre>
+            </details>
+          )}
+        </div>
       </div>
     </div>
   );

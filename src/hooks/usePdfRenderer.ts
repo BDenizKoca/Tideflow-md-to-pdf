@@ -89,20 +89,30 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
       }
       if (!containerRef.current) return;
 
-      // CRITICAL: Use saved scroll position from ref instead of reading from DOM
-      // The DOM may have been reset to 0 by React before this effect runs
-      const savedPosition = savedScrollPositionRef.current ?? {
-        top: containerRef.current.scrollTop,
-        left: containerRef.current.scrollLeft
+      // CRITICAL: Capture scroll position IMMEDIATELY before any async work
+      // Must happen synchronously in this effect to avoid race conditions
+      const currentScrollTop = containerRef.current.scrollTop;
+      const currentScrollLeft = containerRef.current.scrollLeft;
+
+      // Use saved position if available and recent, otherwise use current DOM values
+      // savedScrollPositionRef may be stale if no scroll events fired recently
+      const savedPosition = {
+        top: currentScrollTop,
+        left: currentScrollLeft
       };
+
+      // Update the ref so other code knows the current position
+      savedScrollPositionRef.current = savedPosition;
 
       setRendering(true);
       setPdfError(null);
       localCancel.canceled = false;
-      // Reset the one-shot forced-scroll guard for this new PDF so we can
-      // attempt an initial auto-sync. This avoids a stale true value from
-      // previous render passes preventing the automatic scroll.
-      initialForcedScrollDoneRef.current = false;
+      // CRITICAL: Only reset initial scroll flag on TRUE startup (no activeAnchorId yet)
+      // Don't reset when user has already positioned themselves - this prevents
+      // jump-to-top when images are added mid-session
+      if (!args.activeAnchorId) {
+        initialForcedScrollDoneRef.current = false;
+      }
       try {
         // Ensure file paths are converted to a browser-loadable URL when
         // running inside Tauri; convertFileSrc handles file:// -> http(s)

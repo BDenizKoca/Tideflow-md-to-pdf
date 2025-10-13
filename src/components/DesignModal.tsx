@@ -17,13 +17,21 @@ import {
   StructureTab,
   ImagesTab,
   PresetsTab,
-  AdvancedTab,
-  AboutTab,
   type TabSection
 } from './DesignModal/index';
 
 // Create scoped logger
 const designLogger = logger.createScoped('DesignModal');
+
+const DESIGN_TABS: { id: TabSection; label: string; icon: string }[] = [
+  { id: 'themes', label: 'Themes', icon: '🎨' },
+  { id: 'document', label: 'Document', icon: '📄' },
+  { id: 'typography', label: 'Typography', icon: '🔤' },
+  { id: 'spacing', label: 'Spacing & Layout', icon: '📐' },
+  { id: 'structure', label: 'Structure', icon: '🧱' },
+  { id: 'images', label: 'Images', icon: '🖼️' },
+  { id: 'presets', label: 'Presets', icon: '💾' },
+];
 
 const DesignModal: React.FC = () => {
   const { preferences, setPreferences, themeSelection, setThemeSelection, customPresets, saveCustomPreset, deleteCustomPreset, renameCustomPreset } = usePreferencesStore();
@@ -86,6 +94,28 @@ const DesignModal: React.FC = () => {
     }
     prevOpenRef.current = designModalOpen;
   }, [designModalOpen, preferences, designModalActiveTab, setDesignModalActiveTab]);
+
+  useEffect(() => {
+    if (!designModalOpen) return;
+
+    const handleTabHotkey = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey) || event.shiftKey || event.altKey) return;
+
+      const index = parseInt(event.key, 10);
+      if (!Number.isInteger(index)) return;
+
+      const tab = DESIGN_TABS[index - 1];
+      if (!tab) return;
+
+      event.preventDefault();
+      setActiveTab(tab.id);
+    };
+
+    window.addEventListener('keydown', handleTabHotkey);
+    return () => {
+      window.removeEventListener('keydown', handleTabHotkey);
+    };
+  }, [designModalOpen]);
 
   const latestSeq = () => applySeq.current;
 
@@ -252,17 +282,6 @@ const DesignModal: React.FC = () => {
 
   if (!designModalOpen) return null;
 
-  const tabs: { id: TabSection; label: string; icon: string }[] = [
-    { id: 'themes', label: 'Themes', icon: '🎨' },
-    { id: 'document', label: 'Document', icon: '📄' },
-    { id: 'typography', label: 'Typography', icon: '🔤' },
-    { id: 'spacing', label: 'Spacing & Layout', icon: '📐' },
-    { id: 'structure', label: 'Structure', icon: '🗂️' },
-    { id: 'images', label: 'Images', icon: '🖼️' },
-    { id: 'presets', label: 'Presets', icon: '💾' },
-    { id: 'advanced', label: 'Advanced', icon: '⚙️' },
-    { id: 'about', label: 'About', icon: 'ℹ️' },
-  ];
 
   return (
     <div className="design-modal-overlay" onClick={() => setDesignModalOpen(false)}>
@@ -311,7 +330,7 @@ const DesignModal: React.FC = () => {
 
         <div className="design-modal-body">
           <nav className="design-nav">
-            {tabs.map(tab => (
+            {DESIGN_TABS.map(tab => (
               <button
                 key={tab.id}
                 className={`design-nav-item ${activeTab === tab.id ? 'active' : ''}`}
@@ -375,16 +394,6 @@ const DesignModal: React.FC = () => {
                 deleteCustomPreset={deleteCustomPreset}
                 renameCustomPreset={renameCustomPreset}
               />
-            )}
-
-            {/* Advanced Tab */}
-            {activeTab === 'advanced' && (
-              <AdvancedTab local={local} mutate={mutate} />
-            )}
-
-            {/* About Tab */}
-            {activeTab === 'about' && (
-              <AboutTab />
             )}
           </div>
         </div>

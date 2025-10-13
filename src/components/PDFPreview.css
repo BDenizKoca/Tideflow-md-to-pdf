@@ -627,21 +627,6 @@
   border-radius: var(--border-radius);
 }
 
-.pdfjs-loading-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--overlay-bg);
-  -webkit-backdrop-filter: blur(2px);
-  backdrop-filter: blur(2px);
-  z-index: 10;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
 .pdf-iframe {
   width: 100%;
   height: 100%;
@@ -776,7 +761,7 @@
   align-items: center;
   gap: 1rem;
   padding: 0.5rem;
-  background: var(--preview-bg);
+  background: transparent;
   border-radius: var(--border-radius);
   transition: background 150ms ease;
 }
@@ -985,11 +970,191 @@
   flex: 1;
 }
 
+.pdf-viewer-placeholder {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  color: var(--text-secondary);
+  background: transparent;
+}
+
+[data-ui-theme='light'] .pdf-viewer-placeholder {
+  background: var(--preview-bg);
+}
+
+
+.pdf-skeleton {
+  width: min(440px, 70%);
+  aspect-ratio: 1 / 1.414;
+  background: var(--paper-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--shadow-xl);
+  padding: 1.75rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+  overflow: hidden;
+}
+
+
+.pdf-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0));
+  transform: translateX(-100%);
+  animation: pdf-skeleton-shimmer 1.8s ease-in-out infinite;
+}
+
+.pdf-skeleton-block {
+  position: relative;
+  display: block;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+[data-ui-theme='dark'] .pdf-skeleton-block {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+[data-ui-theme='dark'] .pdf-skeleton-block {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.pdf-skeleton-block::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0));
+  transform: translateX(-100%);
+  animation: pdf-skeleton-shimmer 1.8s ease-in-out infinite;
+}
+
+.pdf-skeleton-header {
+  height: 18%;
+  border-radius: 8px;
+}
+
+.pdf-skeleton-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.pdf-skeleton-line {
+  height: 9px;
+}
+
+.pdf-skeleton-line.long {
+  width: 88%;
+}
+
+.pdf-skeleton-line.medium {
+  width: 68%;
+  opacity: 0.3;
+}
+
+.pdf-skeleton-line.short {
+  width: 52%;
+  opacity: 0.25;
+}
+
+[data-ui-theme='dark'] .pdf-skeleton-line,
+[data-ui-theme='dark'] .pdf-skeleton-line.short,
+[data-ui-theme='dark'] .pdf-skeleton-line.medium,
+[data-ui-theme='dark'] .pdf-skeleton-line.tiny,
+[data-ui-theme='dark'] .pdf-skeleton-line.narrow {
+  opacity: 0.36;
+}
+
+.pdf-skeleton-line.narrow {
+  width: 28%;
+  opacity: 0.2;
+}
+
+.pdf-skeleton-line.tiny {
+  height: 7px;
+  width: 42%;
+}
+
+.pdf-skeleton-figure {
+  height: 24%;
+  border-radius: 12px;
+  margin-top: 0.35rem;
+}
+
+.pdf-skeleton-footer {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: auto;
+  align-items: center;
+}
+
+.pdf-skeleton-caption {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: var(--font-md);
+  color: var(--text-muted);
+}
+
+.pdf-viewer-placeholder .pdf-skeleton-caption {
+  color: var(--text-secondary);
+}
+
+.pdf-skeleton-spinner {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: var(--accent-color);
+  animation: pdf-skeleton-spin 0.9s linear infinite;
+}
+
+@keyframes pdf-skeleton-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pdf-skeleton-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pdf-skeleton::after,
+  .pdf-skeleton-block::after,
+  .pdf-skeleton-spinner {
+    animation: none;
+  }
+}
+
 .pdfjs-scroll-container {
   flex: 1;
   overflow-y: auto;
   padding: 16px;
   box-sizing: border-box;
+  transition: opacity 0.1s ease;
+}
+
+.pdfjs-scroll-container.restoring-scroll {
+  opacity: 0;
 }
 
 .pdfjs-scroll-container::-webkit-scrollbar {

@@ -18,7 +18,10 @@ export function computeAnchorOffsets(metrics: { page: number; height: number; sc
   const sorted = [...metrics].sort((a, b) => a.page - b.page);
   const pageOffsets = new Map<number, number>();
   const PAGE_GAP = 8; // Visual gap between pages
-  let cumulative = 0;
+  const CONTAINER_PADDING = 16; // Padding from .pdfjs-scroll-container CSS
+
+  // Start with container padding offset
+  let cumulative = CONTAINER_PADDING;
   for (let i = 0; i < sorted.length; i++) {
     const metric = sorted[i];
     pageOffsets.set(metric.page, cumulative);
@@ -100,7 +103,8 @@ export function computeFallbackOffsets(
 export async function extractOffsetsFromPdfText(doc: pdfjsLib.PDFDocumentProxy, metrics: PageMetric[], anchors: { id: string }[], renderScale = 1.0): Promise<Map<string, number>> {
   const extracted = new Map<string, number>();
   const pageOffsets = new Map<number, number>();
-  let cum = 0;
+  const CONTAINER_PADDING = 16; // Must match .pdfjs-scroll-container padding
+  let cum = CONTAINER_PADDING; // Start with container padding
   for (const m of metrics) { pageOffsets.set(m.page, cum); cum += m.height; }
   for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
     const page = await doc.getPage(pageNum);

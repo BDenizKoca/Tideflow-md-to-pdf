@@ -22,6 +22,11 @@ interface UIStoreState {
   setDesignModalOpen: (open: boolean) => void;
   designModalActiveTab: TabSection | null;
   setDesignModalActiveTab: (tab: TabSection | null) => void;
+  // Settings modal
+  settingsModalOpen: boolean;
+  setSettingsModalOpen: (open: boolean) => void;
+  settingsModalActiveTab: TabSection | null;
+  setSettingsModalActiveTab: (tab: TabSection | null) => void;
 
   // Toast notifications
   toasts: Toast[];
@@ -56,6 +61,11 @@ export const useUIStore = create<UIStoreState>((set) => ({
   setDesignModalOpen: (open: boolean) => set({ designModalOpen: open }),
   designModalActiveTab: null,
   setDesignModalActiveTab: (tab: TabSection | null) => set({ designModalActiveTab: tab }),
+  // Settings modal (separate from design modal)
+  settingsModalOpen: false,
+  setSettingsModalOpen: (open: boolean) => set({ settingsModalOpen: open }),
+  settingsModalActiveTab: null,
+  setSettingsModalActiveTab: (tab: TabSection | null) => set({ settingsModalActiveTab: tab }),
 
   // Toast notifications
   toasts: [],

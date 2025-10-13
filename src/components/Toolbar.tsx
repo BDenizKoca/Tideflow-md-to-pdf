@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useEditorStore } from '../stores/editorStore';
 import { useUIStore } from '../stores/uiStore';
 import DesignModal from './DesignModal';
+import SettingsModal from './SettingsModal';
 import Dropdown from './Dropdown';
 import { invoke } from '@tauri-apps/api/core';
 import { save, open } from '@tauri-apps/plugin-dialog';
@@ -20,15 +21,15 @@ const Toolbar: React.FC = () => {
     closeAllFiles,
   } = useEditorStore();
   const {
-    previewVisible,
-    setPreviewVisible,
-    designModalOpen,
-    setDesignModalOpen,
-    setDesignModalActiveTab,
+  previewVisible,
+  setPreviewVisible,
+  designModalOpen,
     addToast,
     recentFiles,
     addRecentFile,
     clearRecentFiles,
+    setSettingsModalOpen,
+    setSettingsModalActiveTab,
   } = useUIStore();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [recentDropdownOpen, setRecentDropdownOpen] = useState(false);
@@ -334,6 +335,17 @@ const Toolbar: React.FC = () => {
           >
             {isFullscreen ? '⊡ Exit' : '⛶ Fullscreen'}
           </button>
+          <button
+            type="button"
+            onClick={() => {
+              setSettingsModalActiveTab('advanced');
+              setSettingsModalOpen(true);
+            }}
+            title="Settings"
+            className="toolbar-settings-btn"
+          >
+            ⚙️ Settings
+          </button>
         </div>
 
         <div className="toolbar-separator"></div>
@@ -380,8 +392,8 @@ const Toolbar: React.FC = () => {
           <button
             type="button"
             onClick={() => {
-              setDesignModalActiveTab('about');
-              setDesignModalOpen(true);
+              setSettingsModalActiveTab('about');
+              setSettingsModalOpen(true);
             }}
             title="Batch Export (Pro Feature)"
             className="btn-primary btn-locked"
@@ -399,6 +411,7 @@ const Toolbar: React.FC = () => {
         </div>
       </div>
       {designModalOpen && <DesignModal />}
+      <SettingsModal />
     </div>
   );
 };

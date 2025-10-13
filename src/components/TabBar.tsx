@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useEditorStore } from '../stores/editorStore';
 import { useUIStore } from '../stores/uiStore';
 import { readMarkdownFile } from '../api';
@@ -15,8 +15,10 @@ const TabBar: React.FC = () => {
     removeOpenFile,
   } = useEditorStore();
   const addRecentFile = useUIStore((state) => state.addRecentFile);
+  const designModalOpen = useUIStore((state) => state.designModalOpen);
+  const settingsModalOpen = useUIStore((state) => state.settingsModalOpen);
 
-  const handleTabClick = async (filePath: string) => {
+  const handleTabClick = useCallback(async (filePath: string) => {
     if (currentFile === filePath) return;
 
     try {
@@ -33,7 +35,7 @@ const TabBar: React.FC = () => {
     } catch (err) {
       handleError(err, { operation: 'switch to file', component: 'TabBar' });
     }
-  };
+  }, [currentFile, addRecentFile, setContent, setCurrentFile]);
 
   // Explicitly (re)open the instructions document
   const handleOpenInstructions = async () => {
@@ -49,6 +51,55 @@ const TabBar: React.FC = () => {
     e.stopPropagation();
     removeOpenFile(filePath);
   };
+
+  const openFilesRef = useRef(openFiles);
+  const handleTabClickRef = useRef(handleTabClick);
+
+  useEffect(() => {
+    openFilesRef.current = openFiles;
+  }, [openFiles]);
+
+  useEffect(() => {
+    handleTabClickRef.current = handleTabClick;
+  }, [handleTabClick]);
+
+  useEffect(() => {
+    if (designModalOpen || settingsModalOpen) {
+      return undefined;
+    }
+
+    const handleTabHotkey = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey) || event.shiftKey || event.altKey) return;
+
+      const target = event.target as HTMLElement | null;
+      if (target) {
+        const tagName = target.tagName;
+        if (tagName === 'INPUT' || tagName === 'TEXTAREA' || target.isContentEditable) {
+          return;
+        }
+      }
+
+      const index = parseInt(event.key, 10);
+      if (!Number.isInteger(index) || index < 1) return;
+
+      const files = openFilesRef.current;
+      if (!files || files.length === 0) return;
+
+      const filePath = files[index - 1];
+      if (!filePath) return;
+
+      event.preventDefault();
+      const clickHandler = handleTabClickRef.current;
+      if (clickHandler) {
+        void clickHandler(filePath);
+      }
+    };
+
+    window.addEventListener('keydown', handleTabHotkey);
+    return () => {
+      window.removeEventListener('keydown', handleTabHotkey);
+    };
+  }, [designModalOpen, settingsModalOpen]);
 
   const getFileName = (path: string): string => {
     return path.split(/[/\\]/).pop() || path;

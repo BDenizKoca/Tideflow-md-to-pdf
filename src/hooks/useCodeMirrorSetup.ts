@@ -120,6 +120,12 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
     isUserTypingRef,
   } = editorStateRefs;
 
+  const renderDebounceRef = useRef(renderDebounceMs);
+
+  useEffect(() => {
+    renderDebounceRef.current = renderDebounceMs;
+  }, [renderDebounceMs]);
+
   // Track if we've initialized the editor
   const initializedRef = useRef(false);
 
@@ -501,7 +507,7 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
             contentChangeTimeoutRef.current = setTimeout(() => {
               handleAutoRender(newContent, abortController.signal);
               isUserTypingRef.current = false;
-            }, renderDebounceMs);
+            }, renderDebounceRef.current);
           }
         }), // Close the updateListener.of() call
       ],

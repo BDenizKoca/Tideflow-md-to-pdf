@@ -77,6 +77,13 @@ export async function renderPdfPages(
       willRestore: scrollTop > 0
     });
 
+    // CRITICAL: Hide container during DOM manipulation to prevent visual flash
+    // Only hide if we're going to restore a non-zero position
+    const shouldHide = scrollTop > 0;
+    if (shouldHide) {
+      container.classList.add('restoring-scroll');
+    }
+
     // Prefer iterative removeChild which is safer across browsers
     // than assigning innerHTML when nodes may be mid-mutation.
     try {
@@ -120,6 +127,11 @@ export async function renderPdfPages(
 
         container.scrollTop = scrollTop;
         container.scrollLeft = targetLeft;
+
+        // Remove the hiding class to reveal the PDF at the correct position
+        if (shouldHide) {
+          container.classList.remove('restoring-scroll');
+        }
 
         pdfLogger.debug('Restored scroll position', {
           targetTop: scrollTop,
