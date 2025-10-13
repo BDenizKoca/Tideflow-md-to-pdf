@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { 
-  Panel, 
-  PanelGroup, 
-  PanelResizeHandle 
+import {
+  Panel,
+  PanelGroup,
+  PanelResizeHandle
 } from 'react-resizable-panels';
 import { useEditorStore } from './stores/editorStore';
 import { useUIStore } from './stores/uiStore';
@@ -46,7 +46,7 @@ function App() {
   const openFiles = useEditorStore((state) => state.editor.openFiles);
   const currentFile = useEditorStore((state) => state.editor.currentFile);
   const previewVisibleState = useUIStore((state) => state.previewVisible);
-  
+
   // Load instructions.md content when it's set as current file
   useEffect(() => {
     const loadInstructionsContent = async () => {
@@ -57,7 +57,7 @@ function App() {
     };
     loadInstructionsContent();
   }, [currentFile]);
-  
+
   useEffect(() => {
     // Debounce session saves to prevent high-frequency localStorage writes
     const timeoutId = setTimeout(() => {
@@ -75,7 +75,7 @@ function App() {
         appLogger.warn('Failed to save session', error);
       }
     }, 500); // 500ms debounce
-    
+
     return () => clearTimeout(timeoutId);
   }, [openFiles, currentFile, previewVisibleState]);
 
@@ -121,10 +121,10 @@ function App() {
             defaultSize={defaultPreviewSize}
             minSize={previewCollapsed ? 0 : 20}
             maxSize={previewCollapsed ? 0 : 75}
-            style={{ 
-              overflow: 'hidden', 
-              minWidth: 0, 
-              display: previewCollapsed ? 'none' : 'block' 
+            style={{
+              overflow: 'hidden',
+              minWidth: 0,
+              display: previewCollapsed ? 'none' : 'block'
             }}
           >
             {/* Only mount PDFPreview when not collapsed to avoid wasted renders */}

@@ -29,16 +29,16 @@ export function initErrorHandler(addToast: (toast: Omit<Toast, 'id'>) => void): 
  * Now uses toast notifications instead of alerts
  */
 export function handleError(
-  error: unknown, 
-  context: ErrorContext, 
+  error: unknown,
+  context: ErrorContext,
   severity: ErrorSeverity = 'error'
 ): void {
   const errorMsg = error instanceof Error ? error.message : String(error);
   const component = context.component || 'App';
-  
+
   // Log to console for debugging (using centralized logger)
   const logPrefix = context.operation;
-  
+
   switch (severity) {
     case 'critical':
       logger.error(component, `CRITICAL: ${logPrefix} failed: ${errorMsg}`);
@@ -53,21 +53,21 @@ export function handleError(
       logger.info(component, `${logPrefix}: ${errorMsg}`);
       break;
   }
-  
+
   if (context.details) {
     logger.debug(component, 'Additional details', context.details);
   }
-  
+
   // Show user feedback via toast system (fallback to alert if not initialized)
   const shouldShowToast = severity === 'warning' || severity === 'error' || severity === 'critical';
-  
+
   if (shouldShowToast) {
-    const toastMessage = severity === 'critical' 
+    const toastMessage = severity === 'critical'
       ? `Critical: ${context.operation} failed. ${errorMsg}`
       : severity === 'error'
       ? `${context.operation} failed. ${errorMsg}`
       : `${context.operation}: ${errorMsg}`;
-    
+
     if (addToastFn) {
       addToastFn({
         type: severity === 'critical' ? 'error' : severity,

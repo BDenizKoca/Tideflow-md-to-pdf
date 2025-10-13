@@ -153,8 +153,8 @@ This guide itself was created in Tideflow. It showcases:
 
 ---
 
-**Version:** 2.0  
-**Last Updated:** December 2024  
+**Version:** 2.0
+**Last Updated:** December 2024
 **App Version:** Tideflow 1.0
 
 **Questions? Issues? Feedback?**

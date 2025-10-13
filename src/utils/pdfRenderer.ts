@@ -14,9 +14,9 @@ export interface SavedScrollPosition { top: number; left: number }
  * cancellation via the cancel token.
  */
 export async function renderPdfPages(
-  fileUrl: string, 
-  container: HTMLElement, 
-  renderScale = 1.0, 
+  fileUrl: string,
+  container: HTMLElement,
+  renderScale = 1.0,
   cancelToken: CancelToken,
   savedScrollPosition?: SavedScrollPosition,
   programmaticScrollRef?: React.MutableRefObject<boolean>
@@ -63,20 +63,20 @@ export async function renderPdfPages(
       // Container no longer in DOM; abort appending fragment.
       return { doc, metrics };
     }
-    
+
     // CRITICAL: Preserve scroll position before clearing container
     // Prefer saved position from before render started, fall back to current
     const scrollTop = savedScrollPosition?.top ?? container.scrollTop;
     const scrollLeft = savedScrollPosition?.left ?? container.scrollLeft;
-    
-    pdfLogger.debug('Preserving scroll position', { 
-      scrollTop, 
-      scrollLeft, 
+
+    pdfLogger.debug('Preserving scroll position', {
+      scrollTop,
+      scrollLeft,
       fromSaved: !!savedScrollPosition,
       containerScrollTop: container.scrollTop,
       willRestore: scrollTop > 0
     });
-    
+
     // Prefer iterative removeChild which is safer across browsers
     // than assigning innerHTML when nodes may be mid-mutation.
     try {
@@ -88,11 +88,11 @@ export async function renderPdfPages(
       try { container.innerHTML = ''; } catch { /* swallow */ }
     }
     container.appendChild(frag);
-    
+
     const horizontalOverflow = (container.scrollWidth - container.clientWidth) > 1;
     const targetLeftImmediate = horizontalOverflow ? scrollLeft : 0;
     container.scrollLeft = targetLeftImmediate;
-    
+
     // CRITICAL: Restore scroll position after re-rendering
     // This prevents the "jump to top" issue during re-renders
     // Use requestAnimationFrame to ensure content is laid out first
@@ -102,7 +102,7 @@ export async function renderPdfPages(
         const rafHorizontalOverflow = (container.scrollWidth - container.clientWidth) > 1;
         const targetLeft = rafHorizontalOverflow ? scrollLeft : 0;
 
-        pdfLogger.debug('Restoring scroll position', { 
+        pdfLogger.debug('Restoring scroll position', {
           targetTop: scrollTop,
           beforeTop,
           targetLeft,
@@ -112,16 +112,16 @@ export async function renderPdfPages(
           scrollWidth: container.scrollWidth,
           clientWidth: container.clientWidth
         });
-        
+
         // Set programmatic scroll guard to prevent scroll events from triggering sync
         if (programmaticScrollRef) {
           programmaticScrollRef.current = true;
         }
-        
+
         container.scrollTop = scrollTop;
         container.scrollLeft = targetLeft;
-        
-        pdfLogger.debug('Restored scroll position', { 
+
+        pdfLogger.debug('Restored scroll position', {
           targetTop: scrollTop,
           actualTop: container.scrollTop,
           targetLeft,

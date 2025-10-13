@@ -7,11 +7,11 @@ const DocumentTab: React.FC<TabProps> = ({ local, mutate }) => {
       <h3>Document Settings</h3>
       <div className="form-grid one-col">
         <label className="checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={local.two_column_layout || false} 
-            onChange={e => mutate({ two_column_layout: e.target.checked })} 
-          /> 
+          <input
+            type="checkbox"
+            checked={local.two_column_layout || false}
+            onChange={e => mutate({ two_column_layout: e.target.checked })}
+          />
           <span>Two-Column Layout</span>
         </label>
         <label>Paper Size
@@ -23,11 +23,11 @@ const DocumentTab: React.FC<TabProps> = ({ local, mutate }) => {
         </label>
         <label>Horizontal Margin
           <div className="slider-group">
-            <input 
-              type="range" 
-              min="1" 
-              max="5" 
-              step="0.25" 
+            <input
+              type="range"
+              min="1"
+              max="5"
+              step="0.25"
               value={parseFloat(local.margin.x.replace('cm', '').replace('in',''))}
               onChange={e => mutate({ margin: { ...local.margin, x: `${e.target.value}cm` } })}
             />
@@ -42,11 +42,11 @@ const DocumentTab: React.FC<TabProps> = ({ local, mutate }) => {
         </label>
         <label>Vertical Margin
           <div className="slider-group">
-            <input 
-              type="range" 
-              min="1" 
-              max="5" 
-              step="0.25" 
+            <input
+              type="range"
+              min="1"
+              max="5"
+              step="0.25"
               value={parseFloat(local.margin.y.replace('cm', '').replace('in',''))}
               onChange={e => mutate({ margin: { ...local.margin, y: `${e.target.value}cm` } })}
             />

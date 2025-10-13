@@ -33,10 +33,10 @@ const PDFPreviewHeader: React.FC<Props> = ({ pdfZoom, setPdfZoom }) => {
     setPreferences,
     customPresets,
   } = usePreferencesStore();
-  
+
   const zoomLevels = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
   const currentZoomIndex = zoomLevels.indexOf(pdfZoom);
-  
+
   const rerenderCurrent = async () => {
     const { editor: { currentFile, content } } = useEditorStore.getState();
     if (!currentFile) return;
@@ -95,7 +95,7 @@ const PDFPreviewHeader: React.FC<Props> = ({ pdfZoom, setPdfZoom }) => {
       }
     }
   };
-  
+
   return (
     <div className="pdf-preview-header">
       <div className="pdf-preview-actions sync-controls">
@@ -210,9 +210,9 @@ const PDFPreviewHeader: React.FC<Props> = ({ pdfZoom, setPdfZoom }) => {
           onClick={() => {
             const newMode: SyncMode = syncMode === 'two-way' ? 'auto' : 'two-way';
             setSyncMode(newMode);
-            addToast({ 
-              type: 'success', 
-              message: newMode === 'two-way' ? 'Two-way sync enabled' : 'One-way sync enabled' 
+            addToast({
+              type: 'success',
+              message: newMode === 'two-way' ? 'Two-way sync enabled' : 'One-way sync enabled'
             });
           }}
           title={syncMode === 'two-way' ? 'Switch to one-way sync' : 'Enable two-way sync (PDF scroll updates editor)'}
@@ -225,9 +225,9 @@ const PDFPreviewHeader: React.FC<Props> = ({ pdfZoom, setPdfZoom }) => {
           onClick={() => {
             const newEnabled = !syncEnabled;
             setSyncEnabled(newEnabled);
-            addToast({ 
-              type: 'info', 
-              message: newEnabled ? 'Scroll sync enabled' : 'Scroll sync disabled' 
+            addToast({
+              type: 'info',
+              message: newEnabled ? 'Scroll sync enabled' : 'Scroll sync disabled'
             });
           }}
           title={syncEnabled ? 'Disable scroll synchronization' : 'Enable scroll synchronization'}
@@ -244,20 +244,20 @@ const PDFPreviewHeader: React.FC<Props> = ({ pdfZoom, setPdfZoom }) => {
             if (pdfPath) {
               try {
                 await openPdfInViewer(pdfPath);
-                addToast({ 
-                  type: 'success', 
-                  message: 'PDF sent to printer' 
+                addToast({
+                  type: 'success',
+                  message: 'PDF sent to printer'
                 });
               } catch (error) {
-                addToast({ 
-                  type: 'error', 
-                  message: `Failed to print PDF: ${error}` 
+                addToast({
+                  type: 'error',
+                  message: `Failed to print PDF: ${error}`
                 });
               }
             } else {
-              addToast({ 
-                type: 'error', 
-                message: 'No PDF available to print' 
+              addToast({
+                type: 'error',
+                message: 'No PDF available to print'
               });
             }
           }}

@@ -6,12 +6,12 @@ Download the appropriate Typst binaries for each platform:
 Download from: https://github.com/typst/typst/releases
 Place as: `windows/typst.exe`
 
-## macOS  
+## macOS
 Download from: https://github.com/typst/typst/releases
 Place as: `macos/typst`
 
 ## Linux
-Download from: https://github.com/typst/typst/releases  
+Download from: https://github.com/typst/typst/releases
 Place as: `linux/typst`
 
 ## Current Implementation

@@ -41,10 +41,10 @@ const TypographyTab: React.FC<TabProps> = ({ local, mutate }) => {
         </label>
         <label>Font Size
           <div className="slider-group">
-            <input 
-              type="range" 
-              min="8" 
-              max="18" 
+            <input
+              type="range"
+              min="8"
+              max="18"
               step="0.5"
               value={local.font_size}
               onChange={e => mutate({ font_size: parseFloat(e.target.value) || 11 })}
@@ -63,10 +63,10 @@ const TypographyTab: React.FC<TabProps> = ({ local, mutate }) => {
         </label>
         <label>Heading Scale
           <div className="slider-group">
-            <input 
-              type="range" 
-              min="0.8" 
-              max="1.5" 
+            <input
+              type="range"
+              min="0.8"
+              max="1.5"
               step="0.05"
               value={local.heading_scale}
               onChange={e => mutate({ heading_scale: parseFloat(e.target.value) })}
@@ -85,7 +85,7 @@ const TypographyTab: React.FC<TabProps> = ({ local, mutate }) => {
         </label>
         <label>Page Background
           <div className="color-group">
-            <input 
+            <input
               type="color"
               value={local.page_bg_color}
               onChange={e => mutate({ page_bg_color: e.target.value })}
@@ -100,7 +100,7 @@ const TypographyTab: React.FC<TabProps> = ({ local, mutate }) => {
         </label>
         <label>Font Color
           <div className="color-group">
-            <input 
+            <input
               type="color"
               value={local.font_color}
               onChange={e => mutate({ font_color: e.target.value })}
@@ -115,7 +115,7 @@ const TypographyTab: React.FC<TabProps> = ({ local, mutate }) => {
         </label>
         <label>Accent Color
           <div className="color-group">
-            <input 
+            <input
               type="color"
               value={local.accent_color}
               onChange={e => mutate({ accent_color: e.target.value })}

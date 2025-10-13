@@ -27,10 +27,10 @@ interface UsePdfToEditorSyncParams {
   renderingRef: React.MutableRefObject<boolean>;
   isTypingRef: React.MutableRefObject<boolean>;
   savedScrollPositionRef: React.MutableRefObject<{ top: number; left: number } | null>;
-  
+
   // State values (for proper React dependencies)
   rendering: boolean; // Used to trigger re-attachment when PDF ready
-  
+
   // Actions
   setActiveAnchorId: (id: string) => void;
   setSyncMode: (mode: SyncMode) => void;
@@ -64,7 +64,7 @@ export function usePdfToEditorSync(params: UsePdfToEditorSyncParams): void {
       containerClass: containerRef.current?.className,
       hasSourceMap: !!sourceMapRef.current
     });
-    
+
     const el = containerRef.current;
     if (!el) {
       syncLogger.warn('scroll effect - no container element! Will retry when sourceMap changes.');
@@ -101,7 +101,7 @@ export function usePdfToEditorSync(params: UsePdfToEditorSyncParams): void {
           closestId = anchor.id;
         }
       }
-      
+
       syncLogger.debug('findClosestAnchor result', {
         scrollPos,
         closestId,
@@ -118,23 +118,23 @@ export function usePdfToEditorSync(params: UsePdfToEditorSyncParams): void {
     // This is only called in two-way mode (see handleScroll above)
     const updateActiveAnchor = () => {
       syncLogger.debug('updateActiveAnchor called - checking for anchor update');
-      
+
       // Find closest anchor to center of viewport
       const center = el.scrollTop + el.clientHeight / 2;
       const closestId = findClosestAnchor(center);
 
-      syncLogger.debug('anchor analysis', { 
-        center, 
-        closestId, 
+      syncLogger.debug('anchor analysis', {
+        center,
+        closestId,
         currentActive: activeAnchorRef.current,
         scrollTop: el.scrollTop,
         clientHeight: el.clientHeight
       });
 
       if (closestId && activeAnchorRef.current !== closestId) {
-        syncLogger.debug('two-way sync - updating editor anchor', { 
+        syncLogger.debug('two-way sync - updating editor anchor', {
           from: activeAnchorRef.current,
-          to: closestId 
+          to: closestId
         });
         // Set programmatic flag to prevent feedback loop (editor->PDF->editor->PDF...)
         lastProgrammaticScrollAt.current = Date.now();
@@ -159,7 +159,7 @@ export function usePdfToEditorSync(params: UsePdfToEditorSyncParams): void {
         // Otherwise force it back to 0 so the PDF stays visually centered.
         left: hasHorizontalOverflow ? el.scrollLeft : 0
       };
-      
+
       // Log FIRST before any guards
       if (process.env.NODE_ENV !== 'production') {
         syncLogger.debug('!!!! SCROLL EVENT FIRED !!!!', {
@@ -167,7 +167,7 @@ export function usePdfToEditorSync(params: UsePdfToEditorSyncParams): void {
           timestamp: Date.now()
         });
       }
-      
+
       if (process.env.NODE_ENV !== 'production') {
         syncLogger.debug('scroll event - checking guards', {
           syncMode: syncModeRef.current,
@@ -176,7 +176,7 @@ export function usePdfToEditorSync(params: UsePdfToEditorSyncParams): void {
           rendering: renderingRef.current
         });
       }
-      
+
       // Ignore programmatic scrolls using timestamp
       // This prevents processing scroll events during animations/programmatic updates
       const now = Date.now();
@@ -193,7 +193,7 @@ export function usePdfToEditorSync(params: UsePdfToEditorSyncParams): void {
 
       // Ignore if still rendering
       if (renderingRef.current) return;
-      
+
       // CRITICAL: Don't process PDF scroll events when user is typing
       // This prevents feedback loops in two-way mode
       if (isTypingRef.current) {
@@ -219,10 +219,10 @@ export function usePdfToEditorSync(params: UsePdfToEditorSyncParams): void {
         // Auto mode - activate PERMANENT scroll lock (stays until user scrolls editor!)
         userInteractedRef.current = true;
         userManuallyPositionedPdfRef.current = true;
-        
+
         // Update store state for UI feedback
         useEditorStore.getState().setScrollLocked(true);
-        
+
         if (process.env.NODE_ENV !== 'production') {
           syncLogger.debug('🔒 SCROLL LOCK ACTIVATED - PDF will not move until you scroll editor');
         }
@@ -235,7 +235,7 @@ export function usePdfToEditorSync(params: UsePdfToEditorSyncParams): void {
 
     // Attach scroll listener with passive flag for performance
     el.addEventListener('scroll', handleScroll, { passive: true });
-    
+
     if (process.env.NODE_ENV !== 'production') {
       syncLogger.debug('scroll listener attached to element', {
         element: el,
@@ -375,7 +375,7 @@ export function usePdfToEditorSync(params: UsePdfToEditorSyncParams): void {
         if (userManuallyPositionedPdfRef.current) {
           userManuallyPositionedPdfRef.current = false;
         }
-        
+
         lastProgrammaticScrollAt.current = Date.now();
         setActiveAnchorId(closestId);
       }

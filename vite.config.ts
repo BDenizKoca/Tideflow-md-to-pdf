@@ -6,19 +6,19 @@ export default defineConfig({
   plugins: [
     react(),
   ],
-  
+
   // Strip console.debug in production
   esbuild: {
     drop: process.env.NODE_ENV === 'production' ? ['debugger'] : [],
     pure: process.env.NODE_ENV === 'production' ? ['console.debug'] : [],
   },
-  
+
   // Tauri expects a fixed port, fallback to 5173 if already in use
   server: {
     port: 3000,
     strictPort: true,
   },
-  
+
   // Optimize build for production
   build: {
     target: ["es2021", "chrome100", "safari14"],

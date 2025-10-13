@@ -10,8 +10,8 @@ import { useOffsetManager } from '../hooks/useOffsetManager';
 import { useEditorToPdfSync } from '../hooks/useEditorToPdfSync';
 import { usePdfToEditorSync } from '../hooks/usePdfToEditorSync';
 import { UI } from '../constants/timing';
-import { 
-  ThumbnailsSidebar, 
+import {
+  ThumbnailsSidebar,
   PDFViewer,
   generateThumbnailsFromCanvases,
   detectCurrentPage,
@@ -50,7 +50,7 @@ const PDFPreview: React.FC = () => {
   const savedScrollPositionRef = useRef<{ top: number; left: number } | null>(null);
 
 
-  
+
   // Use scroll state hook - consolidates 19 refs
   const scrollState = useScrollState({
     syncMode,
@@ -110,11 +110,11 @@ const PDFPreview: React.FC = () => {
     const el = containerRef.current;
     // Ensure the container is still attached to the document
     if (!el || !el.parentNode || !el.isConnected) return;
-    
+
     if (process.env.NODE_ENV !== 'production') {
       console.log(`[PDFPreview] scrollToAnchor: anchor=${anchorId}, force=${force}, center=${center}`);
     }
-    
+
     const offset = anchorOffsetsRef.current.get(anchorId);
     if (offset === undefined) {
       if (process.env.NODE_ENV !== 'production') {
@@ -122,12 +122,12 @@ const PDFPreview: React.FC = () => {
       }
       return;
     }
-    
+
     // Calculate target position with bias
     const bias = center ? el.clientHeight / 2 : el.clientHeight * 0.3;
     const target = Math.max(0, offset - bias);
     const currentTop = el.scrollTop ?? 0;
-    
+
     // Skip if already at target position (within tolerance)
     if (Math.abs(currentTop - target) <= UI.SCROLL_POSITION_TOLERANCE_PX) {
       if (process.env.NODE_ENV !== 'production') {
@@ -135,7 +135,7 @@ const PDFPreview: React.FC = () => {
       }
       return;
     }
-    
+
     // Only guard against near-top jumps during initial forced scroll (startup)
     // After that, allow all scrolls to support normal document navigation
     if (force && !initialForcedScrollDoneRef.current) {
@@ -145,19 +145,19 @@ const PDFPreview: React.FC = () => {
         console.debug('[PDFPreview] initial forced scroll completed', { anchorId });
       }
     }
-    
+
     // Set programmatic scroll flag
     programmaticScrollRef.current = true;
     lastProgrammaticScrollAt.current = Date.now();
     const beforeTop = el.scrollTop;
-    
+
     // Perform the scroll
     el.scrollTo({ top: target, behavior: 'auto' });
-    
+
     if (process.env.NODE_ENV !== 'production') {
       console.debug('[PDFPreview] scrolled', { anchorId, from: beforeTop, to: target, delta: target - beforeTop });
     }
-    
+
         // Clear programmatic flag after scroll completes
     requestAnimationFrame(() => {
       setTimeout(() => {
@@ -184,7 +184,7 @@ const PDFPreview: React.FC = () => {
   useEffect(() => {
     const startedTyping = !prevIsTypingForModeRef.current && isTyping;
     prevIsTypingForModeRef.current = isTyping;
-    
+
     if (startedTyping && syncMode === 'two-way') {
       if (process.env.NODE_ENV !== 'production') {
         console.debug('[PDFPreview] 🔄 typing detected in two-way mode - switching to auto');
@@ -200,7 +200,7 @@ const PDFPreview: React.FC = () => {
   useEffect(() => {
     const wasTyping = prevIsTypingRef.current;
     const anchorChanged = activeAnchorId !== prevAnchorIdRef.current;
-    
+
     // Only release lock if:
     // 1. User is NOT currently typing
     // 2. User was NOT typing before (prevents clearing on typing→not-typing transition)
@@ -215,7 +215,7 @@ const PDFPreview: React.FC = () => {
       userManuallyPositionedPdfRef.current = false;
       useEditorStore.getState().setScrollLocked(false);
     }
-    
+
     prevAnchorIdRef.current = activeAnchorId;
     prevIsTypingRef.current = isTyping;
   }, [activeAnchorId, isTyping, userManuallyPositionedPdfRef]);
@@ -279,7 +279,7 @@ const PDFPreview: React.FC = () => {
     }
 
     pendingForcedAnchorRef.current = null;
-    
+
     if (process.env.NODE_ENV !== 'production') {
       console.debug('[PDFPreview] consuming pending anchor', { anchorId, offsets: anchorOffsetsRef.current.size });
     }
@@ -350,7 +350,7 @@ const PDFPreview: React.FC = () => {
         // swallow silently
       }
     };
-    
+
     // Check immediately, then once more after a frame (offsets may arrive asynchronously)
     checkPending();
     const rafId = requestAnimationFrame(checkPending);
@@ -410,7 +410,7 @@ const PDFPreview: React.FC = () => {
         pdfZoom={pdfZoom}
         setPdfZoom={setPdfZoom}
       />
-      
+
       <div className="pdf-preview-content">
         {thumbnailsVisible && (
           <ThumbnailsSidebar
@@ -420,7 +420,7 @@ const PDFPreview: React.FC = () => {
             onPageClick={handlePageClick}
           />
         )}
-        
+
         <PDFViewer
           containerRef={containerRef}
           rendering={rendering}

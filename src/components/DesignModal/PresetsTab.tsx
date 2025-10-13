@@ -14,8 +14,8 @@ interface PresetsTabProps {
   renameCustomPreset: (id: string, name: string) => void;
 }
 
-const PresetsTab: React.FC<PresetsTabProps> = ({ 
-  themeSelection, 
+const PresetsTab: React.FC<PresetsTabProps> = ({
+  themeSelection,
   setThemeSelection,
   customPresets,
   setShowPresetNameModal,
@@ -42,8 +42,8 @@ const PresetsTab: React.FC<PresetsTabProps> = ({
           💾 Save Current Settings as Preset
         </button>
         <div className="helper-text">
-          {themeSelection !== 'custom' 
-            ? 'Switch to Custom theme to save your settings as a preset' 
+          {themeSelection !== 'custom'
+            ? 'Switch to Custom theme to save your settings as a preset'
             : 'Save your current design settings as a reusable preset'}
         </div>
       </div>

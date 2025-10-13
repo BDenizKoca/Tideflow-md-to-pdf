@@ -20,11 +20,11 @@ const StructureTab: React.FC<StructureTabProps> = ({ local, mutate, handleBrowse
       <h3>Document Structure</h3>
       <div className="form-grid one-col">
         <label className="checkbox-label">
-          <input type="checkbox" checked={local.number_sections} onChange={e => mutate({ number_sections: e.target.checked })} /> 
+          <input type="checkbox" checked={local.number_sections} onChange={e => mutate({ number_sections: e.target.checked })} />
           <span>Number Sections</span>
         </label>
         <label className="checkbox-label">
-          <input type="checkbox" checked={local.toc} onChange={e => mutate({ toc: e.target.checked })} /> 
+          <input type="checkbox" checked={local.toc} onChange={e => mutate({ toc: e.target.checked })} />
           <span>Table of Contents</span>
         </label>
         {local.toc && (
@@ -38,19 +38,19 @@ const StructureTab: React.FC<StructureTabProps> = ({ local, mutate, handleBrowse
               <div className="helper-text">Optional heading above the table of contents</div>
             </label>
             <label className="checkbox-label">
-              <input 
-                type="checkbox" 
-                checked={local.toc_two_column || false} 
-                onChange={e => mutate({ toc_two_column: e.target.checked })} 
-              /> 
+              <input
+                type="checkbox"
+                checked={local.toc_two_column || false}
+                onChange={e => mutate({ toc_two_column: e.target.checked })}
+              />
               <span>Two-Column TOC</span>
             </label>
           </>
         )}
         <label className="checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={local.cover_page} 
+          <input
+            type="checkbox"
+            checked={local.cover_page}
             onChange={e => {
               const isEnabled = e.target.checked;
               // When enabling cover page, auto-populate title if empty
@@ -62,8 +62,8 @@ const StructureTab: React.FC<StructureTabProps> = ({ local, mutate, handleBrowse
                 }
               }
               mutate({ cover_page: isEnabled });
-            }} 
-          /> 
+            }}
+          />
           <span>Cover Page</span>
         </label>
         {local.cover_page && (
@@ -92,7 +92,7 @@ const StructureTab: React.FC<StructureTabProps> = ({ local, mutate, handleBrowse
                     // If clearing the field, delete the old image
                     if (!newValue && local.cover_image) {
                       import('../../api').then(({ deleteFile }) => {
-                        deleteFile(local.cover_image).catch(err => 
+                        deleteFile(local.cover_image).catch(err =>
                           designLogger.warn('Failed to delete cover image', err)
                         );
                       });
@@ -111,7 +111,7 @@ const StructureTab: React.FC<StructureTabProps> = ({ local, mutate, handleBrowse
                     type="button"
                     onClick={() => {
                       import('../../api').then(({ deleteFile }) => {
-                        deleteFile(local.cover_image).catch(err => 
+                        deleteFile(local.cover_image).catch(err =>
                           designLogger.warn('Failed to delete cover image', err)
                         );
                       });
@@ -127,8 +127,8 @@ const StructureTab: React.FC<StructureTabProps> = ({ local, mutate, handleBrowse
             </label>
             <label>Cover Image Width
               <div className="slider-group">
-                <input 
-                  type="range" 
+                <input
+                  type="range"
                   min="10"
                   max="100"
                   step="5"

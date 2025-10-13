@@ -35,11 +35,11 @@ export function useAnchorManagement(params: UseAnchorManagementParams) {
   // This allows us to look up the old anchor's line number and find the closest match in the new sourceMap
   // Works with any ID format (not dependent on parsing tf-LINE-N patterns)
   const prevSourceMapRef = useRef<SourceMap | null>(null);
-  
+
   // Track last time typing stopped to prevent immediate scrolls after typing
   const lastTypingStoppedRef = useRef<number>(0);
   const lastIsTyping = useRef(isTypingStoreRef.current);
-  
+
   // Track last scroll time to prevent rapid consecutive scrolls
   const lastScrollTimeRef = useRef<number>(0);
 
@@ -66,7 +66,7 @@ export function useAnchorManagement(params: UseAnchorManagementParams) {
       return;
     }
     if (isTypingStoreRef.current) return;
-    
+
     // CRITICAL: Prevent scrolls for a period after typing stops to avoid jumps
     const now = Date.now();
     const timeSinceTypingStopped = now - lastTypingStoppedRef.current;
@@ -79,7 +79,7 @@ export function useAnchorManagement(params: UseAnchorManagementParams) {
       }
       return;
     }
-    
+
     // Prevent rapid consecutive scrolls (minimum 300ms between scrolls)
     const timeSinceLastScroll = now - lastScrollTimeRef.current;
     if (timeSinceLastScroll < 300) {
@@ -90,7 +90,7 @@ export function useAnchorManagement(params: UseAnchorManagementParams) {
       }
       return;
     }
-    
+
     // Scroll editor in 'locked-to-pdf', 'two-way' modes, OR when explicitly set from PDF click
     // We allow auto mode here because click-to-sync is an explicit user action
     const allowedModes = ['locked-to-pdf', 'two-way', 'auto'];
@@ -105,8 +105,8 @@ export function useAnchorManagement(params: UseAnchorManagementParams) {
     }
 
     if (process.env.NODE_ENV !== 'production') {
-      console.debug('[useAnchorManagement] scrolling editor to anchor', { 
-        activeAnchorId, 
+      console.debug('[useAnchorManagement] scrolling editor to anchor', {
+        activeAnchorId,
         offset: anchor.editor.offset,
         line: anchor.editor.line,
         syncMode: syncModeRef.current
@@ -116,11 +116,11 @@ export function useAnchorManagement(params: UseAnchorManagementParams) {
     const view = editorViewRef.current;
     programmaticScrollRef.current = true;
     lastScrollTimeRef.current = Date.now();
-    
+
     // Use scrollIntoView with double RAF to prevent jarring jumps
     const effect = EditorView.scrollIntoView(anchor.editor.offset, { y: 'center' });
     view.dispatch({ effects: effect });
-    
+
     // Clear programmatic flag after animation completes (double RAF for smoother transition)
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -141,32 +141,32 @@ export function useAnchorManagement(params: UseAnchorManagementParams) {
   useEffect(() => {
     const anchors = sourceMap?.anchors ?? [];
     const prevSourceMap = prevSourceMapRef.current;
-    
+
     // Update ref for next render
     prevSourceMapRef.current = sourceMap;
-    
+
     if (anchors.length === 0) {
       if (activeAnchorId !== null) {
         setActiveAnchorId(null);
       }
       return;
     }
-    
+
     // If current activeAnchorId exists in new anchors, keep it
     if (activeAnchorId && anchors.some((anchor) => anchor.id === activeAnchorId)) {
       return;
     }
-    
+
     // activeAnchorId doesn't exist in new sourceMap (IDs changed after re-render)
     // Use previous sourceMap to find the old anchor's line number
     if (activeAnchorId && prevSourceMap) {
       const oldAnchor = prevSourceMap.anchors.find(a => a.id === activeAnchorId);
-      
+
       if (oldAnchor) {
         // Find closest anchor in new map by line number
         let closest = anchors[0];
         let minDiff = Math.abs(anchors[0].editor.line - oldAnchor.editor.line);
-        
+
         for (const anchor of anchors) {
           const diff = Math.abs(anchor.editor.line - oldAnchor.editor.line);
           if (diff < minDiff) {
@@ -174,7 +174,7 @@ export function useAnchorManagement(params: UseAnchorManagementParams) {
             closest = anchor;
           }
         }
-        
+
         if (process.env.NODE_ENV !== 'production') {
           console.debug('[useAnchorManagement] anchor ID changed, preserving position', {
             oldId: activeAnchorId,
@@ -184,13 +184,13 @@ export function useAnchorManagement(params: UseAnchorManagementParams) {
             diff: minDiff
           });
         }
-        
+
         anchorUpdateFromEditorRef.current = true;
         setActiveAnchorId(closest.id);
         return;
       }
     }
-    
+
     // activeAnchorId exists but no previous sourceMap or anchor not found
     // Don't reset - let editor sync handle it naturally
     if (activeAnchorId) {
@@ -202,7 +202,7 @@ export function useAnchorManagement(params: UseAnchorManagementParams) {
       }
       return;
     }
-    
+
     // Fallback: use first anchor (only on true initial load when no activeAnchorId)
     anchorUpdateFromEditorRef.current = true;
     setActiveAnchorId(anchors[0].id);

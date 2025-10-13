@@ -74,29 +74,29 @@ export function useEditorSync(params: UseEditorSyncParams) {
     // Improved anchor selection: prefer anchors in/just after viewport, avoid far anchors
     let closest: SourceAnchor | null = null;
     let closestScore = Number.POSITIVE_INFINITY;
-    
+
     // First pass: try to find anchor in or near viewport
     for (const anchor of map.anchors) {
       const isInViewport = anchor.editor.line >= topLine && anchor.editor.line <= bottomLine;
       const isJustAfter = anchor.editor.line > bottomLine && anchor.editor.line <= bottomLine + ANCHOR.NEARBY_SEARCH_WINDOW;
       const isJustBefore = anchor.editor.line < topLine && anchor.editor.line >= topLine - ANCHOR.NEARBY_SEARCH_WINDOW;
-      
+
       if (isInViewport || isJustAfter || isJustBefore) {
         const diff = Math.abs(anchor.editor.line - centerLine);
         let score = diff;
-        
+
         // Slight preference for anchors in viewport vs just outside
         if (!isInViewport) {
           score = diff + ANCHOR.NEARBY_SCORE_PENALTY;
         }
-        
+
         if (score < closestScore) {
           closest = anchor;
           closestScore = score;
         }
       }
     }
-    
+
     // If no nearby anchor found, use simple closest by absolute distance
     if (!closest) {
       for (const anchor of map.anchors) {
@@ -177,7 +177,7 @@ export function useEditorSync(params: UseEditorSyncParams) {
       if (programmaticScrollRef.current || isUserTypingRef.current || isTypingStoreRef.current) {
         return;
       }
-      
+
       if (scrollIdleTimeoutRef.current) {
         clearTimeout(scrollIdleTimeoutRef.current);
       }

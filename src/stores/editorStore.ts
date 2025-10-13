@@ -20,12 +20,12 @@ interface EditorStoreState {
   setContent: (content: string) => void;
   setModified: (modified: boolean) => void;
   setCompileStatus: (status: CompileStatus) => void;
-  
+
   // Tab management
   addOpenFile: (path: string) => void;
   removeOpenFile: (path: string) => void;
   closeAllFiles: () => void;
-  
+
   // Scroll / cursor sync
   sourceMap: SourceMap | null;
   setSourceMap: (map: SourceMap | null) => void;
@@ -39,11 +39,11 @@ interface EditorStoreState {
   setScrollLocked: (locked: boolean) => void;
   isTyping: boolean;
   setIsTyping: (v: boolean) => void;
-  
+
   // Timestamp when the last compiled event arrived
   compiledAt: number;
   setCompiledAt: (ts: number) => void;
-  
+
   // Persisted editor scroll positions per-file (in-memory)
   editorScrollPositions: Record<string, number>;
   setEditorScrollPosition: (path: string, pos: number) => void;
@@ -54,28 +54,28 @@ interface EditorStoreState {
 export const useEditorStore = create<EditorStoreState>((set, get) => ({
   // Editor state
   editor: initialEditorState,
-  
+
   sourceMap: null,
   setSourceMap: (map: SourceMap | null) => set({ sourceMap: map }),
-  
+
   activeAnchorId: null,
   setActiveAnchorId: (id: string | null) => set({ activeAnchorId: id }),
-  
+
   syncMode: 'auto',
   setSyncMode: (mode: SyncMode) => set({ syncMode: mode }),
-  
+
   syncEnabled: true,
   setSyncEnabled: (enabled: boolean) => set({ syncEnabled: enabled }),
-  
+
   scrollLocked: false,
   setScrollLocked: (locked: boolean) => set({ scrollLocked: locked }),
-  
+
   isTyping: false,
   setIsTyping: (v: boolean) => set({ isTyping: v }),
-  
+
   compiledAt: 0,
   setCompiledAt: (ts: number) => set({ compiledAt: ts }),
-  
+
   setCurrentFile: (path: string | null) => set((state) => ({
     editor: {
       ...state.editor,
@@ -83,34 +83,34 @@ export const useEditorStore = create<EditorStoreState>((set, get) => ({
       modified: false,
     }
   })),
-  
+
   setContent: (content: string) => set((state) => ({
     editor: {
       ...state.editor,
       content,
     }
   })),
-  
+
   setModified: (modified: boolean) => set((state) => ({
     editor: {
       ...state.editor,
       modified,
     }
   })),
-  
+
   setCompileStatus: (compileStatus: CompileStatus) => set((state) => ({
     editor: {
       ...state.editor,
       compileStatus,
     }
   })),
-  
+
   // Tab management
   addOpenFile: (path: string) => set((state) => {
     if (state.editor.openFiles.includes(path)) {
       return { editor: state.editor };
     }
-    
+
     return {
       editor: {
         ...state.editor,
@@ -118,25 +118,25 @@ export const useEditorStore = create<EditorStoreState>((set, get) => ({
       }
     };
   }),
-  
+
   removeOpenFile: (path: string) => set((state) => {
     const newOpenFiles = state.editor.openFiles.filter(f => f !== path);
-    
+
     let newCurrentFile = state.editor.currentFile;
     let newContent = state.editor.content;
     let newModified = state.editor.modified;
     let newCompileStatus = state.editor.compileStatus;
-    
+
     if (path === state.editor.currentFile) {
       newCurrentFile = newOpenFiles.length > 0 ? newOpenFiles[newOpenFiles.length - 1] : null;
-      
+
       if (newCurrentFile === null) {
         newContent = '';
         newModified = false;
         newCompileStatus = { status: 'idle' };
       }
     }
-    
+
     return {
       editor: {
         ...state.editor,
@@ -148,7 +148,7 @@ export const useEditorStore = create<EditorStoreState>((set, get) => ({
       }
     };
   }),
-  
+
   closeAllFiles: () => set(() => ({
     editor: {
       currentFile: null,
@@ -158,7 +158,7 @@ export const useEditorStore = create<EditorStoreState>((set, get) => ({
       compileStatus: { status: 'idle' }
     }
   })),
-  
+
   // Editor scroll position persistence (in-memory map)
   editorScrollPositions: {},
   setEditorScrollPosition: (path: string, pos: number) => set((state) => ({

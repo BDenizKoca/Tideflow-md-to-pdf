@@ -93,7 +93,7 @@ export function useFileOperations(params: UseFileOperationsParams) {
   // Save the file
   const handleSave = useCallback(async (setIsSaving: (saving: boolean) => void, addToast?: (toast: { type: 'success' | 'error' | 'warning' | 'info'; message: string }) => void) => {
     if (!currentFile || !modified) return;
-    
+
     try {
       setIsSaving(true);
       // Strip invisible raw-typst anchors before saving so the persisted
@@ -102,12 +102,12 @@ export function useFileOperations(params: UseFileOperationsParams) {
       const cleaned = scrubRawTypstAnchors(content);
       await writeMarkdownFile(currentFile, cleaned);
       setModified(false);
-      
+
       // Show success toast
       if (addToast) {
         addToast({ type: 'success', message: 'File saved successfully' });
       }
-      
+
       // After saving, render the file
       await handleRender();
     } catch (err) {
@@ -132,13 +132,13 @@ export function useFileOperations(params: UseFileOperationsParams) {
       fileOpsLogger.debug('No currentFile, skipping content sync');
       return; // No file selected
     }
-    
+
     // When a new file is selected (including when going from no files to first file)
     if (currentFile !== prevFileRef.current) {
       fileOpsLogger.debug('File changed, syncing content', { currentFile, prevFile: prevFileRef.current, contentLength: content.length });
       // Track the target file to detect if user switches away during loading
       const targetFile = currentFile;
-      
+
       // Save current scroll position for the previous file before switching
       if (prevFileRef.current) {
         const sc = getScrollElement(editorViewRef.current);
@@ -148,11 +148,11 @@ export function useFileOperations(params: UseFileOperationsParams) {
           fileOpsLogger.debug('saved scroll pos on file switch', { file: prevFileRef.current, pos });
         }
       }
-      
+
       // Update tracking refs immediately to prevent double-processing
       prevFileRef.current = currentFile;
       lastLoadedContentRef.current = content;
-      
+
       // Replace document content with the file's content
       // Mark as programmatic update using annotation
       editorViewRef.current.dispatch({
@@ -164,7 +164,7 @@ export function useFileOperations(params: UseFileOperationsParams) {
         selection: { anchor: 0, head: 0 }, // Set cursor to top to prevent auto-scroll
         annotations: programmaticUpdateAnnotation.of(true)
       });
-      
+
       // Restore scroll position after content is loaded (async to avoid race)
       requestAnimationFrame(() => {
         // Verify we're still on the same file (user might have switched again)
@@ -172,7 +172,7 @@ export function useFileOperations(params: UseFileOperationsParams) {
           fileOpsLogger.debug('skipped scroll restore - file changed', { targetFile, currentFile });
           return;
         }
-        
+
         try {
           const stored = getEditorScrollPosition(targetFile);
           if (stored !== null && editorViewRef.current) {
@@ -185,7 +185,7 @@ export function useFileOperations(params: UseFileOperationsParams) {
             }
           }
         } catch { /* ignore */ }
-        
+
         // Compute anchor and auto-render (only if still on same file)
         if (currentFile === targetFile) {
           computeAnchorFromViewport(false);
@@ -196,7 +196,7 @@ export function useFileOperations(params: UseFileOperationsParams) {
               handleAutoRender(content, abortController.signal);
             }
           }, 100);
-          
+
           // Cleanup: cancel render if component unmounts or file changes
           return () => {
             clearTimeout(timerId);
@@ -224,10 +224,10 @@ export function useFileOperations(params: UseFileOperationsParams) {
   useEffect(() => {
     if (!editorViewRef.current) return;
     if (!currentFile) return;
-    
+
     // Only update if this content is for the currently displayed file
     if (currentFile !== prevFileRef.current) return;
-    
+
     const currentDoc = editorViewRef.current.state.doc.toString();
     if (content !== currentDoc && content !== lastLoadedContentRef.current) {
       // Mark as programmatic update using annotation
@@ -246,7 +246,7 @@ export function useFileOperations(params: UseFileOperationsParams) {
   // Initial render on startup: trigger auto-render when editor is ready with content but no PDF yet
   // This handles the case where the app starts with a file already loaded from session
   const initialRenderAttemptedRef = useRef(false);
-  
+
   useEffect(() => {
     fileOpsLogger.debug('startup render effect fired', {
       attempted: initialRenderAttemptedRef.current,
@@ -255,13 +255,13 @@ export function useFileOperations(params: UseFileOperationsParams) {
       hasContent: !!content,
       hasSourceMap: !!sourceMap,
     });
-    
+
     // Only attempt initial render once per mount
     if (initialRenderAttemptedRef.current) {
       fileOpsLogger.debug('startup render already attempted, skipping');
       return;
     }
-    
+
     // Wait for editor to be ready
     if (!editorReady) {
       fileOpsLogger.debug('startup render waiting for editor ready');
@@ -275,25 +275,25 @@ export function useFileOperations(params: UseFileOperationsParams) {
       fileOpsLogger.debug('startup render waiting for content');
       return;
     }
-    
+
     // Don't render if we already have a PDF
     if (sourceMap) {
       fileOpsLogger.debug('startup render skipped - sourceMap already exists');
       initialRenderAttemptedRef.current = true;
       return;
     }
-    
+
     // Mark that we've attempted
     initialRenderAttemptedRef.current = true;
-    
+
     // At this point: editor is ready, file is open, has content, but no PDF rendered yet
     fileOpsLogger.debug('startup render triggered', { file: currentFile, contentLength: content.length });
-    
+
     const timerId = setTimeout(() => {
       fileOpsLogger.debug('executing startup render NOW');
       handleAutoRender(content);
     }, 500); // Longer delay to ensure everything is initialized
-    
+
     return () => clearTimeout(timerId);
   }, [editorReady, currentFile, content, sourceMap, handleAutoRender]);
 

@@ -33,13 +33,13 @@ export function generateThumbnailsFromCanvases(
   canvases.forEach((canvas, index) => {
     const pageNum = index + 1;
     const sourceCanvas = canvas as HTMLCanvasElement;
-    
+
     // Use the canvas's intrinsic dimensions (these are the true rendered dimensions)
     // These are independent of CSS styling and window size
     const sourceWidth = sourceCanvas.width;
     const sourceHeight = sourceCanvas.height;
     const aspectRatio = sourceHeight / sourceWidth;
-    
+
     if (process.env.NODE_ENV !== 'production' && index === 0) {
       console.log('[PDFPreview] Canvas dimensions:', {
         width: sourceWidth,
@@ -48,15 +48,15 @@ export function generateThumbnailsFromCanvases(
         expectedA4: '1.414'
       });
     }
-    
+
     // Create thumbnail with fixed width, height based on source aspect ratio
     const thumbnailCanvas = document.createElement('canvas');
     const targetWidth = 140;
     const targetHeight = Math.round(targetWidth * aspectRatio);
-    
+
     thumbnailCanvas.width = targetWidth;
     thumbnailCanvas.height = targetHeight;
-    
+
     const ctx = thumbnailCanvas.getContext('2d', { alpha: false });
     if (ctx && sourceWidth > 0 && sourceHeight > 0) {
       ctx.imageSmoothingEnabled = true;
@@ -65,11 +65,11 @@ export function generateThumbnailsFromCanvases(
       newThumbnails.set(pageNum, thumbnailCanvas.toDataURL('image/png'));
     }
   });
-  
+
   if (process.env.NODE_ENV !== 'production') {
     console.log('[PDFPreview] Generated thumbnails:', newThumbnails.size);
   }
-  
+
   if (newThumbnails.size > 0) {
     onThumbnailsGenerated(newThumbnails, totalPages);
   }
@@ -107,11 +107,11 @@ export function detectCurrentPage(container: HTMLElement): number {
 export function scrollThumbnailToActive(): void {
   const thumbnailsList = document.getElementById('thumbnails-list');
   const activeThumbnail = thumbnailsList?.querySelector('.thumbnail-item.active');
-  
+
   if (activeThumbnail && thumbnailsList) {
     const thumbnailRect = activeThumbnail.getBoundingClientRect();
     const listRect = thumbnailsList.getBoundingClientRect();
-    
+
     // Check if thumbnail is outside visible area
     if (thumbnailRect.top < listRect.top || thumbnailRect.bottom > listRect.bottom) {
       activeThumbnail.scrollIntoView({ behavior: 'smooth', block: 'center' });

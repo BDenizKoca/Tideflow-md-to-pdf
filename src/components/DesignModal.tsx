@@ -44,9 +44,9 @@ const DesignModal: React.FC = () => {
   const handleBrowseCoverImage = async () => {
     try {
       const { open } = await import('@tauri-apps/plugin-dialog');
-      const result = await open({ 
-        multiple: false, 
-        filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'svg'] }] 
+      const result = await open({
+        multiple: false,
+        filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'svg'] }]
       });
       const filePath = Array.isArray(result) ? result?.[0] : result;
       if (filePath) {
@@ -59,7 +59,7 @@ const DesignModal: React.FC = () => {
             designLogger.warn('Failed to delete old cover image', err);
           }
         }
-        
+
         // Import the image to assets directory and get relative path
         const { importImageFromPath } = await import('../api');
         const relativePath = await importImageFromPath(filePath);
@@ -157,9 +157,9 @@ const DesignModal: React.FC = () => {
     if (id === 'custom') {
       return;
     }
-    
+
     setThemeSelection(id);
-    
+
     // Check if it's a custom preset
     const customPreset = customPresets[id];
     if (customPreset) {
@@ -173,7 +173,7 @@ const DesignModal: React.FC = () => {
       scheduleApply(merged);
       return;
     }
-    
+
     // Otherwise it's a built-in theme
     const preset = themePresets[id];
     if (preset) {
@@ -223,7 +223,7 @@ const DesignModal: React.FC = () => {
     setLocal(base);
     setDirty(true);
     setThemeSelection('default'); // Reset theme to default
-    
+
     // Apply default theme preferences
     const defaultTheme = themePresets['default'];
     if (defaultTheme) {
@@ -233,7 +233,7 @@ const DesignModal: React.FC = () => {
         fonts: { ...defaultTheme.preferences.fonts },
       };
       setLocal(merged);
-      
+
       if (autoApply) {
         try {
           setCompileStatus({ status: 'running' });
@@ -363,7 +363,7 @@ const DesignModal: React.FC = () => {
 
             {/* Presets Tab */}
             {activeTab === 'presets' && (
-              <PresetsTab 
+              <PresetsTab
                 themeSelection={themeSelection}
                 setThemeSelection={setThemeSelection}
                 customPresets={customPresets}

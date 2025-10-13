@@ -8,10 +8,10 @@ const SpacingTab: React.FC<TabProps> = ({ local, mutate }) => {
       <div className="form-grid one-col">
         <label>Line Height
           <div className="slider-group">
-            <input 
-              type="range" 
-              min="1.0" 
-              max="2.5" 
+            <input
+              type="range"
+              min="1.0"
+              max="2.5"
               step="0.1"
               value={local.line_height}
               onChange={e => mutate({ line_height: parseFloat(e.target.value) || 1.5 })}
@@ -30,10 +30,10 @@ const SpacingTab: React.FC<TabProps> = ({ local, mutate }) => {
         </label>
         <label>Paragraph Spacing
           <div className="slider-group">
-            <input 
-              type="range" 
-              min="0" 
-              max="2.5" 
+            <input
+              type="range"
+              min="0"
+              max="2.5"
               step="0.05"
               value={parseFloat(local.paragraph_spacing.replace('em', ''))}
               onChange={e => mutate({ paragraph_spacing: `${e.target.value}em` })}
@@ -48,19 +48,19 @@ const SpacingTab: React.FC<TabProps> = ({ local, mutate }) => {
           <div className="helper-text">Space between paragraphs</div>
         </label>
         <label className="checkbox-label">
-          <input 
-            type="checkbox" 
+          <input
+            type="checkbox"
             checked={local.page_numbers}
             onChange={e => mutate({ page_numbers: e.target.checked })}
-          /> 
+          />
           <span>Page Numbers</span>
         </label>
         <label className="checkbox-label">
-          <input 
-            type="checkbox" 
+          <input
+            type="checkbox"
             checked={local.header_title}
             onChange={e => mutate({ header_title: e.target.checked })}
-          /> 
+          />
           <span>Document Title in Header</span>
         </label>
         {local.header_title && (

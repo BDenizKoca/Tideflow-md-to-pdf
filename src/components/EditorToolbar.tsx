@@ -7,7 +7,7 @@ import { DEFAULTS } from '../constants/timing';
 // Curated font list for the dropdown
 const FONT_OPTIONS = [
   "New Computer Modern",
-  "Inter", 
+  "Inter",
   "Arial",
   "Helvetica",
   "Times New Roman",
@@ -67,9 +67,9 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
         <button onClick={() => cmd.link(editorView!)} title="Link (Ctrl+K)">
           🔗
         </button>
-        
+
         <div className="toolbar-divider" />
-        
+
         {/* Structure */}
         <button onClick={() => cmd.heading(editorView!, 1)} title="Heading 1 (Ctrl+Alt+1)">
           H1
@@ -83,9 +83,9 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
         <button onClick={() => cmd.quote(editorView!)} title="Blockquote (Ctrl+Shift+Q)">
           ""
         </button>
-        
+
         <div className="toolbar-divider" />
-        
+
         {/* Lists */}
         <button onClick={() => cmd.ul(editorView!)} title="Bullet List (Ctrl+Shift+8)">
           •
@@ -96,9 +96,9 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
         <button onClick={() => cmd.task(editorView!)} title="Task List (Ctrl+Shift+9)">
           ☐
         </button>
-        
+
         <div className="toolbar-divider" />
-        
+
         {/* Alignment */}
         <button onClick={() => cmd.alignBlock(editorView!, 'left')} title="Align Left">
           ⬅
@@ -109,9 +109,9 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
         <button onClick={() => cmd.alignBlock(editorView!, 'right')} title="Align Right">
           ➡
         </button>
-        
+
         <div className="toolbar-divider" />
-        
+
         {/* History */}
         <button onClick={() => cmd.undo(editorView!)} title="Undo (Ctrl+Z)">
           ↶
@@ -119,9 +119,9 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
         <button onClick={() => cmd.redo(editorView!)} title="Redo (Ctrl+Y)">
           ↷
         </button>
-        
+
         <div className="toolbar-divider" />
-        
+
         {/* Insert Content */}
         <button onClick={() => cmd.table(editorView!)} title="Insert Table">
           ▦
@@ -132,12 +132,12 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
         <button onClick={() => cmd.footnote(editorView!)} title="Insert Footnote">
           ⁵
         </button>
-        
+
         <div className="toolbar-divider" />
-        
+
         {/* Force line break - Image utilities and font controls on second line */}
         <div className="toolbar-line-break" />
-        
+
         <button onClick={onImageInsert} title="Insert Image">
           🖼️
         </button>
@@ -156,9 +156,9 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
           <option value="80%">80%</option>
           <option value="100%">100%</option>
         </select>
-        
+
         <div className="toolbar-divider" />
-        
+
         {/* Layout & Advanced */}
         <button onClick={() => cmd.columnsNoBorder(editorView!)} title="Insert 2 Columns">
           ⫴
@@ -169,7 +169,7 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
         <button onClick={() => cmd.vspace(editorView!, '8pt')} title="Vertical Space">
           ↕
         </button>
-        
+
         <div className="toolbar-divider" />
 
         {/* Font Controls */}
@@ -194,9 +194,9 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
         <button onClick={() => cmd.sizeLocal(editorView!, 'large')} title="Increase Text Size">
           A+
         </button>
-        
+
         <div className="toolbar-divider" />
-        
+
         {/* Actions */}
         <button
           onClick={onSearchToggle}

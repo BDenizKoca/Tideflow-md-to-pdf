@@ -53,14 +53,14 @@ export function checkProgrammaticScroll(
 ): GuardResult {
   const now = Date.now();
   const lastProg = lastProgrammaticScrollAt.current ?? 0;
-  
+
   if (now - lastProg < TIMING.PROGRAMMATIC_SCROLL_GUARD_MS) {
-    return { 
-      passed: false, 
-      reason: `Within programmatic scroll guard (${now - lastProg}ms < ${TIMING.PROGRAMMATIC_SCROLL_GUARD_MS}ms)` 
+    return {
+      passed: false,
+      reason: `Within programmatic scroll guard (${now - lastProg}ms < ${TIMING.PROGRAMMATIC_SCROLL_GUARD_MS}ms)`
     };
   }
-  
+
   return { passed: true };
 }
 
@@ -105,14 +105,14 @@ export function checkScrollLock(
 export function checkMountGuard(mountedAt: React.MutableRefObject<number>): GuardResult {
   const now = Date.now();
   const elapsed = now - mountedAt.current;
-  
+
   if (elapsed < TIMING.USER_INTERACTION_MOUNT_GUARD_MS) {
-    return { 
-      passed: false, 
-      reason: `Within mount guard (${elapsed}ms < ${TIMING.USER_INTERACTION_MOUNT_GUARD_MS}ms)` 
+    return {
+      passed: false,
+      reason: `Within mount guard (${elapsed}ms < ${TIMING.USER_INTERACTION_MOUNT_GUARD_MS}ms)`
     };
   }
-  
+
   return { passed: true };
 }
 
@@ -135,8 +135,8 @@ export function checkEditorToPdfGuards(params: GuardCheckParams): GuardResult {
     () => checkContainer(params.containerRef),
     params.anchorOffsetsRef ? () => checkOffsetsReady(params.anchorOffsetsRef!) : null,
     params.isTypingRef ? () => checkTyping(params.isTypingRef!) : null,
-    params.syncModeRef && params.userManuallyPositionedPdfRef 
-      ? () => checkScrollLock(params.syncModeRef!, params.userManuallyPositionedPdfRef!) 
+    params.syncModeRef && params.userManuallyPositionedPdfRef
+      ? () => checkScrollLock(params.syncModeRef!, params.userManuallyPositionedPdfRef!)
       : null,
   ].filter(Boolean) as (() => GuardResult)[];
 

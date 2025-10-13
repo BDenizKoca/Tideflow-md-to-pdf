@@ -3,7 +3,7 @@
 # Tideflow
 <img width="1920" height="1032" alt="tideflowv1" src="https://github.com/user-attachments/assets/d4d88097-a895-458b-8e75-770398452e0b" />
 
-**Fast, offline-first Markdown → PDF desktop app powered by Typst**  
+**Fast, offline-first Markdown → PDF desktop app powered by Typst**
 Write on the left, get a beautifully typeset PDF on the right – instantly.
 
 [![CI](https://github.com/BDenizKoca/Md-to-PDF/actions/workflows/ci.yml/badge.svg)](https://github.com/BDenizKoca/Md-to-PDF/actions/workflows/ci.yml)
@@ -145,7 +145,7 @@ Tideflow bundles the official Typst CLI (currently v0.13.1) for macOS, Windows, 
 MIT – use, modify, distribute with attribution.
 
 ## Connect
-Email: **b.denizkoca@gmail.com**  
+Email: **b.denizkoca@gmail.com**
 GitHub: [@BDenizKoca](https://github.com/BDenizKoca)
 
 ---

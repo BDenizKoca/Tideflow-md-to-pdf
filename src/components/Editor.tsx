@@ -100,7 +100,7 @@ const Editor: React.FC = () => {
 
   // Wrap handleSave to pass setIsSaving and addToast
   const handleSave = () => handleSaveBase(setIsSaving, addToast);
-  
+
   // Wrap handleRender to pass setPreviewVisible
   const handleRenderWithPreview = () => handleRender(setPreviewVisible);
 
@@ -173,7 +173,7 @@ const Editor: React.FC = () => {
 
     const setupListener = async () => {
       console.log('[Editor] Setting up Tauri file drop listener');
-      
+
       unlisten = await listen<{ paths: string[]; position: { x: number; y: number } } | string[]>('tauri://drag-drop', async (event) => {
         console.log('[Editor] Tauri file drop event:', event.payload);
 
@@ -181,11 +181,11 @@ const Editor: React.FC = () => {
         const paths = (event.payload && typeof event.payload === 'object' && 'paths' in event.payload)
           ? event.payload.paths
           : Array.isArray(event.payload) ? event.payload : [];
-        
+
         if (paths && paths.length > 0) {
           const filePath = paths[0];
           console.log('[Editor] Processing dropped file:', filePath);
-          
+
           // Check if it's a markdown file
           if (filePath.endsWith('.md') || filePath.endsWith('.markdown')) {
             try {
@@ -205,14 +205,14 @@ const Editor: React.FC = () => {
             try {
               const assetPath = await importImageFromPath(filePath);
               const fileName = filePath.split(/[\\/]/).pop() || 'image';
-              
+
               // Prompt for image properties before inserting
               const initial: ImageProps = {
                 width: preferences.default_image_width,
                 alignment: preferences.default_image_alignment as ImageProps['alignment'],
                 alt: fileName.replace(/\.[^.]+$/, '')
               };
-              
+
               const chosen = await promptImageProps(initial);
               if (chosen) {
                 const imageMarkdown = generateImageMarkdown(
@@ -221,7 +221,7 @@ const Editor: React.FC = () => {
                   chosen.alignment,
                   chosen.alt
                 );
-                
+
                 if (editorStateRefs.editorViewRef.current) {
                   const state = editorStateRefs.editorViewRef.current.state;
                   const transaction = state.update({
@@ -229,7 +229,7 @@ const Editor: React.FC = () => {
                   });
                   editorStateRefs.editorViewRef.current.dispatch(transaction);
                 }
-                
+
                 addToast({ message: `Image inserted: ${fileName}`, type: 'success' });
               }
             } catch (err) {
@@ -253,9 +253,9 @@ const Editor: React.FC = () => {
   // Handle search toggle
   const handleSearchToggle = React.useCallback(() => {
     if (!editorStateRefs.editorViewRef.current) return;
-    
+
     const view = editorStateRefs.editorViewRef.current;
-    
+
     // Toggle search panel: if close returns false, panel wasn't open, so open it
     const closed = closeSearchPanel(view);
     if (!closed) {
@@ -271,7 +271,7 @@ const Editor: React.FC = () => {
         // Prevent default browser find
         e.preventDefault();
         e.stopPropagation();
-        
+
         // Toggle search panel
         handleSearchToggle();
       }
@@ -325,9 +325,9 @@ const Editor: React.FC = () => {
   };
 
   return (
-    <div 
+    <div
       ref={containerRef}
-      className="editor-container" 
+      className="editor-container"
       onPaste={handlePaste}
     >
       {/* Always render editor toolbar and content, but hide when no file */}
@@ -348,10 +348,10 @@ const Editor: React.FC = () => {
           }}
           onSearchToggle={handleSearchToggle}
         />
-        
+
         <div className="editor-content" ref={editorStateRefs.editorRef} />
       </div>
-      
+
       {/* Show "no file" message when no file is open */}
       {!currentFile && (
         <div className="no-file-message">
@@ -367,7 +367,7 @@ const Editor: React.FC = () => {
           </div>
         </div>
       )}
-      
+
       {/* Image properties modal */}
       <ImagePropsModal
         open={imageModalOpen}
@@ -381,7 +381,7 @@ const Editor: React.FC = () => {
           if (imageModalResolveRef) imageModalResolveRef(props);
         }}
       />
-      
+
       {/* Image+ modal */}
       <ImagePlusModal
         open={imagePlusOpen}

@@ -54,7 +54,7 @@ export const useImageHandlers = ({
       }]);
 
       if (!selectedFile) return; // User cancelled
-      
+
       // Copy the selected file into the app's assets directory via backend
       try {
         const assetPath = await importImageFromPath(selectedFile);
@@ -88,25 +88,25 @@ export const useImageHandlers = ({
   // Handle paste events for images
   const handlePaste = useCallback(async (e: React.ClipboardEvent) => {
     const items = e.clipboardData.items;
-    
+
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
-      
+
       if (item.type.indexOf('image') === 0) {
         e.preventDefault();
-        
+
         const blob = item.getAsFile();
         if (!blob) continue;
-        
+
         try {
           // Convert blob to base64
           const reader = new FileReader();
           reader.onload = async (event) => {
             if (!event.target?.result) return;
-            
+
             const base64data = event.target.result.toString();
             const assetPath = await importImage(base64data);
-            
+
             // Insert image markdown with default preferences
             const imageMarkdown = generateImageMarkdown(
               assetPath,
@@ -114,10 +114,10 @@ export const useImageHandlers = ({
               preferences.default_image_alignment,
               'Pasted image'
             );
-            
+
             insertSnippet(imageMarkdown);
           };
-          
+
           reader.readAsDataURL(blob);
         } catch (err) {
           handleError(err, { operation: 'process pasted image', component: 'Editor' });
@@ -129,20 +129,20 @@ export const useImageHandlers = ({
   // Handle drop events for images
   const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
-    
+
     if (e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
-      
+
       if (file.type.startsWith('image/')) {
         try {
           // Convert file to base64
           const reader = new FileReader();
           reader.onload = async (event) => {
             if (!event.target?.result) return;
-            
+
             const base64data = event.target.result.toString();
             const assetPath = await importImage(base64data, file.name);
-            
+
             // Prompt for image properties before inserting
             const initial: ImageProps = {
               width: preferences.default_image_width,
@@ -151,18 +151,18 @@ export const useImageHandlers = ({
             };
             const chosen = await promptImageProps(initial);
             if (!chosen) return; // User cancelled
-            
+
             const imageMarkdown = generateImageMarkdown(
               assetPath,
               chosen.width,
               chosen.alignment,
               chosen.alt
             );
-            
+
             insertSnippet(imageMarkdown);
             showSuccess(`Inserted image: ${assetPath}`);
           };
-          
+
           reader.readAsDataURL(file);
         } catch (err) {
           handleError(err, { operation: 'process dropped image', component: 'Editor' });

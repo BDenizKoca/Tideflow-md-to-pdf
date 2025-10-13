@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { themePresets } from '../../themes';
 import type { Preferences, Toast } from '../../types';
+import ThemePreview from './ThemePreview';
 
 interface ThemesTabProps {
   themeSelection: string;
@@ -12,35 +13,120 @@ interface ThemesTabProps {
 }
 
 const sanitizeCssValue = (value: string | undefined, fallback: string) => {
-  if (!value) {
-    return fallback;
-  }
+  if (!value) return fallback;
   return value.replace(/[^#%(),.\-a-zA-Z0-9\s]/g, '').trim() || fallback;
 };
 
-const createClassSlug = (id: string, index: number) => {
-  const base = id
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-  return `custom-preset-${base || 'preset'}-${index}`;
+const HEX_COLOR_REGEX = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+const RGB_COLOR_REGEX = /^rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+(?:\s*,\s*(?:0|0?\.\d+|1))?\s*\)$/i;
+
+const sanitizeColor = (value: string | undefined, fallback: string) => {
+  const sanitized = sanitizeCssValue(value, fallback);
+  if (HEX_COLOR_REGEX.test(sanitized) || RGB_COLOR_REGEX.test(sanitized)) {
+    return sanitized;
+  }
+  return fallback;
 };
 
-const ThemesTab: React.FC<ThemesTabProps> = ({ 
-  themeSelection, 
+const parseHex = (color: string): [number, number, number] | null => {
+  const match = color.match(/^#([0-9a-fA-F]+)$/);
+  if (!match) return null;
+  let hex = match[1];
+  if (hex.length === 3) {
+    hex = hex
+      .split('')
+      .map((ch) => ch + ch)
+      .join('');
+  }
+  if (hex.length !== 6) return null;
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  if ([r, g, b].some((channel) => Number.isNaN(channel))) return null;
+  return [r, g, b];
+};
+
+const parseRgb = (color: string): [number, number, number] | null => {
+  const match = color.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+  if (!match) return null;
+  const r = Number(match[1]);
+  const g = Number(match[2]);
+  const b = Number(match[3]);
+  if ([r, g, b].some((channel) => Number.isNaN(channel))) return null;
+  return [r, g, b];
+};
+
+const isColorDark = (color: string): boolean => {
+  const rgb = parseHex(color) ?? parseRgb(color);
+  if (!rgb) return false;
+  const [r, g, b] = rgb.map((channel) => channel / 255);
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return luminance < 0.45;
+};
+
+const parseNumeric = (value: string | undefined): number | undefined => {
+  if (!value) return undefined;
+  const match = value.match(/-?\d+(\.\d+)?/);
+  if (!match) return undefined;
+  const num = parseFloat(match[0]);
+  return Number.isNaN(num) ? undefined : num;
+};
+
+const computeLayout = (preferences: Preferences) => {
+  const marginX = parseNumeric(preferences.margin?.x) ?? 2.5;
+  if (marginX <= 2) return 'dense';
+  if (marginX >= 3.5) return 'spacious';
+  return 'regular';
+};
+
+const parsePercentage = (value: string | undefined, fallback: number) => {
+  const numeric = parseNumeric(value);
+  if (numeric === undefined) return fallback;
+  return Math.min(100, Math.max(20, numeric));
+};
+
+const parseHeadingScale = (scale: Preferences['heading_scale']) => {
+  if (typeof scale === 'number' && Number.isFinite(scale)) {
+    return scale;
+  }
+  if (typeof scale === 'string') {
+    const numeric = parseFloat(scale);
+    if (!Number.isNaN(numeric)) return numeric;
+  }
+  return 1;
+};
+
+const getPreviewConfig = (preferences: Preferences) => {
+  const pageColor = sanitizeColor(preferences.page_bg_color, '#f8fafc');
+  const fontColor = sanitizeColor(preferences.font_color, '#1f2937');
+  const accentColor = sanitizeColor(preferences.accent_color, '#2563eb');
+
+  return {
+    pageColor,
+    fontColor,
+    accentColor,
+    isDarkPage: isColorDark(pageColor),
+    twoColumn: Boolean(preferences.two_column_layout),
+    layout: computeLayout(preferences) as 'dense' | 'regular' | 'spacious',
+    imageWidth: parsePercentage(preferences.default_image_width, 72),
+    headingScale: parseHeadingScale(preferences.heading_scale),
+  };
+};
+
+const ThemesTab: React.FC<ThemesTabProps> = ({
+  themeSelection,
   setThemeSelection,
   customPresets,
   setLocal,
   scheduleApply,
-  addToast
+  addToast,
 }) => {
   const handleThemeSelect = (themeId: string) => {
     setThemeSelection(themeId);
-    
-    // Check if it's a custom preset or built-in theme
+
     const customPreset = customPresets[themeId];
     const builtInTheme = themePresets[themeId];
-    
+
     if (customPreset) {
       const merged: Preferences = {
         ...customPreset.preferences,
@@ -63,32 +149,12 @@ const ThemesTab: React.FC<ThemesTabProps> = ({
   };
 
   const customPresetEntries = useMemo(() => {
-    return Object.entries(customPresets).map(([id, preset], index) => {
-      const classSlug = createClassSlug(id, index);
-      const pageBg = sanitizeCssValue(preset.preferences.page_bg_color, '#ffffff');
-      const accent = sanitizeCssValue(preset.preferences.accent_color, '#1d4ed8');
-      const fontColor = sanitizeCssValue(preset.preferences.font_color, '#1f2937');
-      const fontMain = sanitizeCssValue(preset.preferences.fonts?.main, 'Inter, sans-serif');
-
-      const cssRule = `.${classSlug} {
-  --page-bg-color: ${pageBg};
-  --accent-color: ${accent};
-  --font-color: ${fontColor};
-  --main-font: ${fontMain};
-}`;
-
-      return {
-        id,
-        preset,
-        className: classSlug,
-        cssRule,
-      };
-    });
+    return Object.entries(customPresets).map(([id, preset]) => ({
+      id,
+      preset,
+      preview: getPreviewConfig(preset.preferences),
+    }));
   }, [customPresets]);
-
-  const customPresetCss = useMemo(() => {
-    return customPresetEntries.map(entry => entry.cssRule).join('\n');
-  }, [customPresetEntries]);
 
   return (
     <div className="tab-panel themes-tab">
@@ -97,82 +163,49 @@ const ThemesTab: React.FC<ThemesTabProps> = ({
         Choose a pre-designed theme as a starting point for your document
       </p>
 
-      {customPresetCss && (
-        <style>{customPresetCss}</style>
-      )}
-      
       <div className="theme-gallery">
-        {Object.entries(themePresets).map(([id, theme]) => {
-          return (
-            <button
-              key={id}
-              type="button"
-              className={`theme-card ${themeSelection === id ? 'active' : ''}`}
-              onClick={() => handleThemeSelect(id)}
-              title={theme.description}
-            >
-              <div className="theme-preview">
-                <img 
-                  src={`/theme-thumbnails/${id}.jpg`}
-                  alt={`${theme.name} preview`}
-                  className="theme-thumbnail"
-                />
-              </div>
-              <div className="theme-card-info">
-                <h4>{theme.name}</h4>
-              </div>
-              {themeSelection === id && (
-                <div className="theme-card-badge">✓</div>
-              )}
-            </button>
-          );
-        })}
+        {Object.entries(themePresets).map(([id, theme]) => (
+          <button
+            key={id}
+            type="button"
+            className={`theme-card ${themeSelection === id ? 'active' : ''}`}
+            onClick={() => handleThemeSelect(id)}
+            title={theme.description}
+          >
+            <div className="theme-preview">
+              <img
+                src={`/theme-thumbnails/${id}.jpg`}
+                alt={`${theme.name} preview`}
+                className="theme-thumbnail"
+              />
+            </div>
+            <div className="theme-card-info">
+              <h4>{theme.name}</h4>
+            </div>
+            {themeSelection === id && <div className="theme-card-badge">✓</div>}
+          </button>
+        ))}
       </div>
 
-      {Object.keys(customPresets).length > 0 && (
+      {customPresetEntries.length > 0 && (
         <>
           <h3 className="custom-presets-heading">Custom Presets</h3>
           <div className="theme-gallery">
-            {customPresetEntries.map(({ id, preset, className }) => (
-              <div
+            {customPresetEntries.map(({ id, preset, preview }) => (
+              <button
                 key={id}
-                className={className}
+                type="button"
+                className={`theme-card ${themeSelection === id ? 'active' : ''}`}
+                onClick={() => handleThemeSelect(id)}
               >
-                <button
-                  type="button"
-                  className={`theme-card ${themeSelection === id ? 'active' : ''}`}
-                  onClick={() => handleThemeSelect(id)}
-                >
                 <div className="theme-preview">
-                  <div 
-                    className="theme-preview-fallback custom-preset"
-                  >
-                    <div 
-                      className="theme-preview-header"
-                    >
-                      ⭐
-                    </div>
-                    <div className="theme-preview-lines">
-                      <div 
-                        className="theme-preview-line"
-                      />
-                      <div 
-                        className="theme-preview-line short"
-                      />
-                      <div 
-                        className="theme-preview-line"
-                      />
-                    </div>
-                  </div>
+                  <ThemePreview {...preview} />
                 </div>
                 <div className="theme-card-info">
                   <h4>{preset.name}</h4>
                 </div>
-                {themeSelection === id && (
-                  <div className="theme-card-badge">✓</div>
-                )}
-                </button>
-              </div>
+                {themeSelection === id && <div className="theme-card-badge">✓</div>}
+              </button>
             ))}
           </div>
         </>

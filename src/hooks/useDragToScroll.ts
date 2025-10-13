@@ -24,12 +24,12 @@ export const useDragToScroll = <T extends HTMLElement>(
     const handleMouseDown = (e: MouseEvent) => {
       // Only handle left mouse button
       if (e.button !== 0) return;
-      
+
       // Don't start drag if clicking on interactive elements
       const target = e.target as HTMLElement;
       if (
-        target.tagName === 'BUTTON' || 
-        target.tagName === 'A' || 
+        target.tagName === 'BUTTON' ||
+        target.tagName === 'A' ||
         target.tagName === 'INPUT' ||
         target.closest('button') ||
         target.closest('a')
@@ -43,25 +43,25 @@ export const useDragToScroll = <T extends HTMLElement>(
       startY.current = e.clientY;
       scrollLeft.current = element.scrollLeft;
       scrollTop.current = element.scrollTop;
-      
+
       element.style.cursor = 'grabbing';
       element.style.userSelect = 'none';
     };
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging.current) return;
-      
+
       e.preventDefault();
-      
+
       const deltaX = e.clientX - startX.current;
       const deltaY = e.clientY - startY.current;
-      
+
       // Check if user has moved enough to consider it a drag
       if (!hasMoved.current && (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5)) {
         hasMoved.current = true;
         element.classList.add('is-dragging');
       }
-      
+
       if (hasMoved.current) {
         element.scrollLeft = scrollLeft.current - deltaX;
         element.scrollTop = scrollTop.current - deltaY;
@@ -70,30 +70,30 @@ export const useDragToScroll = <T extends HTMLElement>(
 
     const handleMouseUp = () => {
       if (!isDragging.current) return;
-      
+
       isDragging.current = false;
       element.style.cursor = 'grab';
       element.style.userSelect = '';
       element.classList.remove('is-dragging');
-      
+
       // If the user didn't move much, allow the click to propagate
       if (!hasMoved.current) {
         // Let the click event fire normally
         return;
       }
-      
+
       // Prevent click events if it was a drag
       const preventClick = (clickEvent: MouseEvent) => {
         clickEvent.preventDefault();
         clickEvent.stopPropagation();
         element.removeEventListener('click', preventClick, true);
       };
-      
+
       element.addEventListener('click', preventClick, true);
       setTimeout(() => {
         element.removeEventListener('click', preventClick, true);
       }, 0);
-      
+
       hasMoved.current = false;
     };
 

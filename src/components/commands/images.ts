@@ -85,20 +85,20 @@ export const imageCommands = {
     const cursor = sel.from;
     const upto = docText.slice(0, cursor);
     const tagStart = upto.lastIndexOf("<img");
-    
+
     if (tagStart < 0) {
       return;
     }
-    
+
     const tagEnd = docText.indexOf('>', tagStart);
     if (tagEnd < 0) {
       return;
     }
-    
+
     const original = docText.slice(tagStart, tagEnd + 1);
     let updated = original;
     const widthRe = /\swidth\s*=\s*(["'])(.*?)\1/;
-    
+
     if (widthRe.test(updated)) {
       updated = original.replace(widthRe, (_m, q) => ` width=${q}${width}${q}`);
     } else {
@@ -109,7 +109,7 @@ export const imageCommands = {
         updated = `${updated.slice(0, insertAt)} width="${width}"${updated.slice(insertAt)}`;
       }
     }
-    
+
     if (updated !== original) {
       view.dispatch({
         changes: { from: tagStart, to: tagEnd + 1, insert: updated },

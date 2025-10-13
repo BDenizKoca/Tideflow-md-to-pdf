@@ -1,7 +1,7 @@
 /**
  * Simplified hook to sync PDF preview to editor scroll position.
  * Handles: activeAnchorId changes, sourceMap changes, startup sync.
- * 
+ *
  * Replaces: useAnchorSync, usePendingScroll, useStartupSync, useFinalSync
  */
 
@@ -17,7 +17,7 @@ interface UseEditorToPdfSyncParams {
   isTyping: boolean;
   sourceMap: SourceMap | null;
   compileStatus: { status: string; pdf_path?: string | null };
-  
+
   // Refs
   containerRef: React.RefObject<HTMLDivElement | null>;
   anchorOffsetsRef: React.MutableRefObject<Map<string, number>>;
@@ -27,7 +27,7 @@ interface UseEditorToPdfSyncParams {
   userInteractedRef: React.MutableRefObject<boolean>;
   userManuallyPositionedPdfRef: React.MutableRefObject<boolean>;
   programmaticScrollRef: React.MutableRefObject<boolean>;
-  
+
   // Actions
   scrollToAnchor: (anchorId: string, center?: boolean, force?: boolean) => void;
   recomputeAnchorOffsets: (map: SourceMap | null) => void;
@@ -86,7 +86,7 @@ export function useEditorToPdfSync(params: UseEditorToPdfSyncParams): void {
 
     // Don't sync if same anchor as last time (prevents feedback loop from PDF scroll handler)
     if (activeAnchorId === lastActiveAnchorIdRef.current) return;
-    
+
     // Don't sync if no anchor
     if (!activeAnchorId) {
       lastActiveAnchorIdRef.current = activeAnchorId;
@@ -119,7 +119,7 @@ export function useEditorToPdfSync(params: UseEditorToPdfSyncParams): void {
     if (stoppedTyping) {
       // User stopped typing - record the timestamp
       lastTypingStoppedAtRef.current = Date.now();
-      
+
       if (process.env.NODE_ENV !== 'production') {
         console.debug('[EditorToPdfSync] user stopped typing - ready for next navigation');
       }
@@ -130,7 +130,7 @@ export function useEditorToPdfSync(params: UseEditorToPdfSyncParams): void {
   useEffect(() => {
     // Skip if no sourceMap or same as last time
     if (!sourceMap || sourceMap === lastSourceMapRef.current) return;
-    
+
     lastSourceMapRef.current = sourceMap;
 
     if (process.env.NODE_ENV !== 'production') {
@@ -146,7 +146,7 @@ export function useEditorToPdfSync(params: UseEditorToPdfSyncParams): void {
     const checkAndScroll = () => {
       const el = containerRef.current;
       if (!el || !el.isConnected) return;
-      
+
       // Check if offsets are ready
       if (anchorOffsetsRef.current.size === 0) {
         if (process.env.NODE_ENV !== 'production') {
@@ -167,21 +167,21 @@ export function useEditorToPdfSync(params: UseEditorToPdfSyncParams): void {
 
       // Only skip post-render scroll if user has manually positioned PDF
       // AND we're not on initial render (when lastScrolledToAnchorRef is set)
-      if (userManuallyPositionedPdfRef.current && 
-          syncModeRef.current === 'auto' && 
+      if (userManuallyPositionedPdfRef.current &&
+          syncModeRef.current === 'auto' &&
           lastScrolledToAnchorRef.current !== null) {
         if (process.env.NODE_ENV !== 'production') {
           console.debug('[EditorToPdfSync] skipping post-render scroll - user has PDF positioned elsewhere');
         }
         return;
       }
-      
+
       // CRITICAL: Don't scroll PDF if we just stopped typing recently AND anchor hasn't changed
       // This prevents the "jump to top" issue after typing, but allows scrolling when user moves cursor
       const now = Date.now();
       const timeSinceTypingStopped = now - lastTypingStoppedAtRef.current;
       const anchorChanged = targetAnchor !== lastScrolledToAnchorRef.current;
-      
+
       if (timeSinceTypingStopped < 2000 && !anchorChanged) { // Only block if anchor is the same
         if (process.env.NODE_ENV !== 'production') {
           console.debug('[EditorToPdfSync] skipping post-render scroll - recently stopped typing at same anchor', {
@@ -194,7 +194,7 @@ export function useEditorToPdfSync(params: UseEditorToPdfSyncParams): void {
       }
 
       if (process.env.NODE_ENV !== 'production') {
-        console.debug('[EditorToPdfSync] scrolling after sourceMap change', { 
+        console.debug('[EditorToPdfSync] scrolling after sourceMap change', {
           targetAnchor,
           activeAnchorId,
           isTyping,
@@ -291,14 +291,14 @@ export function useEditorToPdfSync(params: UseEditorToPdfSyncParams): void {
 
     const resizeObserver = new ResizeObserver(() => {
       if (!sourceMapRef.current) return;
-      
+
       // Only recompute if size actually changed significantly (more than 10px)
       const newWidth = el.clientWidth;
       const newHeight = el.clientHeight;
       if (Math.abs(newWidth - lastWidth) < 10 && Math.abs(newHeight - lastHeight) < 10) {
         return; // Ignore tiny fluctuations
       }
-      
+
       lastWidth = newWidth;
       lastHeight = newHeight;
 
@@ -308,7 +308,7 @@ export function useEditorToPdfSync(params: UseEditorToPdfSyncParams): void {
           console.debug('[EditorToPdfSync] container resized, recomputing offsets');
         }
         recomputeAnchorOffsets(sourceMapRef.current);
-        
+
         // Re-sync to current anchor after resize ONLY if not locked
         // Check the lock flag, not the mode!
         const isLocked = syncModeRef.current === 'auto' && userManuallyPositionedPdfRef.current;

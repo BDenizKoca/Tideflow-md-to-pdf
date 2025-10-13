@@ -30,7 +30,7 @@ const SearchModal: React.FC<Props> = ({ isOpen, onClose, onSearch }) => {
 
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
-    
+
     if (!searchQuery.trim()) {
       addToast({ type: 'warning', message: 'Please enter a search term' });
       return;
@@ -56,7 +56,7 @@ const SearchModal: React.FC<Props> = ({ isOpen, onClose, onSearch }) => {
           <h2>🔍 Find in Document</h2>
           <button className="modal-close" onClick={onClose} type="button">×</button>
         </div>
-        
+
         <form onSubmit={handleSearch}>
           <div className="design-section">
             <label className="form-label">
@@ -96,14 +96,14 @@ const SearchModal: React.FC<Props> = ({ isOpen, onClose, onSearch }) => {
           </div>
 
           <div className="modal-footer">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={onClose}
               className="btn-secondary"
             >
               Cancel
             </button>
-            <button 
+            <button
               type="submit"
               className="btn-primary"
             >

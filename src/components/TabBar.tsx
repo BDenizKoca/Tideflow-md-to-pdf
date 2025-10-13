@@ -7,7 +7,7 @@ import './TabBar.css';
 import { INSTRUCTIONS_DOC } from '../instructionsDoc';
 
 const TabBar: React.FC = () => {
-  const { 
+  const {
     editor: { openFiles, currentFile, modified },
     setCurrentFile,
     setContent,
@@ -18,7 +18,7 @@ const TabBar: React.FC = () => {
 
   const handleTabClick = async (filePath: string) => {
     if (currentFile === filePath) return;
-    
+
     try {
       if (filePath === 'instructions.md') {
         // Use embedded instructions content
@@ -58,8 +58,8 @@ const TabBar: React.FC = () => {
     <div className="tab-bar">
       <div className="tab-container">
         {openFiles.map((file: string) => (
-          <div 
-            key={file} 
+          <div
+            key={file}
             className={`tab ${currentFile === file ? 'active' : ''} ${modified && currentFile === file ? 'modified' : ''}`}
             onClick={() => handleTabClick(file)}
           >

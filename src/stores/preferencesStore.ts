@@ -49,18 +49,18 @@ interface PreferencesStoreState {
   // Preferences state
   preferences: Preferences;
   setPreferences: (preferences: Preferences) => void;
-  
+
   // Theme selection & design
   themeSelection: string;
   setThemeSelection: (theme: string) => void;
   lastCustomPreferences: Preferences;
-  
+
   // Custom presets (persisted to localStorage)
   customPresets: Record<string, { name: string; preferences: Preferences }>;
   saveCustomPreset: (id: string, name: string, preferences: Preferences) => void;
   deleteCustomPreset: (id: string) => void;
   renameCustomPreset: (id: string, newName: string) => void;
-  
+
   // Cache management
   clearCache: () => void;
   resetState: () => void;
@@ -81,16 +81,16 @@ export const usePreferencesStore = create<PreferencesStoreState>((set) => ({
       lastCustomPreferences: state.themeSelection === 'custom' ? snapshot : state.lastCustomPreferences,
     };
   }),
-  
+
   themeSelection: 'default',
   setThemeSelection: (theme: string) => set({ themeSelection: theme }),
-  
+
   lastCustomPreferences: {
     ...defaultPreferences,
     margin: { ...defaultPreferences.margin },
     fonts: { ...defaultPreferences.fonts },
   },
-  
+
   // Custom presets (persisted to localStorage)
   customPresets: (() => {
     try {
@@ -100,56 +100,56 @@ export const usePreferencesStore = create<PreferencesStoreState>((set) => ({
       return {};
     }
   })() as Record<string, { name: string; preferences: Preferences }>,
-  
+
   saveCustomPreset: (id: string, name: string, preferences: Preferences) => set((state) => {
     const newPresets = {
       ...state.customPresets,
       [id]: { name, preferences: { ...preferences, margin: { ...preferences.margin }, fonts: { ...preferences.fonts } } }
     };
-    
+
     try {
       localStorage.setItem('customPresets', JSON.stringify(newPresets));
     } catch (e) {
       prefsLogger.warn('Failed to save custom preset', e);
     }
-    
+
     return { customPresets: newPresets };
   }),
-  
+
   deleteCustomPreset: (id: string) => set((state) => {
     const newPresets = { ...state.customPresets };
     delete newPresets[id];
-    
+
     try {
       localStorage.setItem('customPresets', JSON.stringify(newPresets));
     } catch (e) {
       prefsLogger.warn('Failed to delete custom preset', e);
     }
-    
+
     return { customPresets: newPresets };
   }),
-  
+
   renameCustomPreset: (id: string, newName: string) => set((state) => {
     if (!state.customPresets[id]) return state;
-    
+
     const newPresets = {
       ...state.customPresets,
       [id]: { ...state.customPresets[id], name: newName }
     };
-    
+
     try {
       localStorage.setItem('customPresets', JSON.stringify(newPresets));
     } catch (e) {
       prefsLogger.warn('Failed to rename custom preset', e);
     }
-    
+
     return { customPresets: newPresets };
   }),
-  
+
   clearCache: () => set(() => ({
     preferences: defaultPreferences,
   })),
-  
+
   resetState: () => set({
     preferences: defaultPreferences,
     themeSelection: 'default',

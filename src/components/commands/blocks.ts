@@ -9,16 +9,16 @@ export const blockCommands = {
   codeBlock: (view: EditorView) => {
     const s = view.state.selection.main;
     let text = view.state.sliceDoc(s.from, s.to) || "code";
-    
+
     // Strip code block markers if already wrapped
     text = text.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim();
-    
+
     const lang = prompt("Language (optional):") || "";
-    view.dispatch({ 
-      changes: { 
-        from: s.from, 
-        to: s.to, 
-        insert: `\`\`\`${lang}\n${text}\n\`\`\`` 
+    view.dispatch({
+      changes: {
+        from: s.from,
+        to: s.to,
+        insert: `\`\`\`${lang}\n${text}\n\`\`\``
       }
     });
   },
@@ -27,10 +27,10 @@ export const blockCommands = {
   blockMath: (view: EditorView) => {
     const s = view.state.selection.main;
     let text = view.state.sliceDoc(s.from, s.to) || "a^2 + b^2 = c^2";
-    
+
     // Strip math delimiters if already wrapped
     text = text.replace(/^\$\$\n?/, '').replace(/\n?\$\$$/, '').trim();
-    
+
     const block = `$$\n${text}\n$$`;
     view.dispatch({ changes: { from: s.from, to: s.to, insert: block } });
   },
@@ -77,10 +77,10 @@ export const blockCommands = {
   alignBlock: (view: EditorView, where: "left" | "center" | "right") => {
     const s = view.state.selection.main;
     let text = view.state.sliceDoc(s.from, s.to) || "Content";
-    
+
     // Strip any existing Typst wrappers to prevent nesting
     text = stripTypstWrappers(text);
-    
+
     const block = `<!--raw-typst #align(${where})[\n${text}\n] -->`;
     view.dispatch({ changes: { from: s.from, to: s.to, insert: block } });
   },
@@ -118,19 +118,19 @@ export const blockCommands = {
     const rightText = view.state.sliceDoc(s.from, s.to) || "Right column text";
     const leftText = "Left column text";
     const block = `\n<table border="0" cellspacing="0" cellpadding="0" role="presentation" data-borderless="1" style="border-collapse: collapse; border: 0">\n  <tr>\n    <td style="border: 0">${leftText}</td>\n    <td style="border: 0">${rightText}</td>\n  </tr>\n</table>\n\n`;
-    
+
     let rightIdx = block.indexOf(`>${rightText}<`);
     if (rightIdx >= 0) {
       rightIdx += 1;
     } else {
       rightIdx = block.indexOf(rightText);
     }
-    
+
     const insertFrom = s.from;
     const insertTo = s.to;
     let anchor = insertFrom;
     let head = insertFrom;
-    
+
     if (rightIdx >= 0) {
       const startOfRight = insertFrom + rightIdx;
       if (hadSelection) {
@@ -141,8 +141,8 @@ export const blockCommands = {
         head = startOfRight + rightText.length;
       }
     }
-    
-    view.dispatch({ 
+
+    view.dispatch({
       changes: { from: insertFrom, to: insertTo, insert: block },
       selection: { anchor, head }
     });

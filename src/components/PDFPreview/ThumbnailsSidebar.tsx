@@ -2,14 +2,14 @@ import React from 'react';
 import type { ThumbnailsProps } from './types';
 import { useDragToScroll } from '../../hooks/useDragToScroll';
 
-const ThumbnailsSidebar: React.FC<ThumbnailsProps> = ({ 
-  thumbnails, 
-  currentPage, 
-  totalPages, 
-  onPageClick 
+const ThumbnailsSidebar: React.FC<ThumbnailsProps> = ({
+  thumbnails,
+  currentPage,
+  totalPages,
+  onPageClick
 }) => {
   const thumbnailsListRef = useDragToScroll<HTMLDivElement>();
-  
+
   return (
     <div className="pdf-thumbnails-sidebar">
       <div className="thumbnails-header">Pages ({totalPages || '...'})</div>

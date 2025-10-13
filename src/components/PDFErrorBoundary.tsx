@@ -46,7 +46,7 @@ class PDFErrorBoundary extends Component<Props, State> {
       error: null,
       errorInfo: null,
     });
-    
+
     if (this.props.onReset) {
       this.props.onReset();
     }
@@ -59,9 +59,9 @@ class PDFErrorBoundary extends Component<Props, State> {
           <div className="pdf-error-content">
             <h3>⚠️ PDF Preview Error</h3>
             <p>The PDF preview encountered an error and couldn't render.</p>
-            
+
             <div className="pdf-error-actions">
-              <button 
+              <button
                 onClick={this.handleReset}
                 className="pdf-error-button primary"
               >
@@ -74,7 +74,7 @@ class PDFErrorBoundary extends Component<Props, State> {
               <div className="pdf-error-stack">
                 <strong>Error:</strong>
                 <pre>{this.state.error?.message || 'Unknown error'}</pre>
-                
+
                 {this.state.error?.stack && (
                   <>
                     <strong>Stack Trace:</strong>
@@ -83,7 +83,7 @@ class PDFErrorBoundary extends Component<Props, State> {
                 )}
               </div>
             </details>
-            
+
             <p className="pdf-error-help">
               If this persists, try:
               <ul>

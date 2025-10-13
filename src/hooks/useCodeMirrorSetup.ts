@@ -9,6 +9,8 @@ import { markdown } from '@codemirror/lang-markdown';
 import { keymap } from '@codemirror/view';
 import { search, searchKeymap, closeSearchPanel, openSearchPanel } from '@codemirror/search';
 import { StateField, Annotation, Prec, Compartment } from '@codemirror/state';
+import { syntaxHighlighting, HighlightStyle } from '@codemirror/language';
+import { tags } from '@lezer/highlight';
 import { TIMING } from '../constants/timing';
 import { cmd } from '../components/commands';
 import { scrubRawTypstAnchors } from '../utils/scrubAnchors';
@@ -125,21 +127,56 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
   useEffect(() => {
     // Only initialize once - component is persistent now
     if (initializedRef.current) return;
-    
+
     // Don't create editor if we don't have an editor container yet
     if (!editorRef.current) return;
-    
+
     // Don't create editor if one already exists
     if (editorViewRef.current) return;
-    
+
     // Create editor even without content - it will be updated by useFileOperations
     // This is because the component is now persistent and never unmounts
     if (process.env.NODE_ENV !== 'production') {
       useCodeMirrorSetupLogger.info('Initializing editor, content length:', content.length);
     }
-    
+
     initializedRef.current = true;
-    
+
+    // Create custom syntax highlighting for markdown with BRIGHT visible colors
+    // Using a fallback approach - everything gets a color
+    const markdownHighlighting = HighlightStyle.define([
+      // Default color for all text - WHITE
+      { tag: tags.standard(tags.content), color: '#e2e8f0' },
+
+      // Headings - BRIGHT BLUE with bold
+      { tag: tags.heading, color: '#60a5fa !important', fontWeight: 'bold' },
+
+      // Strong/Bold and Emphasis/Italic - white but styled
+      { tag: tags.strong, color: '#e2e8f0 !important', fontWeight: 'bold' },
+      { tag: tags.emphasis, color: '#e2e8f0 !important', fontStyle: 'italic' },
+
+      // Links - BRIGHT BLUE and PURPLE
+      { tag: tags.link, color: '#60a5fa !important' },
+      { tag: tags.url, color: '#a78bfa !important' },
+
+      // Code - BRIGHT YELLOW
+      { tag: tags.monospace, color: '#fbbf24 !important' },
+
+      // Lists - white text
+      { tag: tags.list, color: '#e2e8f0 !important' },
+
+      // Quotes - lighter white
+      { tag: tags.quote, color: '#cbd5e1 !important', fontStyle: 'italic' },
+
+      // ALL punctuation and separators - BRIGHT BLUE
+      { tag: tags.contentSeparator, color: '#60a5fa !important' },
+      { tag: tags.processingInstruction, color: '#60a5fa !important' },
+      { tag: tags.punctuation, color: '#60a5fa !important' },
+      { tag: tags.meta, color: '#60a5fa !important' },
+      { tag: tags.bracket, color: '#60a5fa !important' },
+      { tag: tags.brace, color: '#60a5fa !important' },
+    ], { all: { color: '#e2e8f0' } }); // Fallback color for everything else
+
     const view = new EditorView({
       doc: content,
       extensions: [
@@ -147,153 +184,141 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
         // Core Extensions
         // ====================================================================
         basicSetup,
-        markdown(),
+        markdown(), // Markdown language support
         EditorView.lineWrapping,
-        
+
+        // Custom syntax highlighting - APPLY THIS TO MAKE COLORS WORK!
+        syntaxHighlighting(markdownHighlighting),
+
         // Custom state field for editor-specific state
         editorCustomState,
-        
+
         // Search configuration (wrapped in compartment for future reconfiguration)
         searchConfigCompartment.of(search({
           top: true,
           caseSensitive: false,
         })),
-        
+
         // ====================================================================
-        // Theme Configuration (Consolidated)
+        // Theme Configuration (Using CSS Variables)
         // ====================================================================
-        EditorView.baseTheme({
-          // Content wrapping styles (light/dark same for now)
+        // Using EditorView.theme() instead of baseTheme() for higher specificity
+        EditorView.theme({
+          // Editor background and text - CRITICAL: Set default text color
+          '&': {
+            'background-color': 'var(--editor-bg)',
+            'color': '#e2e8f0'
+          },
+          '& *': {
+            'color': '#e2e8f0'
+          },
           '.cm-content': {
             'white-space': 'pre-wrap',
             'word-wrap': 'break-word',
-            'overflow-wrap': 'break-word'
+            'overflow-wrap': 'break-word',
+            'background-color': 'var(--cm-content-bg)',
+            'color': 'var(--cm-text)',
+            'caret-color': 'var(--cm-cursor)'
           },
           '.cm-line': {
             'white-space': 'pre-wrap',
             'word-wrap': 'break-word',
-            'overflow-wrap': 'break-word'
+            'overflow-wrap': 'break-word',
+            'background-color': 'var(--cm-line-bg)'
           },
-          
-          // Search panel styles - light mode
-          '&light .cm-panel.cm-search': {
-            'background': '#ffffff',
-            'border-bottom': '1px solid #cbd5e1',
+          '.cm-cursor, .cm-dropCursor': {
+            'border-left-color': 'var(--cm-cursor)'
+          },
+          '.cm-selectionBackground, ::selection': {
+            'background-color': 'var(--cm-selection) !important'
+          },
+          '&.cm-focused .cm-selectionBackground, &.cm-focused ::selection': {
+            'background-color': 'var(--cm-selection) !important'
+          },
+          '.cm-activeLine': {
+            'background-color': 'transparent'
+          },
+          '.cm-gutters': {
+            'background-color': 'var(--cm-gutter-bg)',
+            'color': 'var(--cm-gutter-text)',
+            'border': 'none'
+          },
+          '.cm-activeLineGutter': {
+            'background-color': 'transparent'
+          },
+
+          // Search panel styles using CSS variables
+          '.cm-panel.cm-search': {
+            'background': 'var(--search-panel-bg)',
+            'border-bottom': '1px solid var(--search-panel-border)',
             'padding': '8px 12px',
-            'box-shadow': '0 2px 4px rgba(0, 0, 0, 0.05)',
-            'color': '#1f2937'
+            'box-shadow': 'var(--shadow-sm)',
+            'color': 'var(--text-primary)'
           },
-          '&light .cm-panel.cm-search label': {
-            'color': '#374151',
+          '.cm-panel.cm-search label': {
+            'color': 'var(--text-secondary)',
             'font-size': '0.85rem'
           },
-          '&light .cm-panel.cm-search input': {
-            'background': '#ffffff',
-            'border': '1px solid #cbd5e1',
-            'border-radius': '4px',
+          '.cm-panel.cm-search input, .cm-panel.cm-search textarea': {
+            'background': 'var(--search-input-bg)',
+            'border': '1px solid var(--search-input-border)',
+            'border-radius': 'var(--border-radius)',
             'padding': '6px 8px',
             'font-size': '0.85rem',
             'outline': 'none',
-            'color': '#1f2937'
+            'color': 'var(--search-input-text)'
           },
-          '&light .cm-panel.cm-search input::placeholder': {
-            'color': '#9ca3af'
+          '.cm-panel.cm-search input::placeholder, .cm-panel.cm-search textarea::placeholder': {
+            'color': 'var(--text-placeholder)'
           },
-          '&light .cm-panel.cm-search input:focus': {
-            'border-color': '#64748b',
-            'box-shadow': '0 0 0 2px rgba(100, 116, 139, 0.1)'
+          '.cm-panel.cm-search input:focus, .cm-panel.cm-search textarea:focus': {
+            'border-color': 'var(--search-input-border-focus)',
+            'box-shadow': '0 0 0 2px var(--search-input-border-focus)'
           },
-          '&light .cm-panel.cm-search button': {
-            'background': 'linear-gradient(to bottom, #f8fafc, #f1f5f9)',
-            'border': '1px solid #cbd5e1',
-            'border-radius': '4px',
+          '.cm-panel.cm-search button': {
+            'background': 'var(--search-button-bg)',
+            'border': '1px solid var(--border-color)',
+            'border-radius': 'var(--border-radius)',
             'padding': '4px 8px',
             'font-size': '0.75rem',
             'cursor': 'pointer',
-            'transition': 'all 150ms ease',
-            'color': '#475569',
+            'transition': 'all var(--transition-fast)',
+            'color': 'var(--search-button-text)',
             'font-weight': '500'
           },
-          '&light .cm-panel.cm-search button:hover': {
-            'background': 'linear-gradient(to bottom, #e2e8f0, #cbd5e1)',
-            'border-color': '#94a3b8',
-            'color': '#334155'
+          '.cm-panel.cm-search button:hover': {
+            'background': 'var(--search-button-bg-hover)',
+            'border-color': 'var(--border-color-hover)',
+            'color': 'var(--text-primary)'
           },
-          '&light .cm-panel.cm-search button[name="close"]': {
-            'color': '#64748b'
+          '.cm-panel.cm-search button[name="close"]': {
+            'color': 'var(--text-tertiary)'
           },
-          '&light .cm-panel.cm-search button[name="close"]:hover': {
+          '.cm-panel.cm-search button[name="close"]:hover': {
             'color': '#dc2626',
-            'background': '#fee2e2',
-            'border-color': '#fca5a5'
+            'background': 'rgba(220, 38, 38, 0.1)',
+            'border-color': '#dc2626'
           },
-          '&light .cm-search-label': {
-            'color': '#6b7280',
+          '.cm-search-label': {
+            'color': 'var(--text-secondary)',
             'font-size': '0.75rem'
           },
-          
-          // Search panel styles - dark mode (same values for now)
-          '&dark .cm-panel.cm-search': {
-            'background': '#ffffff',
-            'border-bottom': '1px solid #cbd5e1',
-            'padding': '8px 12px',
-            'box-shadow': '0 2px 4px rgba(0, 0, 0, 0.05)',
-            'color': '#1f2937'
+          // Search matches highlighting
+          '.cm-searchMatch': {
+            'background-color': 'rgba(255, 215, 0, 0.3)',
+            'outline': '1px solid rgba(255, 215, 0, 0.5)'
           },
-          '&dark .cm-panel.cm-search label': {
-            'color': '#374151',
-            'font-size': '0.85rem'
+          '.cm-searchMatch-selected': {
+            'background-color': 'rgba(255, 165, 0, 0.4)',
+            'outline': '1px solid rgba(255, 165, 0, 0.6)'
           },
-          '&dark .cm-panel.cm-search input': {
-            'background': '#ffffff',
-            'border': '1px solid #cbd5e1',
-            'border-radius': '4px',
-            'padding': '6px 8px',
-            'font-size': '0.85rem',
-            'outline': 'none',
-            'color': '#1f2937'
-          },
-          '&dark .cm-panel.cm-search input::placeholder': {
-            'color': '#9ca3af'
-          },
-          '&dark .cm-panel.cm-search input:focus': {
-            'border-color': '#64748b',
-            'box-shadow': '0 0 0 2px rgba(100, 116, 139, 0.1)'
-          },
-          '&dark .cm-panel.cm-search button': {
-            'background': 'linear-gradient(to bottom, #f8fafc, #f1f5f9)',
-            'border': '1px solid #cbd5e1',
-            'border-radius': '4px',
-            'padding': '4px 8px',
-            'font-size': '0.75rem',
-            'cursor': 'pointer',
-            'transition': 'all 150ms ease',
-            'color': '#475569',
-            'font-weight': '500'
-          },
-          '&dark .cm-panel.cm-search button:hover': {
-            'background': 'linear-gradient(to bottom, #e2e8f0, #cbd5e1)',
-            'border-color': '#94a3b8',
-            'color': '#334155'
-          },
-          '&dark .cm-panel.cm-search button[name="close"]': {
-            'color': '#64748b'
-          },
-          '&dark .cm-panel.cm-search button[name="close"]:hover': {
-            'color': '#dc2626',
-            'background': '#fee2e2',
-            'border-color': '#fca5a5'
-          },
-          '&dark .cm-search-label': {
-            'color': '#6b7280',
-            'font-size': '0.75rem'
-          }
-        }),
-        
+
+        }, {dark: true}),
+
         // ====================================================================
         // Keyboard Shortcuts (Organized by Priority)
         // ====================================================================
-        
+
         // High priority: System commands that override defaults
         Prec.high(keymap.of([
           {
@@ -325,7 +350,7 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
             }
           }
         ])),
-        
+
         // Normal priority: Text formatting shortcuts
         keymap.of([
           // Text formatting
@@ -335,7 +360,7 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
             preventDefault: true
           },
           {
-            key: "Ctrl-i", 
+            key: "Ctrl-i",
             run: (view) => { cmd.italic(view); return true; },
             preventDefault: true
           },
@@ -349,7 +374,7 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
             run: (view) => { cmd.link(view); return true; },
             preventDefault: true
           },
-          
+
           // Heading shortcuts
           {
             key: "Ctrl-Alt-1",
@@ -366,7 +391,7 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
             run: (view) => { cmd.heading(view, 3); return true; },
             preventDefault: true
           },
-          
+
           // List shortcuts
           {
             key: "Ctrl-Shift-8",
@@ -383,7 +408,7 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
             run: (view) => { cmd.task(view); return true; },
             preventDefault: true
           },
-          
+
           // Other formatting
           {
             key: "Ctrl-Shift-q",
@@ -396,10 +421,10 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
             preventDefault: true
           }
         ]),
-        
+
         // Search keymap at default precedence
         keymap.of(searchKeymap),
-        
+
         // Normal priority: History shortcuts
         keymap.of([
           {
@@ -418,7 +443,7 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
             preventDefault: true
           }
         ]),
-        
+
         // Normal priority: Copy with anchor scrubbing
         keymap.of([
           {
@@ -433,7 +458,7 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
             }
           }
         ]),
-        
+
         // ====================================================================
         // Update Listener with Optimized State Management
         // ====================================================================
@@ -443,7 +468,7 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
             const isProgrammatic = update.transactions.some(
               tr => tr.annotation(programmaticUpdateAnnotation)
             );
-            
+
             // Skip marking as modified if this is a programmatic update
             if (isProgrammatic) {
               // Use requestMeasure for DOM-related work
@@ -455,11 +480,11 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
               });
               return;
             }
-            
+
             // This is a user edit - mark as typing and modified
             isUserTypingRef.current = true;
             setIsTyping(true);
-            
+
             // Use requestMeasure for state updates
             update.view.requestMeasure({
               read: () => update.state.doc.toString(),
@@ -468,7 +493,7 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
                 setModified(true);
               }
             });
-            
+
             // Clear existing timeouts
             if (contentChangeTimeoutRef.current) {
               clearTimeout(contentChangeTimeoutRef.current);
@@ -476,12 +501,12 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
             if (typingDetectionTimeoutRef.current) {
               clearTimeout(typingDetectionTimeoutRef.current);
             }
-            
+
             // Typing detection timeout (longer to avoid inter-keystroke sync)
             typingDetectionTimeoutRef.current = setTimeout(() => {
               setIsTyping(false);
             }, TIMING.TYPING_IDLE_THRESHOLD_MS);
-            
+
             // Smart trailing-only debounced render: one render after the last change
             const newContent = update.state.doc.toString();
             const abortController = new AbortController();
@@ -495,7 +520,7 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
       ],
       parent: editorRef.current!
     });
-    
+
     editorViewRef.current = view;
 
     // If content prop has a value, ensure editor is initialized with it
@@ -527,7 +552,7 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
         (scrollEl as ScrollElementWithHandler)._tideflowScrollHandler = cleanup;
       }
     }
-    
+
     return () => {
       // Capture refs locally
       const timeoutId = contentChangeTimeoutRef.current;
@@ -552,7 +577,7 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
       if (timeoutId) clearTimeout(timeoutId);
       if (abortController) abortController.abort();
       if (typingId) clearTimeout(typingId);
-      
+
       // Reset initialization flag so editor can be recreated on remount
       initializedRef.current = false;
     };

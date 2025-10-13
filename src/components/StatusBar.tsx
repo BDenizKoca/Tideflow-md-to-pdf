@@ -16,19 +16,19 @@ const StatusBar: React.FC = () => {
     if (!currentFile) {
       return 'No file open';
     }
-    
+
     if (compileStatus.status === 'running') {
       return 'Rendering PDF...';
     }
-    
+
     if (compileStatus.status === 'error') {
       return 'Render failed - check preview for details';
     }
-    
+
     if (modified) {
       return 'Unsaved changes';
     }
-    
+
     return 'Ready';
   };
 
@@ -36,15 +36,15 @@ const StatusBar: React.FC = () => {
     if (compileStatus.status === 'error') {
       return 'status-error';
     }
-    
+
     if (compileStatus.status === 'running') {
       return 'status-running';
     }
-    
+
     if (modified) {
       return 'status-modified';
     }
-    
+
     return 'status-ok';
   };
 
@@ -58,7 +58,7 @@ const StatusBar: React.FC = () => {
           </span>
         )}
       </div>
-      
+
       <div className="status-info">
         {scrollLocked && (
           <span className="status-item status-scroll-locked">

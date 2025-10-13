@@ -1,56 +1,99 @@
 /* Global CSS Variables for consistent styling across the application */
 
 :root {
-  /* Colors - Borders */
-  --border-color: #d1d5db;
-  --border-color-hover: #9ca3af;
-  --border-color-light: #e5e7eb;
-  --border-color-separator: #cbd5e1;
-  
-  /* Colors - Backgrounds */
-  --bg-white: #ffffff;
-  --bg-light: #f9fafb;
-  --bg-lighter: #f3f4f6;
-  --bg-lightest: #f8fafc;
-  --bg-gradient-light: linear-gradient(to bottom, #fafafa, #f5f5f5);
-  
-  /* Colors - Text */
-  --text-primary: #374151;
-  --text-secondary: #6b7280;
-  --text-tertiary: #64748b;
-  
+  /* ============================================
+     Theme Colors - Managed by themes.ts
+     ============================================ */
+
+  /* Background colors - Default dark theme values */
+  --editor-bg: #0f172a;
+  --panel-bg: rgba(20, 31, 52, 0.95);
+  --toolbar-bg: linear-gradient(180deg, rgba(20, 31, 52, 0.95), rgba(12, 20, 36, 0.9));
+  --button-bg: linear-gradient(to bottom, rgba(30, 41, 59, 0.95), rgba(20, 31, 52, 0.95));
+  --button-bg-hover: linear-gradient(to bottom, rgba(40, 51, 69, 0.98), rgba(30, 41, 59, 0.95));
+  --button-bg-active: linear-gradient(to bottom, rgba(15, 23, 42, 0.95), rgba(12, 20, 36, 0.9));
+  --select-bg: rgba(30, 41, 59, 0.95);
+  --select-bg-hover: rgba(40, 51, 69, 0.98);
+
+  /* Text colors */
+  --text-primary: #e2e8f0;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --text-placeholder: #64748b;
+
+  /* Border colors */
+  --border-color: rgba(148, 163, 184, 0.3);
+  --border-color-hover: rgba(148, 163, 184, 0.5);
+  --border-color-light: rgba(148, 163, 184, 0.18);
+  --border-color-separator: rgba(71, 85, 105, 0.6);
+
+  /* Accent colors */
+  --accent-primary: #3b82f6;
+  --accent-primary-hover: #2563eb;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(3, 7, 18, 0.55);
+  --shadow-md: 0 6px 14px -6px rgba(15, 23, 42, 0.7);
+  --shadow-lg: 0 18px 32px -12px rgba(3, 7, 18, 0.75);
+
+  /* CodeMirror specific */
+  --cm-content-bg: transparent;
+  --cm-line-bg: transparent;
+  --cm-cursor: #3b82f6;
+  --cm-selection: rgba(59, 130, 246, 0.25);
+  --cm-gutter-bg: rgba(15, 23, 42, 0.5);
+  --cm-gutter-text: #64748b;
+  --cm-text: #e2e8f0;
+
+  /* Search panel */
+  --search-panel-bg: rgba(20, 31, 52, 0.98);
+  --search-panel-border: rgba(148, 163, 184, 0.3);
+  --search-input-bg: rgba(30, 41, 59, 0.95);
+  --search-input-border: rgba(148, 163, 184, 0.3);
+  --search-input-border-focus: rgba(59, 130, 246, 0.5);
+  --search-input-text: #e2e8f0;
+  --search-button-bg: linear-gradient(to bottom, rgba(30, 41, 59, 0.95), rgba(20, 31, 52, 0.95));
+  --search-button-bg-hover: linear-gradient(to bottom, rgba(40, 51, 69, 0.98), rgba(30, 41, 59, 0.95));
+  --search-button-text: #cbd5e1;
+
+  /* Legacy aliases for backward compatibility */
+  --bg-white: var(--panel-bg);
+  --bg-light: rgba(15, 23, 42, 0.95);
+  --bg-lighter: rgba(11, 18, 32, 0.92);
+  --bg-lightest: rgba(8, 14, 28, 0.9);
+  --bg-gradient-light: var(--toolbar-bg);
+
+  /* ============================================
+     Layout & Design Tokens (Theme-independent)
+     ============================================ */
+
   /* Borders */
   --border-radius: 4px;
   --border-radius-sm: 3px;
   --border-width: 1px;
-  
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.1);
-  
+
   /* Transitions */
   --transition-fast: 150ms ease;
   --transition-normal: 200ms ease;
   --transition-slow: 400ms ease;
-  
+
   /* Spacing */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.35rem;
   --spacing-md: 0.5rem;
   --spacing-lg: 0.75rem;
-  
+
   /* Button/Control Heights */
   --control-height-sm: 28px;
   --control-height: 30px;
   --control-height-lg: 32px;
-  
+
   /* Font Sizes */
   --font-xs: 0.7rem;
   --font-sm: 0.75rem;
   --font-md: 0.8rem;
   --font-base: 0.875rem;
-  
+
   /* Ripple Animation */
-  --ripple-color: rgba(0, 0, 0, 0.06);
+  --ripple-color: rgba(59, 130, 246, 0.25);
 }

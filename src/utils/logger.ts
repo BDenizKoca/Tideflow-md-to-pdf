@@ -1,6 +1,6 @@
 /**
  * Production-safe centralized logging utility
- * 
+ *
  * Features:
  * - Environment-aware log levels
  * - Structured logging with component context
@@ -30,7 +30,7 @@ class Logger {
    */
   debug(component: string, message: string, data?: unknown): void {
     if (!this.isDevelopment || this.isTest) return;
-    
+
     const timestamp = new Date().toISOString();
     console.debug(`[${timestamp}] [${component}] ${message}`, data ?? '');
   }
@@ -41,7 +41,7 @@ class Logger {
    */
   info(component: string, message: string, data?: unknown): void {
     if (this.isTest) return;
-    
+
     const timestamp = new Date().toISOString();
     console.log(`[${timestamp}] [${component}] ${message}`, data ?? '');
   }
@@ -52,7 +52,7 @@ class Logger {
    */
   warn(component: string, message: string, data?: unknown): void {
     if (this.isTest) return;
-    
+
     const timestamp = new Date().toISOString();
     console.warn(`[${timestamp}] [${component}] ${message}`, data ?? '');
   }
@@ -63,7 +63,7 @@ class Logger {
    */
   error(component: string, message: string, error?: unknown): void {
     const timestamp = new Date().toISOString();
-    
+
     if (error instanceof Error) {
       console.error(
         `[${timestamp}] [${component}] ${message}`,
@@ -82,7 +82,7 @@ class Logger {
   log(level: LogLevel, context: LogContext, message: string, data?: unknown): void {
     const { component, operation, metadata } = context;
     const fullMessage = operation ? `${operation}: ${message}` : message;
-    
+
     const logData = {
       ...metadata,
       ...(data && typeof data === 'object' ? data : { data }),
@@ -114,7 +114,7 @@ class Logger {
     }
 
     const start = performance.now();
-    
+
     return () => {
       const duration = performance.now() - start;
       this.debug(component, `${operation} completed in ${duration.toFixed(2)}ms`);
@@ -127,7 +127,7 @@ class Logger {
    */
   group(component: string, label: string, collapsed = false): void {
     if (!this.isDevelopment || this.isTest) return;
-    
+
     if (collapsed) {
       console.groupCollapsed(`[${component}] ${label}`);
     } else {

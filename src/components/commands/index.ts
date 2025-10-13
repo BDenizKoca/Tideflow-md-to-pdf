@@ -17,13 +17,13 @@ export { wrapSel, toggleInline, toggleLinePrefix, getImageAtCursor, insertAtCurs
 export const cmd = {
   // Text formatting
   ...formattingCommands,
-  
+
   // Document structure
   ...structureCommands,
-  
+
   // Block elements
   ...blockCommands,
-  
+
   // Image handling
   ...imageCommands
 };

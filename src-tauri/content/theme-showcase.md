@@ -51,7 +51,7 @@ Complex bullet lists with longer content:
 ## Block Quotes
 
 > "The details are not the details. They make the design."
-> 
+>
 > — Charles Eames
 
 > Typography is the craft of endowing human language with a durable visual form, and thus with an independent existence. Its heartwood is calligraphy—the dance, on a tiny stage, of the living, speaking hand—and its roots reach into living soil, though its branches may be hung each year with new machines.

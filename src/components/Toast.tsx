@@ -40,8 +40,8 @@ const Toast: React.FC<ToastProps> = ({ id, type, message, duration = UI.TOAST_DE
     <div className={`toast toast-${type}`} role="alert">
       <div className="toast-icon">{getIcon()}</div>
       <div className="toast-message">{message}</div>
-      <button 
-        className="toast-close" 
+      <button
+        className="toast-close"
         onClick={() => onClose(id)}
         aria-label="Close notification"
       >

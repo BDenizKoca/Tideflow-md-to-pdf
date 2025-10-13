@@ -14,7 +14,7 @@
   align-items: center;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--border-color);
-  background: linear-gradient(to bottom, #fafafa, #f5f5f5);
+  background: var(--toolbar-bg);
   gap: 1rem;
   min-height: 52px;
 }
@@ -25,7 +25,7 @@
   align-items: center;
   padding: 0.35rem 1rem;
   border-top: 1px solid var(--border-color);
-  background: linear-gradient(to bottom, #fafafa, #f5f5f5);
+  background: var(--toolbar-bg);
   gap: 1rem;
   min-height: 28px;
   font-size: 0.75rem;
@@ -33,7 +33,7 @@
 
 .file-path {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--text-tertiary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -47,7 +47,7 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-tertiary);
 }
 
 /* Content visibility utilities */
@@ -99,11 +99,11 @@
 }
 
 @keyframes typingPulse {
-  0%, 100% { 
+  0%, 100% {
     opacity: 1;
     transform: scale(1);
   }
-  50% { 
+  50% {
     opacity: 0.85;
     transform: scale(0.98);
   }
@@ -125,16 +125,16 @@
 }
 
 .editor-actions button {
-  background: linear-gradient(to bottom, #ffffff, #f8fafc);
-  border: 1px solid #cbd5e1;
+  background: var(--button-bg);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 6px 14px;
   cursor: pointer;
   font-size: 0.8rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--text-secondary);
   transition: all 200ms ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
 }
@@ -158,16 +158,16 @@
 }
 
 .editor-actions button:hover:not(:disabled) {
-  background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
-  border-color: #94a3b8;
+  background: var(--button-bg-hover);
+  border-color: var(--border-color-hover);
   transform: translateY(-1px);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-md);
 }
 
 .editor-actions button:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-  background: linear-gradient(to bottom, #f1f5f9, #e2e8f0);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  background: var(--button-bg-active);
 }
 
 .editor-actions button:focus-visible {
@@ -222,7 +222,7 @@
 }
 
 .simple-markdown-toolbar button {
-  background: var(--bg-white);
+  background: var(--button-bg);
   color: var(--text-primary);
   border: var(--border-width) solid var(--border-color);
   border-radius: var(--border-radius);
@@ -260,7 +260,7 @@
 }
 
 .simple-markdown-toolbar button:hover {
-  background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+  background: var(--button-bg-hover);
   border-color: var(--border-color-hover);
   transform: translateY(-1px);
   box-shadow: var(--shadow-lg);
@@ -268,8 +268,8 @@
 
 .simple-markdown-toolbar button:active {
   transform: translateY(0);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-  background: linear-gradient(to bottom, #f1f5f9, #e2e8f0);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  background: var(--button-bg-active);
 }
 
 .simple-markdown-toolbar button:focus-visible {
@@ -294,8 +294,8 @@
   padding: 0.25rem 0.4rem;
   border: var(--border-width) solid var(--border-color);
   border-radius: var(--border-radius);
-  background: var(--bg-white);
-  color: #475569;
+  background: var(--select-bg);
+  color: var(--text-secondary);
   font-size: var(--font-xs);
   margin-left: 3px;
   box-shadow: var(--shadow-sm);
@@ -308,7 +308,7 @@
 }
 
 .simple-markdown-toolbar .toolbar-select {
-  background: var(--bg-white);
+  background: var(--select-bg);
   color: var(--text-primary);
   border: var(--border-width) solid var(--border-color);
   border-radius: var(--border-radius);
@@ -323,7 +323,7 @@
 }
 
 .simple-markdown-toolbar .toolbar-select:hover {
-  background: var(--bg-light);
+  background: var(--select-bg-hover);
   border-color: var(--border-color-hover);
   box-shadow: var(--shadow-md);
 }
@@ -334,11 +334,23 @@
   outline: none;
 }
 
+/* Dropdown option styling */
+.simple-markdown-toolbar .toolbar-select option {
+  background: var(--select-bg);
+  color: var(--text-primary);
+  padding: 0.5rem;
+}
+
+.simple-markdown-toolbar select option {
+  background: var(--select-bg) !important;
+  color: var(--text-primary) !important;
+}
+
 .font-control-group {
   display: flex;
   align-items: center;
   gap: 0;
-  background: var(--bg-white);
+  background: var(--select-bg);
   border: var(--border-width) solid var(--border-color);
   border-radius: var(--border-radius);
   box-shadow: var(--shadow-sm);
@@ -400,10 +412,10 @@
 .font-mode-selector select,
 .font-selector select {
   padding: 0.25rem 0.5rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 4px;
-  background: white;
-  color: #475569;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--select-bg);
+  color: var(--text-secondary);
   font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
@@ -413,15 +425,15 @@
 
 .font-mode-selector select:hover,
 .font-selector select:hover {
-  border-color: #94a3b8;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-color: var(--border-color-hover);
+  box-shadow: var(--shadow-sm);
 }
 
 .font-mode-selector select:focus,
 .font-selector select:focus {
   outline: none;
-  border-color: #007acc;
-  box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px var(--cm-selection);
 }
 
 .editor-content {
@@ -438,7 +450,7 @@
   justify-content: center;
   align-items: center;
   height: 100%;
-  color: #94a3b8;
+  color: var(--text-tertiary);
   padding: 2rem;
   text-align: center;
   background-color: var(--editor-bg);
@@ -448,14 +460,14 @@
   font-size: 1.25rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .no-file-message p {
   font-size: 0.875rem;
   margin-bottom: 1.5rem;
   max-width: 400px;
-  color: #94a3b8;
+  color: var(--text-tertiary);
 }
 
 .no-file-actions {
@@ -467,27 +479,27 @@
 
 .no-file-actions button {
   background: transparent;
-  border: 1px solid #cbd5e1;
-  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
   padding: 8px 16px;
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #64748b;
-  transition: all 150ms ease;
+  color: var(--text-tertiary);
+  transition: all var(--transition-fast);
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
 .no-file-actions button:hover {
-  background: #f8fafc;
-  border-color: #94a3b8;
-  color: #475569;
+  background: var(--button-bg-hover);
+  border-color: var(--border-color-hover);
+  color: var(--text-secondary);
 }
 
 .no-file-actions button:active {
-  background: #f1f5f9;
+  background: var(--button-bg-active);
 }
 
 /* CodeMirror overrides */
@@ -495,6 +507,8 @@
   height: 100%;
   font-size: 14px;
   overflow: hidden;
+  background-color: var(--editor-bg) !important;
+  color: var(--cm-text) !important;
 }
 
 .cm-editor.cm-focused {
@@ -506,6 +520,7 @@
   font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
   line-height: 1.6;
   padding: 1rem;
+  color: var(--cm-text) !important;
 }
 
 .cm-content {
@@ -514,6 +529,7 @@
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: pre-wrap;
+  color: var(--cm-text) !important;
 }
 
 .cm-line {
@@ -522,14 +538,18 @@
   overflow-wrap: break-word;
   white-space: pre-wrap;
   max-width: 100%;
+  color: var(--cm-text) !important;
 }
 
+/* Let CodeMirror's HighlightStyle handle all syntax coloring via inline styles */
+/* Don't override with CSS - it will conflict with JavaScript-generated styles */
+
 .cm-cursor {
-  border-left: 2px solid #007acc;
+  border-left: 2px solid var(--cm-cursor) !important;
 }
 
 .cm-selectionBackground {
-  background-color: rgba(0, 122, 204, 0.1) !important;
+  background-color: var(--cm-selection) !important;
 }
 
 /* Force word wrapping for very long lines */
@@ -556,12 +576,12 @@
 }
 
 .cm-scroller::-webkit-scrollbar-track {
-  background: linear-gradient(to right, #f1f5f9, #e2e8f0);
+  background: rgba(15, 23, 42, 0.5);
   border-radius: 5px;
 }
 
 .cm-scroller::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #64748b, #475569);
+  background: linear-gradient(to bottom, rgba(100, 116, 139, 0.8), rgba(71, 85, 105, 0.8));
   border-radius: 5px;
   transition: all 200ms ease;
   border: 2px solid transparent;
@@ -571,4 +591,17 @@
 .cm-scroller::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(to bottom, #3b82f6, #2563eb);
   box-shadow: 0 0 6px rgba(59, 130, 246, 0.4);
+}
+
+/* Global select dropdown styling for dark mode */
+select option,
+select optgroup {
+  background-color: rgba(30, 41, 59, 0.98) !important;
+  color: #e2e8f0 !important;
+}
+
+/* Font selector group options */
+.font-control-group select option {
+  background-color: rgba(30, 41, 59, 0.98) !important;
+  color: #e2e8f0 !important;
 }

@@ -8,8 +8,8 @@ const ImagesTab: React.FC<TabProps> = ({ local, mutate }) => {
       <div className="form-grid one-col">
         <label>Default Width
           <div className="slider-group">
-            <input 
-              type="range" 
+            <input
+              type="range"
               min="10"
               max="100"
               step="5"

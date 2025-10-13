@@ -1,17 +1,17 @@
 .tab-bar {
   display: flex;
-  background: linear-gradient(to bottom, #fafafa, #f5f5f5);
-  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(180deg, rgba(13, 23, 42, 0.95), rgba(6, 12, 24, 0.92));
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
   padding: 0 12px;
   height: 42px;
   align-items: center;
   justify-content: space-between;
   overflow-x: auto;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  /* Prevent text selection across all major engines */
-  -webkit-user-select: none; /* Safari */
-  -ms-user-select: none; /* Old Edge / IE (legacy) */
-  user-select: none; /* Standard */
+  box-shadow: 0 10px 28px -16px rgba(2, 6, 20, 0.65);
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  color: var(--text-muted);
 }
 
 .hidden-file-input {
@@ -34,9 +34,9 @@
   display: flex;
   overflow-x: auto;
   max-width: calc(100% - 120px);
+  gap: 4px;
 }
 
-/* Progressive enhancement: Only Firefox currently supports scrollbar-width */
 @supports (scrollbar-width: thin) {
   .tab-container {
     scrollbar-width: thin;
@@ -48,11 +48,11 @@
   align-items: center;
   padding: 0 16px;
   height: 36px;
-  background: linear-gradient(to bottom, #f1f5f9, var(--border-color-light));
-  border: var(--border-width) solid #cbd5e1;
+  background: linear-gradient(180deg, rgba(20, 31, 52, 0.95), rgba(12, 20, 36, 0.9));
+  border: var(--border-width) solid rgba(148, 163, 184, 0.28);
   border-bottom: none;
   border-radius: 6px 6px 0 0;
-  margin-right: 3px;
+  margin-right: 0;
   cursor: pointer;
   min-width: 120px;
   max-width: 200px;
@@ -61,8 +61,8 @@
   overflow: hidden;
   font-size: 0.85rem;
   font-weight: 500;
-  color: #64748b;
-  box-shadow: var(--shadow-sm);
+  color: var(--text-muted);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 2px 10px -6px rgba(3, 7, 18, 0.7);
 }
 
 .tab::before {
@@ -73,44 +73,44 @@
   right: 0;
   height: 2px;
   background: transparent;
-  transition: background 200ms ease;
+  transition: background 200ms ease, box-shadow 200ms ease;
 }
 
 .tab:hover:not(.active) {
-  background: linear-gradient(to bottom, var(--bg-lightest), #f1f5f9);
-  border-color: #94a3b8;
-  color: #475569;
+  background: linear-gradient(180deg, rgba(26, 41, 70, 0.95), rgba(17, 28, 48, 0.9));
+  border-color: rgba(148, 163, 184, 0.45);
+  color: var(--text-secondary);
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 14px -6px rgba(15, 23, 42, 0.75);
 }
 
 .tab.active {
-  background: linear-gradient(to bottom, var(--bg-white), #fefefe);
-  border-color: #e5e7eb;
-  color: #1f2937;
+  background: linear-gradient(180deg, rgba(28, 43, 74, 1), rgba(16, 27, 48, 0.98));
+  border-color: rgba(59, 130, 246, 0.45);
+  color: var(--text-color);
   font-weight: 600;
   position: relative;
   z-index: 1;
-  box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 -1px 0 rgba(148, 163, 184, 0.2), 0 6px 18px -8px rgba(15, 23, 42, 0.8);
 }
 
 .tab.active::before {
-  background: linear-gradient(90deg, #10b981, #059669);
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(90deg, rgba(52, 211, 153, 0.95), rgba(14, 165, 233, 0.9));
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.45);
 }
 
 .tab.modified .tab-name::after {
-  content: "●";
-  color: #f59e0b;
+  content: "?";
+  color: #fbbf24;
   margin-left: 6px;
   font-size: 11px;
   animation: modifiedPulse 2s ease-in-out infinite;
-  text-shadow: 0 0 4px rgba(245, 158, 11, 0.5);
+  text-shadow: 0 0 4px rgba(251, 191, 36, 0.55);
 }
 
 .tab.active.modified .tab-name::after {
-  color: #10b981;
-  text-shadow: 0 0 4px rgba(16, 185, 129, 0.5);
+  color: var(--success-color);
+  text-shadow: 0 0 4px rgba(52, 211, 153, 0.55);
 }
 
 @keyframes modifiedPulse {
@@ -131,7 +131,7 @@
   cursor: pointer;
   font-size: 18px;
   line-height: 18px;
-  color: #9ca3af;
+  color: rgba(148, 163, 184, 0.7);
   margin-left: 8px;
   padding: 2px 6px;
   border-radius: var(--border-radius);
@@ -142,14 +142,14 @@
 }
 
 .close-tab:hover {
-  background-color: #fee2e2;
-  color: #dc2626;
-  transform: scale(1.1);
+  background-color: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+  transform: scale(1.08);
 }
 
 .close-tab:active {
-  background-color: #fecaca;
-  transform: scale(0.95);
+  background-color: rgba(248, 113, 113, 0.25);
+  transform: scale(0.96);
 }
 
 .tab-actions {
@@ -159,9 +159,9 @@
 }
 
 .tab-button {
-  background: linear-gradient(135deg, #5fa67d, #518369);
+  background: linear-gradient(135deg, rgba(37, 211, 140, 0.9), rgba(16, 185, 129, 0.85));
   color: white;
-  border: none;
+  border: 1px solid rgba(16, 185, 129, 0.65);
   border-radius: 5px;
   padding: 6px 12px;
   margin-left: 6px;
@@ -169,7 +169,7 @@
   font-size: 0.8rem;
   font-weight: 600;
   transition: all var(--transition-normal);
-  box-shadow: 0 2px 4px rgba(81, 131, 105, 0.3);
+  box-shadow: 0 6px 14px -6px rgba(16, 185, 129, 0.65);
   position: relative;
   overflow: hidden;
 }
@@ -182,7 +182,7 @@
   width: 0;
   height: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.18);
   transform: translate(-50%, -50%);
   transition: width 0.5s, height 0.5s;
 }
@@ -193,33 +193,32 @@
 }
 
 .tab-button:hover {
-  background: linear-gradient(135deg, #6bb88a, #5fa67d);
-  box-shadow: 0 3px 6px rgba(81, 131, 105, 0.4);
+  background: linear-gradient(135deg, rgba(45, 227, 150, 0.95), rgba(20, 200, 140, 0.9));
+  box-shadow: 0 8px 18px -6px rgba(16, 185, 129, 0.75);
   transform: translateY(-1px);
 }
 
 .tab-button:active {
   transform: translateY(0);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35);
 }
 
 .tab-button:focus-visible {
-  outline: 2px solid #518369;
+  outline: 2px solid rgba(16, 185, 129, 0.65);
   outline-offset: 2px;
 }
 
-/* Consistent scrollbar styling - horizontal tabs */
 .tab-container::-webkit-scrollbar {
   height: 8px;
 }
 
 .tab-container::-webkit-scrollbar-track {
-  background: linear-gradient(to bottom, #f1f5f9, #e2e8f0);
+  background: linear-gradient(180deg, rgba(12, 20, 36, 0.85), rgba(8, 14, 28, 0.85));
   border-radius: var(--border-radius);
 }
 
 .tab-container::-webkit-scrollbar-thumb {
-  background: linear-gradient(to right, var(--text-tertiary), #475569);
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0.55), rgba(59, 130, 246, 0.6));
   border-radius: var(--border-radius);
   transition: all var(--transition-normal);
   border: 2px solid transparent;
@@ -227,6 +226,6 @@
 }
 
 .tab-container::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to right, #3b82f6, #2563eb);
-  box-shadow: 0 0 6px rgba(59, 130, 246, 0.4);
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.75), rgba(14, 165, 233, 0.75));
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.45);
 }

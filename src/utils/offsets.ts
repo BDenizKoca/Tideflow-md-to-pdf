@@ -3,7 +3,7 @@ import type * as pdfjsLib from 'pdfjs-dist';
 
 export interface ComputeResult {
   offsets: Map<string, number>;
-  samples: Array<{ id: string; hasPdf: boolean; metricPage?: number | undefined; offset?: number }>; 
+  samples: Array<{ id: string; hasPdf: boolean; metricPage?: number | undefined; offset?: number }>;
 }
 
 /**
@@ -36,7 +36,7 @@ export function computeAnchorOffsets(metrics: { page: number; height: number; sc
     const metric = pdf ? sorted.find((m) => m.page === pdf.page) : undefined;
     if (!pdf || !metric) {
       if (idx < 5) samplesForLog.push({ id: anchor.id, hasPdf, metricPage: metric?.page });
-      
+
       // FALLBACK: If no PDF position, create a proportional offset based on anchor index
       if (!pdf && sorted.length > 0) {
         const totalHeight = sorted.reduce((sum, m) => sum + m.height, 0);
@@ -44,7 +44,7 @@ export function computeAnchorOffsets(metrics: { page: number; height: number; sc
         offsets.set(anchor.id, Math.round(proportionalOffset));
         if (idx < 5) samplesForLog.push({ id: anchor.id, hasPdf: false, offset: Math.round(proportionalOffset) });
       }
-      
+
       idx++;
       continue;
     }
@@ -64,7 +64,7 @@ export interface PageMetric { page: number; height: number; scale: number }
 /**
  * Compute fallback anchor offsets by distributing anchors proportionally
  * across the available scroll space. Used when precise PDF positions unavailable.
- * 
+ *
  * @param anchors - Array of anchors to position
  * @param scrollHeight - Total scrollable height
  * @param clientHeight - Visible viewport height
@@ -77,20 +77,20 @@ export function computeFallbackOffsets(
 ): Map<string, number> {
   const available = Math.max(0, scrollHeight - clientHeight);
   const fallback = new Map<string, number>();
-  
+
   for (let i = 0; i < anchors.length; i++) {
     // Distribute evenly from start to end
     const fraction = anchors.length > 1 ? i / (anchors.length - 1) : 0;
     let position = Math.round(fraction * available);
-    
+
     // Avoid positions too close to zero for better UX (users can still see content)
     if (available > 100 && position < 8) {
       position = 8;
     }
-    
+
     fallback.set(anchors[i].id, position);
   }
-  
+
   return fallback;
 }
 

@@ -10,7 +10,7 @@ import { scrubRawTypstAnchors } from '../utils/scrubAnchors';
 import './Toolbar.css';
 
 const Toolbar: React.FC = () => {
-  const { 
+  const {
     editor,
     setCurrentFile,
     setContent,
@@ -45,7 +45,7 @@ const Toolbar: React.FC = () => {
         setSaveDropdownOpen(false);
       }
     };
-    
+
     if (recentDropdownOpen || saveDropdownOpen) {
       document.addEventListener('click', handleClickOutside);
       return () => document.removeEventListener('click', handleClickOutside);
@@ -75,12 +75,12 @@ const Toolbar: React.FC = () => {
     try {
       const name = prompt('Enter file name (with .md extension):');
       if (!name) return;
-      
+
       const fileName = name.includes('.') ? name : `${name}.md`;
       const newContent = `# ${name.replace('.md', '')}\n\nStart writing your document.`;
       const filePath = await createFile(fileName);
       await writeMarkdownFile(filePath, newContent);
-      
+
       addOpenFile(filePath);
       setCurrentFile(filePath);
       setContent(newContent);
@@ -97,9 +97,9 @@ const Toolbar: React.FC = () => {
       console.log('[Toolbar] Opening file dialog...');
       const result = await open({ multiple: false, filters: [{ name: 'Markdown Files', extensions: ['md'] }] });
       const filePath = Array.isArray(result) ? result?.[0] : result;
-      
+
       console.log('[Toolbar] File selected:', filePath);
-      
+
       if (filePath) {
         try {
           console.log('[Toolbar] Reading file content...');
@@ -126,7 +126,7 @@ const Toolbar: React.FC = () => {
   const handleSaveFile = async () => {
     const { currentFile, content, modified } = editor;
     if (!currentFile || !modified) return;
-    
+
     try {
       const cleaned = scrubRawTypstAnchors(content);
       await writeMarkdownFile(currentFile, cleaned);
@@ -146,9 +146,9 @@ const Toolbar: React.FC = () => {
         defaultPath: suggestedName,
         filters: [{ name: 'Markdown Files', extensions: ['md'] }]
       });
-      
+
       if (!filePath) return;
-      
+
       const cleaned = scrubRawTypstAnchors(content);
       await writeMarkdownFile(filePath, cleaned);
       setCurrentFile(filePath);
@@ -167,14 +167,14 @@ const Toolbar: React.FC = () => {
     try {
       const baseName = currentFile ? currentFile.split(/[\\/]/).pop()?.replace('.md', '') : 'document';
       const suggestedName = `${baseName}-clean.md`;
-      
+
       const filePath = await save({
         defaultPath: suggestedName,
         filters: [{ name: 'Markdown Files', extensions: ['md'] }]
       });
-      
+
       if (!filePath) return;
-      
+
       const cleaned = scrubRawTypstAnchors(content);
       await writeMarkdownFile(filePath, cleaned);
       setSaveDropdownOpen(false);
@@ -194,7 +194,7 @@ const Toolbar: React.FC = () => {
       const newPath = await createFile(safeName);
       const cleaned = scrubRawTypstAnchors(text);
       await writeMarkdownFile(newPath, cleaned);
-      
+
       addOpenFile(newPath);
       setCurrentFile(newPath);
       setContent(cleaned);
@@ -215,7 +215,7 @@ const Toolbar: React.FC = () => {
     try {
       const pdfSource = editor.compileStatus.pdf_path;
       if (!pdfSource) {
-        handleError(new Error('No PDF available to export'), 
+        handleError(new Error('No PDF available to export'),
           { operation: 'export PDF', component: 'Toolbar' }, 'warning');
         return;
       }
@@ -254,11 +254,11 @@ const Toolbar: React.FC = () => {
         className="hidden-file-input"
         aria-hidden="true"
       />
-      
+
       <div className="toolbar-logo">
         <h1>Tideflow</h1>
       </div>
-      
+
       <div className="toolbar-actions">
         {/* File Operations */}
         <div className="toolbar-section">
@@ -268,8 +268,8 @@ const Toolbar: React.FC = () => {
                 📂 Open
               </button>
               <div className="dropdown">
-                <button 
-                  className="dropdown-toggle" 
+                <button
+                  className="dropdown-toggle"
                   title="Recent Files"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -360,8 +360,8 @@ const Toolbar: React.FC = () => {
 
         <div className="toolbar-section">
           <div className="file-control-group">
-            <button 
-              onClick={handleSaveFile} 
+            <button
+              onClick={handleSaveFile}
               disabled={!editor.modified}
               title="Save File (Ctrl+S)"
               className="file-open-btn btn-primary"
@@ -369,8 +369,8 @@ const Toolbar: React.FC = () => {
               💾 Save
             </button>
             <div className="dropdown">
-              <button 
-                className="dropdown-toggle btn-primary" 
+              <button
+                className="dropdown-toggle btn-primary"
                 title="Save options"
                 onClick={(e) => {
                   e.stopPropagation();

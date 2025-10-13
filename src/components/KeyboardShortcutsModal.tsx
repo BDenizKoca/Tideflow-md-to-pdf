@@ -122,8 +122,8 @@ const KeyboardShortcutsModal: React.FC<Props> = ({ isOpen, onClose }) => {
         </div>
 
         <div className="modal-footer">
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={onClose}
             className="btn-primary"
           >

@@ -42,10 +42,10 @@ export function useAppInitialization() {
         const editorStore = useEditorStore.getState();
         const uiStore = useUIStore.getState();
         const preferencesStore = usePreferencesStore.getState();
-        
+
         // Initialize error handler with toast system
         initErrorHandler(uiStore.addToast);
-        
+
         let sampleInjected = uiStore.initialSampleInjected;
 
         const prefs = await getPreferences();
@@ -73,7 +73,7 @@ export function useAppInitialization() {
               if (!f.match(/\.(md|qmd)$/i)) return false;
               return true;
             });
-            
+
             for (const f of restored) {
               try {
                 const content = await readMarkdownFile(f);
@@ -208,9 +208,9 @@ export function useAppInitialization() {
       } catch (error) {
         initLogger.error('Init failed', error);
         const uiStore = useUIStore.getState();
-        uiStore.addToast({ 
-          type: 'error', 
-          message: 'Failed to initialize app. Please refresh the page.' 
+        uiStore.addToast({
+          type: 'error',
+          message: 'Failed to initialize app. Please refresh the page.'
         });
       }
     };

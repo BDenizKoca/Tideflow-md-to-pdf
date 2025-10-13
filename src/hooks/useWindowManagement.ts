@@ -41,20 +41,20 @@ export function useWindowManagement(setLoading: (loading: boolean) => void) {
         const appWindow = getCurrentWindow();
         const unlistenCloseRequested = await appWindow.onCloseRequested(async (event) => {
           windowMgmtLogger.info('Close requested');
-          
+
           // Always prevent default and handle close manually
           event.preventDefault();
-          
+
           const editor = useEditorStore.getState().editor;
           const preferences = usePreferencesStore.getState().preferences;
           const previewVisible = useUIStore.getState().previewVisible;
-          
+
           windowMgmtLogger.debug('Close handler', { modified: editor.modified, confirm_exit_on_unsaved: preferences.confirm_exit_on_unsaved });
-          
+
           // Save window state before potential exit
           const isMaximized = await appWindow.isMaximized();
           saveSession({ maximized: isMaximized });
-          
+
           // Check if there are unsaved changes and confirmation is enabled
           if (editor.modified && preferences.confirm_exit_on_unsaved) {
             // Ask for confirmation using Tauri dialog
@@ -67,7 +67,7 @@ export function useWindowManagement(setLoading: (loading: boolean) => void) {
                 cancelLabel: 'Cancel'
               }
             );
-            
+
             if (result) {
               windowMgmtLogger.info('User confirmed exit');
               // User confirmed exit, save session and close

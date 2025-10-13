@@ -8,34 +8,34 @@ import { toggleInline, stripTypstWrappers } from "./helpers";
 export const formattingCommands = {
   /** Toggle bold formatting */
   bold: (view: EditorView) => toggleInline(view, "**", /^\*\*([\s\S]+)\*\*$/),
-  
+
   /** Toggle italic formatting */
   italic: (view: EditorView) => toggleInline(view, "*", /^\*([\s\S]+)\*$/),
-  
+
   /** Toggle strikethrough formatting */
   strike: (view: EditorView) => toggleInline(view, "~~", /^~~([\s\S]+)~~$/),
-  
+
   /** Toggle inline code formatting */
   codeInline: (view: EditorView) => toggleInline(view, "`", /^`([\s\S]+)`$/),
-  
+
   /** Insert/edit link with URL prompt */
   link: (view: EditorView) => {
     const s = view.state.selection.main;
     let text = view.state.sliceDoc(s.from, s.to) || "link";
-    
+
     // Strip Typst wrappers first
     text = stripTypstWrappers(text);
-    
+
     // Check if already a link [text](url) and extract parts
     const linkPattern = /^\[([^\]]+)\]\(([^)]+)\)$/;
     const linkMatch = text.match(linkPattern);
-    
+
     const linkText = linkMatch ? linkMatch[1] : text;
     const currentUrl = linkMatch ? linkMatch[2] : "https://";
-    
+
     const url = prompt("Enter URL:", currentUrl) || currentUrl;
-    
-    view.dispatch({ 
+
+    view.dispatch({
       changes: { from: s.from, to: s.to, insert: `[${linkText}](${url})` },
       selection: { anchor: s.from + `[${linkText}](`.length, head: s.from + `[${linkText}](${url}`.length }
     });
@@ -45,15 +45,15 @@ export const formattingCommands = {
   inlineMath: (view: EditorView) => {
     const s = view.state.selection.main;
     let text = view.state.sliceDoc(s.from, s.to) || "x";
-    
+
     // Strip any Typst wrappers first
     text = stripTypstWrappers(text);
-    
+
     // Then toggle math delimiters
     const hasMath = /^\$(.+)\$$/.test(text);
     const result = hasMath ? text.replace(/^\$(.+)\$$/, "$1") : `$${text}$`;
-    
-    view.dispatch({ 
+
+    view.dispatch({
       changes: { from: s.from, to: s.to, insert: result },
       selection: { anchor: s.from + 1, head: s.from + result.length - 1 }
     });
@@ -63,10 +63,10 @@ export const formattingCommands = {
   fontLocal: (view: EditorView, font: string) => {
     const s = view.state.selection.main;
     let text = view.state.sliceDoc(s.from, s.to) || "Sample text";
-    
+
     // Strip any existing Typst wrappers to prevent nesting
     text = stripTypstWrappers(text);
-    
+
     const cleanText = text.replace(/\s+/g, ' ').trim();
     const rawTypstComment = `<!--raw-typst #text(font: "${font}")[${cleanText}] -->`;
     view.dispatch({ changes: { from: s.from, to: s.to, insert: rawTypstComment } });
@@ -78,16 +78,16 @@ export const formattingCommands = {
     let text = view.state.sliceDoc(s.from, s.to) || "Sample text";
     let replaceFrom = s.from;
     let replaceTo = s.to;
-    
+
     // Size steps: 0.7em, 0.8em, 0.9em, normal(1em), 1.1em, 1.2em, 1.4em, 1.6em
     const sizeSteps = ["0.7em", "0.8em", "0.9em", "1em", "1.1em", "1.2em", "1.4em", "1.6em"];
-    
+
     // Check if selection itself includes the wrapper
     const sizePattern = /^<!--raw-typst\s+#text\(size:\s*([^)]+)\)\[\s*([\s\S]*?)\s*\]\s*-->$/;
     const directMatch = text.match(sizePattern);
-    
+
     let currentSizeValue = "1em"; // default to normal
-    
+
     if (directMatch) {
       // Selection includes the wrapper
       text = directMatch[2].trim();
@@ -98,7 +98,7 @@ export const formattingCommands = {
       const beforeStart = Math.max(0, s.from - 100); // Look back up to 100 chars
       const afterEnd = Math.min(docText.length, s.to + 50); // Look ahead up to 50 chars
       const context = docText.slice(beforeStart, afterEnd);
-      
+
       // Try to find wrapper around selection
       const wrapperPattern = /<!--raw-typst\s+#text\(size:\s*([^)]+)\)\[\s*([\s\S]*?)\s*\]\s*-->/g;
       let match;
@@ -107,12 +107,12 @@ export const formattingCommands = {
         const wrapEnd = beforeStart + match.index + match[0].length;
         const contentStart = beforeStart + match.index + match[0].indexOf('[') + 1;
         const contentEnd = beforeStart + match.index + match[0].lastIndexOf(']');
-        
+
         // Check if our selection is within this wrapper's content
         if (s.from >= contentStart && s.to <= contentEnd) {
           // Found surrounding wrapper!
           currentSizeValue = match[1].trim();
-          
+
           // Expand selection to include entire wrapper
           replaceFrom = wrapStart;
           replaceTo = wrapEnd;
@@ -120,17 +120,17 @@ export const formattingCommands = {
           break;
         }
       }
-      
+
       if (replaceFrom === s.from) {
         // No wrapper found, strip other wrappers
         text = stripTypstWrappers(text);
       }
     }
-    
+
     // Find current index in size steps
     let currentIndex = sizeSteps.indexOf(currentSizeValue);
     if (currentIndex === -1) currentIndex = 3; // default to normal (1em)
-    
+
     // Calculate next size based on direction
     let nextIndex: number;
     if (direction === "small") {
@@ -140,20 +140,20 @@ export const formattingCommands = {
       // Large button: increase size (move right in array)
       nextIndex = Math.min(sizeSteps.length - 1, currentIndex + 1);
     }
-    
+
     const nextSizeValue = sizeSteps[nextIndex];
-    
+
     // Apply the new size
     if (nextSizeValue === "1em") {
       // Normal size - remove wrapper
-      view.dispatch({ 
+      view.dispatch({
         changes: { from: replaceFrom, to: replaceTo, insert: text },
         selection: { anchor: replaceFrom, head: replaceFrom + text.length }
       });
     } else {
       // Apply size wrapper
       const block = `<!--raw-typst #text(size: ${nextSizeValue})[${text}] -->`;
-      view.dispatch({ 
+      view.dispatch({
         changes: { from: replaceFrom, to: replaceTo, insert: block },
         selection: { anchor: replaceFrom, head: replaceFrom + block.length }
       });

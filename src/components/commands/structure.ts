@@ -14,15 +14,15 @@ export const structureCommands = {
     const fromLine = doc.lineAt(sel.from).number;
     const toLine = doc.lineAt(sel.to).number;
     const changes: ChangeSpec[] = [];
-    
+
     for (let n = fromLine; n <= toLine; n++) {
       const line = doc.line(n);
       const stripped = line.text.replace(/^#{1,6}\s+/, "");
       const current = line.text.startsWith(hashes);
-      changes.push({ 
-        from: line.from, 
-        to: line.to, 
-        insert: current ? stripped : hashes + stripped 
+      changes.push({
+        from: line.from,
+        to: line.to,
+        insert: current ? stripped : hashes + stripped
       });
     }
     view.dispatch({ changes });
@@ -35,7 +35,7 @@ export const structureCommands = {
     const fromLine = doc.lineAt(sel.from).number;
     const toLine = doc.lineAt(sel.to).number;
     const changes: ChangeSpec[] = [];
-    
+
     for (let n = fromLine; n <= toLine; n++) {
       const line = doc.line(n);
       const cleaned = line.text.replace(/^(#{1,6}\s+|>\s+)/, "");
@@ -49,10 +49,10 @@ export const structureCommands = {
 
   /** Toggle unordered list */
   ul: (view: EditorView) => toggleLinePrefix(view, "- "),
-  
+
   /** Toggle ordered list */
   ol: (view: EditorView) => toggleLinePrefix(view, "1. "),
-  
+
   /** Toggle task list checkbox */
   task: (view: EditorView) => toggleLinePrefix(view, "- [ ] "),
 
@@ -63,7 +63,7 @@ export const structureCommands = {
     const fromLine = doc.lineAt(sel.from).number;
     const toLine = doc.lineAt(sel.to).number;
     const changes: ChangeSpec[] = [];
-    
+
     for (let n = fromLine; n <= toLine; n++) {
       const line = doc.line(n);
       changes.push({ from: line.from, insert: "  " });
@@ -78,11 +78,11 @@ export const structureCommands = {
     const fromLine = doc.lineAt(sel.from).number;
     const toLine = doc.lineAt(sel.to).number;
     const changes: ChangeSpec[] = [];
-    
+
     for (let n = fromLine; n <= toLine; n++) {
       const line = doc.line(n);
-      const newText = line.text.startsWith("  ") 
-        ? line.text.slice(2) 
+      const newText = line.text.startsWith("  ")
+        ? line.text.slice(2)
         : line.text.replace(/^(\t)/, "");
       changes.push({ from: line.from, to: line.to, insert: newText });
     }

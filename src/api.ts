@@ -26,14 +26,14 @@ export async function writeMarkdownFile(path: string, content: string): Promise<
 export async function exportCleanMarkdown(content: string, suggestedName?: string): Promise<string | null> {
   // Export scrubbed markdown (no Typst wrappers) to a new file
   const { save } = await import('@tauri-apps/plugin-dialog');
-  
+
   const filePath = await save({
     defaultPath: suggestedName,
     filters: [{ name: 'Markdown Files', extensions: ['md'] }]
   });
-  
+
   if (!filePath) return null;
-  
+
   const cleaned = scrubRawTypstAnchors(content);
   await invoke('write_markdown_file', { path: filePath, content: cleaned });
   return filePath;
@@ -127,33 +127,33 @@ function normalizeRenderedDocument(doc: BackendRenderedDocument): RenderedDocume
 }
 
 async function invokeRenderTypst(args: RenderArgs): Promise<RenderedDocument> {
-  const result: BackendRenderedDocument = await invoke('render_typst', { 
-    content: args.content, 
+  const result: BackendRenderedDocument = await invoke('render_typst', {
+    content: args.content,
     format: args.format,
-    currentFile: args.currentFile 
+    currentFile: args.currentFile
   });
   return normalizeRenderedDocument(result);
 }
 
 async function processRenderQueue(): Promise<void> {
   if (renderQueue.inFlight) return;
-  
+
   renderQueue.inFlight = true;
-  
+
   try {
     while (renderQueue.pending) {
       const args = renderQueue.pending;
       renderQueue.pending = null;
-      
+
       try {
         const document = await invokeRenderTypst(args);
-        
+
         // If no new requests came in, resolve all subscribers
         if (!renderQueue.pending) {
           const subscribers = new Map(renderQueue.subscribers);
           renderQueue.subscribers.clear();
           renderQueue.currentGeneration++;
-          
+
           subscribers.forEach(({ resolve }) => resolve(document));
           break;
         }
@@ -164,7 +164,7 @@ async function processRenderQueue(): Promise<void> {
           const subscribers = new Map(renderQueue.subscribers);
           renderQueue.subscribers.clear();
           renderQueue.currentGeneration++;
-          
+
           subscribers.forEach(({ reject }) => reject(err));
           break;
         }
@@ -178,19 +178,19 @@ async function processRenderQueue(): Promise<void> {
 
 export function renderTypst(content: string, format: string, currentFile?: string | null): Promise<RenderedDocument> {
   const args: RenderArgs = { content, format, currentFile: currentFile || undefined };
-  
+
   // Update pending with latest content (last one wins)
   renderQueue.pending = args;
-  
+
   // Create a new subscriber promise
   const generation = renderQueue.currentGeneration;
   const promise = new Promise<RenderedDocument>((resolve, reject) => {
     renderQueue.subscribers.set(generation + renderQueue.subscribers.size, { resolve, reject });
   });
-  
+
   // Start processing if not already running
   processRenderQueue();
-  
+
   return promise;
 }
 
@@ -359,7 +359,7 @@ export async function showOpenDialog(
     if (typeof open !== 'function') {
       throw new Error('Dialog plugin not available');
     }
-    
+
     // Use more specific type annotation to help TypeScript
     const dialogOptions: {
       multiple?: boolean;
@@ -369,17 +369,17 @@ export async function showOpenDialog(
       multiple: false,
       directory
     };
-    
+
     if (filters && filters.length > 0) {
       dialogOptions.filters = filters;
     }
-    
+
     const result = await open(dialogOptions);
-    
+
     if (result === null) {
       return null;
     }
-    
+
     if (Array.isArray(result)) {
       return result.length > 0 ? result[0] : null;
     } else {
@@ -413,7 +413,7 @@ export function generateImageMarkdown(
   const trimmedWidth = width.trim();
   const trimmedAlignment = alignment.trim() || 'center';
   const widthAttr = trimmedWidth.length > 0 ? ` width="${trimmedWidth}"` : '';
-  
+
   // Escape special characters in both path and alt text for HTML safety
   const safePath = path
     .replace(/&/g, '&amp;')
@@ -421,7 +421,7 @@ export function generateImageMarkdown(
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/#/g, '%23');  // Escape # to prevent Typst interpretation
-  
+
   const safeAlt = altText
     .trim()
     .replace(/&/g, '&amp;')
@@ -429,7 +429,7 @@ export function generateImageMarkdown(
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
-  
+
   return `<img src="${safePath}" alt="${safeAlt}"${widthAttr} data-align="${trimmedAlignment}" />`;
 }
 

@@ -51,7 +51,7 @@ export function useContentManagement(params: UseContentManagementParams) {
       if (signal?.aborted) {
         return;
       }
-      
+
       if (autoRenderInFlightRef.current) {
         // A render is already in progress; remember the latest content to render afterwards.
         pendingRenderRef.current = content;
@@ -60,14 +60,14 @@ export function useContentManagement(params: UseContentManagementParams) {
       autoRenderInFlightRef.current = true;
       const wasSourceMapNull = !sourceMap;
       setCompileStatus({ status: 'running' });
-      
+
       const document = await renderTypst(content, 'pdf', currentFile);
-      
+
       // Check if operation was cancelled after async operation
       if (signal?.aborted) {
         return;
       }
-      
+
       setSourceMap(document.sourceMap);
       setCompileStatus({
         status: 'ok',
@@ -78,7 +78,7 @@ export function useContentManagement(params: UseContentManagementParams) {
       if (wasSourceMapNull) {
         setSyncMode('auto');
       }
-      
+
       // Clean up old temp PDFs after successful render
       try {
         await cleanupTempPdfs(10); // Keep last 10 temp PDFs

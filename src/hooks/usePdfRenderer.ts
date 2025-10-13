@@ -88,14 +88,14 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
         return;
       }
       if (!containerRef.current) return;
-      
+
       // CRITICAL: Use saved scroll position from ref instead of reading from DOM
       // The DOM may have been reset to 0 by React before this effect runs
       const savedPosition = savedScrollPositionRef.current ?? {
         top: containerRef.current.scrollTop,
         left: containerRef.current.scrollLeft
       };
-      
+
       setRendering(true);
       setPdfError(null);
       localCancel.canceled = false;
@@ -130,7 +130,7 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
         if (process.env.NODE_ENV !== 'production') {
           console.debug('[usePdfRenderer] Final URL for PDF loading:', fileUrl);
         }
-        
+
         fileUrl += `?v=${Date.now()}`;
         const renderScale = pdfZoom;
         const { doc, metrics } = await renderPdfPages(fileUrl, containerRef.current, renderScale, localCancel, savedPosition, programmaticScrollRef);
@@ -210,11 +210,11 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
               const avail = Math.max(0, el.scrollHeight - el.clientHeight);
               const fallback = new Map<string, number>();
               if (process.env.NODE_ENV !== 'production') {
-                console.debug('[usePdfRenderer] creating fallback offsets', { 
-                  anchors: anchors.length, 
-                  avail, 
-                  scrollHeight: el.scrollHeight, 
-                  clientHeight: el.clientHeight 
+                console.debug('[usePdfRenderer] creating fallback offsets', {
+                  anchors: anchors.length,
+                  avail,
+                  scrollHeight: el.scrollHeight,
+                  clientHeight: el.clientHeight
                 });
               }
               for (let i = 0; i < anchors.length; i++) {
@@ -227,11 +227,11 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
                 // Apply fallback immediately if not typing OR if this is initial startup
                 // At startup, user hasn't interacted yet, so it's safe to apply fallback
                 const shouldApplyImmediately = !isTypingRef.current || !userInteractedRef.current;
-                
+
                 if (shouldApplyImmediately) {
                   anchorOffsetsRef.current = fallback;
                   if (process.env.NODE_ENV !== 'production') {
-                    console.debug('[usePdfRenderer] applied fallback offsets immediately', { 
+                    console.debug('[usePdfRenderer] applied fallback offsets immediately', {
                       size: fallback.size,
                       isTyping: isTypingRef.current,
                       userInteracted: userInteractedRef.current,
@@ -245,18 +245,18 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
                     const anchors = sourceMapRef.current?.anchors ?? [];
                     let anchorId: string | null = null;
                     let targetIndex = 0;
-                    
+
                     if (anchors.length > 0) {
                       // Smart fallback: use anchor at SMART_FALLBACK_POSITION into document (better than start)
                       // This shows some content without being too far in
                       targetIndex = Math.floor(anchors.length * ANCHOR.SMART_FALLBACK_POSITION);
                       anchorId = anchors[targetIndex]?.id ?? anchors[0]?.id;
                     }
-                    
+
                     if (anchorId) {
                       if (process.env.NODE_ENV !== 'production') {
-                        console.debug('[usePdfRenderer] registering pending anchor', { 
-                          anchorId, 
+                        console.debug('[usePdfRenderer] registering pending anchor', {
+                          anchorId,
                           activeAnchorId: args.activeAnchorId,
                           anchorCount: anchors.length,
                           targetIndex,
@@ -275,7 +275,7 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
                   // Store fallback to be applied when typing stops (handled by useEditorToPdfSync)
                   pendingFallbackRef.current = fallback;
                   if (process.env.NODE_ENV !== 'production') {
-                    console.debug('[usePdfRenderer] stored fallback for later (user actively typing)', { 
+                    console.debug('[usePdfRenderer] stored fallback for later (user actively typing)', {
                       size: fallback.size,
                       isTyping: isTypingRef.current
                     });

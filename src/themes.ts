@@ -45,7 +45,7 @@ export const themePresets: Record<string, ThemeDefinition> = {
       default_image_alignment: 'center',
     }),
   },
-  
+
   minimal: {
     id: 'minimal',
     name: 'Minimal',
@@ -67,7 +67,7 @@ export const themePresets: Record<string, ThemeDefinition> = {
       default_image_alignment: 'center',
     }),
   },
-  
+
   compact: {
     id: 'compact',
     name: 'Compact',
@@ -89,7 +89,7 @@ export const themePresets: Record<string, ThemeDefinition> = {
       default_image_alignment: 'left',
     }),
   },
-  
+
   elegant: {
     id: 'elegant',
     name: 'Elegant',
@@ -111,7 +111,7 @@ export const themePresets: Record<string, ThemeDefinition> = {
       default_image_alignment: 'center',
     }),
   },
-  
+
   technical: {
     id: 'technical',
     name: 'Technical',
@@ -133,7 +133,7 @@ export const themePresets: Record<string, ThemeDefinition> = {
       default_image_alignment: 'left',
     }),
   },
-  
+
   magazine: {
     id: 'magazine',
     name: 'Magazine',
@@ -155,7 +155,7 @@ export const themePresets: Record<string, ThemeDefinition> = {
       default_image_alignment: 'center',
     }),
   },
-  
+
   academic: {
     id: 'academic',
     name: 'Academic',
@@ -178,7 +178,7 @@ export const themePresets: Record<string, ThemeDefinition> = {
       default_image_alignment: 'center',
     }),
   },
-  
+
   creative: {
     id: 'creative',
     name: 'Creative',
@@ -200,7 +200,7 @@ export const themePresets: Record<string, ThemeDefinition> = {
       default_image_alignment: 'center',
     }),
   },
-  
+
   modern: {
     id: 'modern',
     name: 'Modern',
@@ -222,7 +222,7 @@ export const themePresets: Record<string, ThemeDefinition> = {
       default_image_alignment: 'center',
     }),
   },
-  
+
   serif: {
     id: 'serif',
     name: 'Serif',
@@ -244,7 +244,7 @@ export const themePresets: Record<string, ThemeDefinition> = {
       default_image_alignment: 'center',
     }),
   },
-  
+
   notebook: {
     id: 'notebook',
     name: 'Notebook',
@@ -266,7 +266,7 @@ export const themePresets: Record<string, ThemeDefinition> = {
       default_image_alignment: 'left',
     }),
   },
-  
+
   dark: {
     id: 'dark',
     name: 'Dark',
