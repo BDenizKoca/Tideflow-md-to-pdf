@@ -36,32 +36,90 @@ h1 {
 }
 
 button {
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
+  border-radius: var(--border-radius);
+  border: var(--border-width) solid var(--interactive-border);
+  padding: 0.5rem 0.9rem;
+  font-size: var(--font-base);
+  font-weight: 600;
   font-family: inherit;
-  background: var(--button-bg);
+  background: var(--interactive-surface);
   color: var(--text-primary);
   cursor: pointer;
-  transition: border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
+  transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
   box-shadow: var(--shadow-sm);
+  outline: none;
 }
 
-button:hover {
-  border-color: var(--border-hover);
-  background: var(--button-bg-hover);
+button:hover:not(:disabled) {
+  background: var(--interactive-surface-hover);
+  border-color: var(--interactive-border-hover);
   transform: translateY(-1px);
 }
 
-button:active {
-  background: var(--button-bg-active);
+button:active:not(:disabled) {
+  background: var(--interactive-surface-active);
   transform: translateY(0);
 }
 
 button:focus,
 button:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
+  outline: none;
+  border-color: var(--interactive-border-hover);
+  box-shadow: none;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: var(--font-base);
+  color: var(--text-primary);
+}
+
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  border: var(--border-width) solid var(--interactive-border);
+  background: var(--interactive-surface);
+  border-radius: var(--border-radius);
+  padding: 0.45rem 0.6rem;
+  transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  outline: none;
+  box-shadow: none;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):hover,
+textarea:hover,
+select:hover {
+  border-color: var(--interactive-border-hover);
+  background: var(--interactive-surface-hover);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+input:not([type="checkbox"]):not([type="radio"]):focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible {
+  outline: none;
+  border-color: var(--interactive-border-hover);
+  background: var(--interactive-surface);
+  box-shadow: none;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-placeholder);
+}
+
+select option {
+  background: var(--surface-subtle);
+  color: var(--text-primary);
 }

@@ -60,25 +60,43 @@
   --text-muted: #8895a3;
   --text-placeholder: #7a8796;
 
+  /* Surface & Interaction Scale */
+  --surface-base: #0e161f;
+  --surface-muted: #111a24;
+  --surface-subtle: rgba(22, 32, 43, 0.95);
+  --surface-raised: rgba(28, 40, 52, 0.98);
+  --surface-popover: rgba(32, 45, 58, 0.98);
+  --surface-highlight: rgba(255, 255, 255, 0.12);
+
+  --border-default: rgba(89, 109, 129, 0.32);
+  --border-strong: rgba(122, 142, 162, 0.45);
+  --border-muted: rgba(80, 98, 116, 0.18);
+
+  --interactive-surface: var(--surface-subtle);
+  --interactive-surface-hover: var(--surface-popover);
+  --interactive-surface-active: var(--surface-muted);
+  --interactive-border: var(--border-default);
+  --interactive-border-hover: var(--border-strong);
+  --focus-outline: rgba(255, 255, 255, 0.18);
+
   /* Background Colors */
-  --background-color: #0e161f;
-  --app-background: #0e161f;
-  --panel-bg: rgba(22, 32, 43, 0.95);
-  --panel-elevated-bg: rgba(28, 40, 52, 0.98);
+  --background-color: var(--surface-base);
+  --app-background: var(--surface-base);
+  --panel-bg: var(--surface-subtle);
+  --panel-elevated-bg: var(--surface-raised);
   --toolbar-bg: #293848;
-  --hover-bg: rgba(40, 55, 70, 0.35);
-  --active-bg: rgba(40, 55, 70, 0.5);
-  --editor-bg: #111a24;
+  --hover-bg: rgba(255, 255, 255, 0.04);
+  --active-bg: rgba(255, 255, 255, 0.08);
+  --editor-bg: var(--surface-muted);
   --preview-bg: #0b121a;
   --paper-bg: #ffffff;
   --toolbar-text: #f7f0f0;
-  --secondary-bar-bg: linear-gradient(180deg, rgba(28, 40, 52, 0.96), rgba(14, 22, 30, 0.92));
-  --status-bar-bg: linear-gradient(to bottom, rgba(28, 40, 52, 0.9), rgba(14, 22, 30, 0.9));
-  --surface-highlight: rgba(255, 255, 255, 0.12);
-  --panel-hover-bg: rgba(15, 23, 42, 0.95);
-  --panel-active-bg: rgba(12, 20, 36, 0.9);
-  --sidebar-bg: linear-gradient(to bottom, rgba(24, 36, 64, 0.95), rgba(20, 30, 52, 0.9));
-  --scrollbar-track-bg: linear-gradient(to right, rgba(18, 28, 48, 0.92), rgba(148, 163, 184, 0.25));
+  --secondary-bar-bg: var(--surface-subtle);
+  --status-bar-bg: var(--surface-subtle);
+  --panel-hover-bg: var(--surface-popover);
+  --panel-active-bg: var(--surface-muted);
+  --sidebar-bg: var(--surface-subtle);
+  --scrollbar-track-bg: linear-gradient(to right, rgba(18, 28, 48, 0.92), rgba(148, 163, 184, 0.2));
   --overlay-bg: linear-gradient(to bottom right, rgba(255, 255, 255, 0.85), rgba(248, 250, 252, 0.85));
   --overlay-dark: rgba(0, 0, 0, 0.75);
   --preview-page-color: var(--paper-bg);
@@ -86,11 +104,11 @@
   --preview-accent-color: var(--accent-color-strong);
 
   /* Button Colors */
-  --button-bg: linear-gradient(180deg, rgba(32, 45, 58, 0.95), rgba(22, 32, 43, 0.95));
-  --button-bg-hover: linear-gradient(180deg, rgba(40, 55, 70, 0.98), rgba(28, 40, 52, 0.96));
-  --button-bg-active: linear-gradient(180deg, rgba(18, 27, 36, 0.95), rgba(14, 22, 30, 0.92));
-  --select-bg: rgba(28, 40, 52, 0.96);
-  --select-bg-hover: rgba(40, 55, 70, 0.98);
+  --button-bg: var(--interactive-surface);
+  --button-bg-hover: var(--interactive-surface-hover);
+  --button-bg-active: var(--interactive-surface-active);
+  --select-bg: var(--interactive-surface);
+  --select-bg-hover: var(--interactive-surface-hover);
 
   /* Toolbar Button Colors */
   --toolbar-primary-bg: #3590F3;
@@ -101,10 +119,10 @@
   --toolbar-primary-shadow: rgba(53, 144, 243, 0.45);
 
   --toolbar-secondary-bg: #4e7660;
-  --toolbar-secondary-hover: #5f8d74;
-  --toolbar-secondary-active: #3d5f4d;
-  --toolbar-secondary-border: #324d3e;
-  --toolbar-secondary-text: #F7F0F0;
+  --toolbar-secondary-hover: #7cba97;
+  --toolbar-secondary-active: #3a5b47;
+  --toolbar-secondary-border: #2f4a3c;
+  --toolbar-secondary-text: #f7f9f8;
   --toolbar-secondary-shadow: rgba(78, 118, 96, 0.4);
 
   --toolbar-locked-bg: rgba(32, 45, 58, 0.6);
@@ -113,10 +131,10 @@
   --toolbar-locked-shadow: none;
 
   /* Border Colors */
-  --border-color: rgba(89, 109, 129, 0.32);
-  --border-hover: rgba(122, 142, 162, 0.45);
-  --border-color-hover: rgba(122, 142, 162, 0.45);
-  --border-color-light: rgba(80, 98, 116, 0.18);
+  --border-color: var(--border-default);
+  --border-hover: var(--border-strong);
+  --border-color-hover: var(--border-strong);
+  --border-color-light: var(--border-muted);
   --border-color-separator: rgba(55, 70, 86, 0.6);
   --panel-border-strong: rgba(122, 142, 162, 0.6);
 
@@ -175,14 +193,14 @@
   --search-button-text: #d4dbe5;
 
   /* Utility Colors */
-  --bg-white: rgba(22, 32, 43, 0.95);
-  --bg-light: rgba(24, 34, 45, 0.94);
-  --bg-lighter: rgba(20, 30, 41, 0.92);
-  --bg-lightest: rgba(16, 24, 33, 0.9);
+  --bg-white: var(--surface-subtle);
+  --bg-light: var(--surface-popover);
+  --bg-lighter: var(--surface-muted);
+  --bg-lightest: var(--surface-base);
   --bg-gradient-light: linear-gradient(180deg, rgba(28, 40, 52, 0.96), rgba(18, 27, 36, 0.92));
 
   --ripple-color: rgba(77, 154, 199, 0.25);
-  --focus-ring: rgba(255, 255, 255, 0.18);
+  --focus-ring: var(--focus-outline);
   --button-glow-primary: rgba(77, 154, 199, 0.45);
   --link-color: #4d9ac7;
   --link-hover-color: #6bb7dd;
@@ -213,24 +231,43 @@
   --text-muted: #9ca3af;
   --text-placeholder: #9ca3af;
 
+  /* Surface & Interaction Scale */
+  --surface-base: #f8fafc;
+  --surface-muted: #f1f5f9;
+  --surface-subtle: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-popover: #ffffff;
+  --surface-highlight: rgba(15, 23, 42, 0.06);
+
+  --border-default: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --border-muted: rgba(226, 232, 240, 0.7);
+
+  --interactive-surface: var(--surface-subtle);
+  --interactive-surface-hover: var(--surface-muted);
+  --interactive-surface-active: #e2e8f0;
+  --interactive-border: var(--border-default);
+  --interactive-border-hover: var(--border-strong);
+  --focus-outline: rgba(15, 23, 42, 0.12);
+
   /* Background Colors */
-  --background-color: #f8fafc;
-  --app-background: #f8fafc;
-  --panel-bg: #ffffff;
-  --panel-elevated-bg: #ffffff;
+  --background-color: var(--surface-base);
+  --app-background: var(--surface-base);
+  --panel-bg: var(--surface-subtle);
+  --panel-elevated-bg: var(--surface-raised);
   --toolbar-bg: #293848;
-  --hover-bg: #f1f5f9;
-  --active-bg: #e5e7eb;
-  --editor-bg: #fefefe;
-  --preview-bg: #f8fafc;
+  --hover-bg: rgba(15, 23, 42, 0.06);
+  --active-bg: rgba(15, 23, 42, 0.12);
+  --editor-bg: var(--surface-subtle);
+  --preview-bg: var(--surface-base);
   --paper-bg: #ffffff;
   --toolbar-text: #f7f0f0;
-  --secondary-bar-bg: linear-gradient(to bottom, #fefefe, #f9f9f9);
-  --status-bar-bg: linear-gradient(to bottom, #ffffff, #f1f5f9);
-  --surface-highlight: rgba(15, 23, 42, 0.08);
-  --panel-hover-bg: #f1f5f9;
-  --panel-active-bg: #e2e8f0;
-  --sidebar-bg: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+  --secondary-bar-bg: var(--surface-subtle);
+  --status-bar-bg: var(--surface-subtle);
+  --surface-highlight: rgba(15, 23, 42, 0.06);
+  --panel-hover-bg: var(--interactive-surface-hover);
+  --panel-active-bg: var(--interactive-surface-active);
+  --sidebar-bg: var(--surface-subtle);
   --scrollbar-track-bg: linear-gradient(to right, #f1f5f9, #e2e8f0);
   --overlay-bg: linear-gradient(to bottom right, rgba(226, 232, 240, 0.92), rgba(241, 245, 249, 0.92));
   --overlay-dark: rgba(15, 23, 42, 0.7);
@@ -239,11 +276,11 @@
   --preview-accent-color: var(--accent-color-strong);
 
   /* Button Colors */
-  --button-bg: #ffffff;
-  --button-bg-hover: #f1f5f9;
-  --button-bg-active: #e5e7eb;
-  --select-bg: #ffffff;
-  --select-bg-hover: #f1f5f9;
+  --button-bg: var(--interactive-surface);
+  --button-bg-hover: var(--interactive-surface-hover);
+  --button-bg-active: var(--interactive-surface-active);
+  --select-bg: var(--interactive-surface);
+  --select-bg-hover: var(--interactive-surface-hover);
 
   /* Toolbar Button Colors */
   --toolbar-primary-bg: #3590F3;
@@ -253,25 +290,25 @@
   --toolbar-primary-text: #F7F0F0;
   --toolbar-primary-shadow: rgba(53, 144, 243, 0.35);
 
-  --toolbar-secondary-bg: #4e7660;
-  --toolbar-secondary-hover: #5f8d74;
-  --toolbar-secondary-active: #3d5f4d;
-  --toolbar-secondary-border: #324d3e;
-  --toolbar-secondary-text: #F7F0F0;
-  --toolbar-secondary-shadow: rgba(78, 118, 96, 0.3);
+  --toolbar-secondary-bg: #5e8c73;
+  --toolbar-secondary-hover: #7fbc98;
+  --toolbar-secondary-active: #4c725c;
+  --toolbar-secondary-border: #3f5c4a;
+  --toolbar-secondary-text: #f5f9f6;
+  --toolbar-secondary-shadow: rgba(94, 140, 115, 0.25);
 
   --toolbar-locked-bg: #edf2f7;
-  --toolbar-locked-border: #cbd5e1;
+  --toolbar-locked-border: var(--border-default);
   --toolbar-locked-text: #64748b;
   --toolbar-locked-shadow: none;
 
   /* Border Colors */
-  --border-color: #e2e8f0;
-  --border-hover: #cbd5e1;
-  --border-color-hover: #cbd5e1;
-  --border-color-light: #e2e8f0;
+  --border-color: var(--border-default);
+  --border-hover: var(--border-strong);
+  --border-color-hover: var(--border-strong);
+  --border-color-light: var(--border-muted);
   --border-color-separator: #e2e8f0;
-  --panel-border-strong: #cbd5e1;
+  --panel-border-strong: var(--border-strong);
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -300,7 +337,7 @@
   --info-color-strong: #2563eb;
   --info-bg: #eff6ff;
 
-  /* CodeMirror Editor Colors */
+  /* CodeMirror Editor Colors - Light mode uses darker, saturated colors for readability */
   --cm-content-bg: transparent;
   --cm-line-bg: transparent;
   --cm-cursor: #007acc;
@@ -308,13 +345,13 @@
   --cm-gutter-bg: #f8fafc;
   --cm-gutter-text: #64748b;
   --cm-text: #0f172a;
-  --cm-heading-color: #1d4d79;
-  --cm-strong-color: #9c4221;
-  --cm-link-color: #145c7f;
-  --cm-url-color: #5b3abf;
-  --cm-code-color: #a0431f;
-  --cm-quote-color: #475569;
-  --cm-punctuation-color: #1d4ed8;
+  --cm-heading-color: #0369a1;     /* Bright blue - stands out for headings */
+  --cm-strong-color: #b91c1c;      /* Deep red - strong emphasis */
+  --cm-link-color: #0284c7;        /* Cyan blue - clear link indication */
+  --cm-url-color: #7c3aed;         /* Purple - distinguishes URLs from links */
+  --cm-code-color: #c2410c;        /* Orange-red - code blocks pop */
+  --cm-quote-color: #64748b;       /* Slate gray - subtle but readable */
+  --cm-punctuation-color: #6366f1; /* Indigo - visible markdown syntax */
 
   /* Search Panel Colors */
   --search-panel-bg: #ffffff;
@@ -328,14 +365,14 @@
   --search-button-text: #1f2937;
 
   /* Utility Colors */
-  --bg-white: #ffffff;
-  --bg-light: #f8fafc;
-  --bg-lighter: #f1f5f9;
+  --bg-white: var(--surface-subtle);
+  --bg-light: var(--surface-muted);
+  --bg-lighter: var(--surface-base);
   --bg-lightest: #e2e8f0;
-  --bg-gradient-light: linear-gradient(180deg, #ffffff, #f1f5f9);
+  --bg-gradient-light: linear-gradient(180deg, var(--surface-subtle), var(--surface-muted));
 
   --ripple-color: rgba(0, 102, 204, 0.15);
-  --focus-ring: rgba(15, 23, 42, 0.12);
+  --focus-ring: var(--focus-outline);
   --button-glow-primary: rgba(53, 144, 243, 0.3);
   --link-color: #2563eb;
   --link-hover-color: #1d4ed8;

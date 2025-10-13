@@ -1,0 +1,172 @@
+/* ============================================================================
+   Tideflow UI Primitives
+   Utility classes for consistent buttons, inputs, and pills across the app
+   ============================================================================ */
+
+.ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--border-radius);
+  border: var(--border-width) solid var(--interactive-border);
+  background: var(--interactive-surface);
+  color: var(--text-primary);
+  font-size: var(--font-base);
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+  outline: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.ui-button:hover:not(:disabled) {
+  background: var(--interactive-surface-hover);
+  border-color: var(--interactive-border-hover);
+  transform: translateY(-1px);
+}
+
+.ui-button:active:not(:disabled) {
+  background: var(--interactive-surface-active);
+  transform: translateY(0);
+  box-shadow: var(--shadow-inset);
+}
+
+.ui-button:focus,
+.ui-button:focus-visible {
+  outline: none;
+  border-color: var(--interactive-border-hover);
+  box-shadow: none;
+}
+
+.ui-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.ui-button--primary {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+  color: var(--text-on-primary);
+  box-shadow: 0 10px 24px -12px rgba(77, 154, 199, 0.45);
+}
+
+.ui-button--primary:hover:not(:disabled) {
+  background: var(--accent-color-strong);
+  border-color: var(--accent-color-strong);
+}
+
+.ui-button--primary:active:not(:disabled) {
+  background: var(--accent-color);
+  box-shadow: var(--shadow-inset);
+}
+
+.ui-button--danger {
+  background: var(--error-color);
+  border-color: var(--error-color);
+  color: var(--text-on-primary);
+}
+
+.ui-button--danger:hover:not(:disabled) {
+  background: var(--error-color-hover);
+  border-color: var(--error-color-hover);
+}
+
+.ui-button--danger:active:not(:disabled) {
+  background: var(--error-color-active);
+}
+
+.ui-button--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-secondary);
+  box-shadow: none;
+}
+
+.ui-button--ghost:hover:not(:disabled) {
+  background: var(--hover-bg);
+  border-color: var(--interactive-border);
+}
+
+.ui-button--ghost:active:not(:disabled) {
+  background: var(--active-bg);
+}
+
+.ui-input,
+.ui-select {
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border-radius: var(--border-radius);
+  border: var(--border-width) solid var(--interactive-border);
+  background: var(--interactive-surface);
+  color: var(--text-primary);
+  font-size: var(--font-base);
+  line-height: 1.4;
+  transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  outline: none;
+  box-shadow: none;
+}
+
+.ui-input::placeholder {
+  color: var(--text-placeholder);
+}
+
+.ui-input:focus,
+.ui-input:focus-visible,
+.ui-select:focus,
+.ui-select:focus-visible {
+  border-color: var(--interactive-border-hover);
+  background: var(--interactive-surface-hover);
+  outline: none;
+  box-shadow: none;
+}
+
+.ui-select {
+  appearance: none;
+  cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%), linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+  background-position: calc(100% - 16px) calc(50% - 2px), calc(100% - 11px) calc(50% - 2px);
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.ui-select:hover {
+  border-color: var(--interactive-border-hover);
+}
+
+.ui-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 0.25rem 0.6rem;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  border-radius: 999px;
+  border: var(--border-width) solid transparent;
+  background: var(--interactive-surface);
+  color: var(--text-secondary);
+}
+
+.ui-pill--success {
+  background: var(--success-bg);
+  border-color: rgba(52, 211, 153, 0.35);
+  color: var(--success-color);
+}
+
+.ui-pill--warning {
+  background: var(--warning-bg);
+  border-color: rgba(251, 191, 36, 0.35);
+  color: var(--warning-color);
+}
+
+.ui-pill--danger {
+  background: var(--error-bg);
+  border-color: rgba(248, 113, 113, 0.35);
+  color: var(--error-color);
+}

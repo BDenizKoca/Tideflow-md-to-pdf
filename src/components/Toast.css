@@ -15,8 +15,6 @@
   min-width: 300px;
   max-width: 520px;
   animation: slideInRight 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
   position: relative;
   overflow: hidden;
   color: var(--text-primary);

@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useEditorStore } from '../stores/editorStore';
 import { useUIStore } from '../stores/uiStore';
 import DesignModal from './DesignModal';
+import Dropdown from './Dropdown';
 import { invoke } from '@tauri-apps/api/core';
 import { save, open } from '@tauri-apps/plugin-dialog';
 import { handleError, showSuccess } from '../utils/errorHandler';
@@ -33,24 +34,6 @@ const Toolbar: React.FC = () => {
   const [recentDropdownOpen, setRecentDropdownOpen] = useState(false);
   const [saveDropdownOpen, setSaveDropdownOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = React.useState(false);
-
-  // Close dropdown when clicking outside
-  React.useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (recentDropdownOpen && !target.closest('.dropdown')) {
-        setRecentDropdownOpen(false);
-      }
-      if (saveDropdownOpen && !target.closest('.dropdown')) {
-        setSaveDropdownOpen(false);
-      }
-    };
-
-    if (recentDropdownOpen || saveDropdownOpen) {
-      document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
-    }
-  }, [recentDropdownOpen, saveDropdownOpen]);
 
   React.useEffect(() => {
     const handleFullscreenChange = () => {
@@ -264,70 +247,67 @@ const Toolbar: React.FC = () => {
         <div className="toolbar-section">
           {recentFiles.length > 0 ? (
             <div className="file-control-group">
-              <button onClick={handleOpenFile} title="Open File (Ctrl+O)" className="file-open-btn">
+              <button type="button" onClick={handleOpenFile} title="Open File (Ctrl+O)" className="file-open-btn">
                 📂 Open
               </button>
-              <div className="dropdown">
+              <Dropdown
+                trigger={
+                  <button type="button" className="dropdown-toggle" title="Recent Files">
+                    ▼
+                  </button>
+                }
+                isOpen={recentDropdownOpen}
+                onToggle={() => setRecentDropdownOpen(!recentDropdownOpen)}
+              >
+                <div className="dropdown-header">Recent Files</div>
+                {recentFiles.map((file) => (
+                  <button
+                    type="button"
+                    key={file}
+                    className="dropdown-item"
+                    onClick={async () => {
+                      try {
+                        const content = await readMarkdownFile(file);
+                        addOpenFile(file);
+                        setCurrentFile(file);
+                        setContent(content);
+                        addRecentFile(file);
+                        setRecentDropdownOpen(false);
+                        addToast({ type: 'success', message: 'File opened successfully' });
+                      } catch (err) {
+                        addToast({ type: 'error', message: 'Failed to open file' });
+                        handleError(err, { operation: 'open recent file', component: 'Toolbar' });
+                      }
+                    }}
+                    title={file}
+                  >
+                    {file.split(/[\\/]/).pop() || file}
+                  </button>
+                ))}
+                <div className="dropdown-divider"></div>
                 <button
-                  className="dropdown-toggle"
-                  title="Recent Files"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setRecentDropdownOpen(!recentDropdownOpen);
+                  type="button"
+                  className="dropdown-item dropdown-clear"
+                  onClick={() => {
+                    clearRecentFiles();
+                    setRecentDropdownOpen(false);
+                    addToast({ type: 'success', message: 'Recent files cleared' });
                   }}
                 >
-                  ▼
+                  ✖ Clear Recent
                 </button>
-                {recentDropdownOpen && (
-                  <div className="dropdown-menu">
-                    <div className="dropdown-header">Recent Files</div>
-                    {recentFiles.map((file) => (
-                      <button
-                        key={file}
-                        className="dropdown-item"
-                        onClick={async () => {
-                          try {
-                            const content = await readMarkdownFile(file);
-                            addOpenFile(file);
-                            setCurrentFile(file);
-                            setContent(content);
-                            addRecentFile(file);
-                            setRecentDropdownOpen(false);
-                            addToast({ type: 'success', message: 'File opened successfully' });
-                          } catch (err) {
-                            addToast({ type: 'error', message: 'Failed to open file' });
-                            handleError(err, { operation: 'open recent file', component: 'Toolbar' });
-                          }
-                        }}
-                        title={file}
-                      >
-                        {file.split(/[\\/]/).pop() || file}
-                      </button>
-                    ))}
-                    <div className="dropdown-divider"></div>
-                    <button
-                      className="dropdown-item dropdown-clear"
-                      onClick={() => {
-                        clearRecentFiles();
-                        setRecentDropdownOpen(false);
-                        addToast({ type: 'success', message: 'Recent files cleared' });
-                      }}
-                    >
-                      ✖ Clear Recent
-                    </button>
-                  </div>
-                )}
-              </div>
+              </Dropdown>
             </div>
           ) : (
-            <button onClick={handleOpenFile} title="Open File (Ctrl+O)">
+            <button type="button" onClick={handleOpenFile} title="Open File (Ctrl+O)">
               📂 Open
             </button>
           )}
-          <button onClick={handleNewFile} title="New File (Ctrl+N)">
+          <button type="button" onClick={handleNewFile} title="New File (Ctrl+N)">
             📄 New
           </button>
           <button
+            type="button"
             onClick={closeAllFiles}
             title="Close all tabs and return to instructions"
           >
@@ -361,6 +341,7 @@ const Toolbar: React.FC = () => {
         <div className="toolbar-section">
           <div className="file-control-group">
             <button
+              type="button"
               onClick={handleSaveFile}
               disabled={!editor.modified}
               title="Save File (Ctrl+S)"
@@ -368,36 +349,33 @@ const Toolbar: React.FC = () => {
             >
               💾 Save
             </button>
-            <div className="dropdown">
+            <Dropdown
+              trigger={
+                <button type="button" className="dropdown-toggle btn-primary" title="Save options">
+                  ▼
+                </button>
+              }
+              isOpen={saveDropdownOpen}
+              onToggle={() => setSaveDropdownOpen(!saveDropdownOpen)}
+              className="save-dropdown"
+            >
               <button
-                className="dropdown-toggle btn-primary"
-                title="Save options"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSaveDropdownOpen(!saveDropdownOpen);
-                }}
+                type="button"
+                className="dropdown-item"
+                onClick={handleSaveAs}
+                title="Save to a different location or filename"
               >
-                ▼
+                💾 Save As…
               </button>
-              {saveDropdownOpen && (
-                <div className="dropdown-menu save-dropdown">
-                  <button
-                    className="dropdown-item"
-                    onClick={handleSaveAs}
-                    title="Save to a different location or filename"
-                  >
-                    💾 Save As…
-                  </button>
-                  <button
-                    className="dropdown-item"
-                    onClick={handleExportClean}
-                    title="Export without Typst wrappers (pure Markdown)"
-                  >
-                    ✨ Export Clean MD
-                  </button>
-                </div>
-              )}
-            </div>
+              <button
+                type="button"
+                className="dropdown-item"
+                onClick={handleExportClean}
+                title="Export without Typst wrappers (pure Markdown)"
+              >
+                ✨ Export Clean MD
+              </button>
+            </Dropdown>
           </div>
           <button
             type="button"

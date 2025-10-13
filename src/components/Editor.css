@@ -125,8 +125,8 @@
 }
 
 .editor-actions button {
-  background: var(--button-bg);
-  border: 1px solid var(--border-color);
+  background: var(--interactive-surface);
+  border: var(--border-width) solid var(--interactive-border);
   border-radius: 6px;
   padding: 6px 14px;
   cursor: pointer;
@@ -159,8 +159,8 @@
 }
 
 .editor-actions button:hover:not(:disabled) {
-  background: var(--button-bg-hover);
-  border-color: var(--border-color-hover);
+  background: var(--interactive-surface-hover);
+  border-color: var(--interactive-border-hover);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
@@ -168,13 +168,13 @@
 .editor-actions button:active:not(:disabled) {
   transform: translateY(0);
   box-shadow: var(--shadow-inset);
-  background: var(--button-bg-active);
+  background: var(--interactive-surface-active);
 }
 
 .editor-actions button:focus-visible {
   outline: none;
-  border-color: var(--border-color);
-  box-shadow: var(--shadow-sm);
+  border-color: var(--interactive-border-hover);
+  box-shadow: none;
 }
 
 .editor-actions button:disabled {
@@ -225,9 +225,9 @@
 }
 
 .simple-markdown-toolbar button {
-  background: var(--button-bg);
+  background: var(--interactive-surface);
   color: var(--text-primary);
-  border: var(--border-width) solid var(--border-color);
+  border: var(--border-width) solid var(--interactive-border);
   border-radius: var(--border-radius);
   padding: 0.4rem 0.55rem;
   font-size: var(--font-md);
@@ -264,8 +264,8 @@
 }
 
 .simple-markdown-toolbar button:hover {
-  background: var(--button-bg-hover);
-  border-color: var(--border-color-hover);
+  background: var(--interactive-surface-hover);
+  border-color: var(--interactive-border-hover);
   transform: translateY(-1px);
   box-shadow: var(--shadow-lg);
 }
@@ -273,13 +273,13 @@
 .simple-markdown-toolbar button:active {
   transform: translateY(0);
   box-shadow: var(--shadow-inset);
-  background: var(--button-bg-active);
+  background: var(--interactive-surface-active);
 }
 
 .simple-markdown-toolbar button:focus-visible {
   outline: none;
-  border-color: var(--border-color);
-  box-shadow: var(--shadow-sm);
+  border-color: var(--interactive-border-hover);
+  box-shadow: none;
 }
 
 .simple-markdown-toolbar .toolbar-divider {
@@ -313,9 +313,9 @@
 }
 
 .simple-markdown-toolbar .toolbar-select {
-  background: var(--select-bg);
+  background: var(--interactive-surface);
   color: var(--text-primary);
-  border: var(--border-width) solid var(--border-color);
+  border: var(--border-width) solid var(--interactive-border);
   border-radius: var(--border-radius);
   padding: 0.4rem var(--spacing-md);
   font-size: var(--font-md);
@@ -328,14 +328,14 @@
 }
 
 .simple-markdown-toolbar .toolbar-select:hover {
-  background: var(--select-bg-hover);
-  border-color: var(--border-color-hover);
-  box-shadow: var(--shadow-md);
+  background: var(--interactive-surface-hover);
+  border-color: var(--interactive-border-hover);
+  box-shadow: none;
 }
 
 .simple-markdown-toolbar .toolbar-select:focus-visible {
-  border-color: var(--border-color);
-  box-shadow: var(--shadow-sm);
+  border-color: var(--interactive-border-hover);
+  box-shadow: none;
   outline: none;
 }
 

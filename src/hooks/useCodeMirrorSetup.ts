@@ -10,6 +10,7 @@ import { keymap } from '@codemirror/view';
 import { search, searchKeymap, closeSearchPanel, openSearchPanel } from '@codemirror/search';
 import { StateField, Annotation, Prec, Compartment } from '@codemirror/state';
 import { syntaxHighlighting, HighlightStyle } from '@codemirror/language';
+import { tags } from '@lezer/highlight';
 import { TIMING } from '../constants/timing';
 import { cmd } from '../components/commands';
 import { scrubRawTypstAnchors } from '../utils/scrubAnchors';
@@ -145,9 +146,23 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
     // Do NOT read and bake CSS variables into hardcoded colors - that breaks theme switching!
 
     // Create custom syntax highlighting using CSS variables (not hardcoded colors!)
-    // Using var() in HighlightStyle doesn't work, so we use transparent and let CSS handle it
+    // We map token types to CSS classes that use our theme variables
     const markdownHighlighting = HighlightStyle.define([
-      // Don't define colors here - let CSS variables handle everything
+      { tag: tags.heading, class: 'cm-heading' },
+      { tag: tags.heading1, class: 'cm-heading1' },
+      { tag: tags.heading2, class: 'cm-heading2' },
+      { tag: tags.heading3, class: 'cm-heading3' },
+      { tag: tags.heading4, class: 'cm-heading4' },
+      { tag: tags.heading5, class: 'cm-heading5' },
+      { tag: tags.heading6, class: 'cm-heading6' },
+      { tag: tags.strong, class: 'cm-strong' },
+      { tag: tags.emphasis, class: 'cm-em' },
+      { tag: tags.link, class: 'cm-link' },
+      { tag: tags.url, class: 'cm-url' },
+      { tag: tags.monospace, class: 'cm-code' },
+      { tag: tags.quote, class: 'cm-quote' },
+      { tag: tags.meta, class: 'cm-meta' },
+      { tag: tags.punctuation, class: 'cm-punctuation' },
     ]);
 
     const view = new EditorView({

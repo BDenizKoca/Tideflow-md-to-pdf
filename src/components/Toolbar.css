@@ -8,6 +8,8 @@
   border-bottom: 1px solid var(--border-color);
   color: var(--toolbar-text);
   box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: visible;
 }
 
 .toolbar-logo h1 {
@@ -23,6 +25,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  overflow: visible;
 }
 
 .toolbar-separator {
@@ -78,77 +81,105 @@
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
-  padding: 0.55rem 1rem;
-  border-radius: 6px;
-  border: 1px solid var(--toolbar-secondary-border);
-  background: var(--toolbar-secondary-bg);
-  color: var(--toolbar-secondary-text);
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--border-radius);
+  border: var(--border-width) solid var(--interactive-border);
+  background: var(--interactive-surface);
+  color: var(--text-primary);
   font-size: 0.85rem;
   font-weight: 600;
   line-height: 1;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 18px -12px var(--toolbar-secondary-shadow);
-  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: none;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
   outline: none;
-}
-
-.toolbar-actions button::after,
-.file-control-group .file-open-btn::after,
-.file-control-group .dropdown-toggle::after,
-.toolbar-button-group > button::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent, var(--surface-highlight));
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-  pointer-events: none;
 }
 
 .toolbar-actions button:hover:not(:disabled),
 .file-control-group .file-open-btn:hover:not(:disabled),
 .file-control-group .dropdown-toggle:hover:not(:disabled),
 .toolbar-button-group > button:hover:not(:disabled) {
-  background: var(--toolbar-secondary-hover);
-  border-color: var(--toolbar-secondary-border);
-  box-shadow: 0 12px 20px -14px var(--toolbar-secondary-shadow);
+  background: var(--interactive-surface-hover);
+  border-color: var(--interactive-border-hover);
   transform: translateY(-1px);
-}
-
-.toolbar-actions button:hover:not(:disabled)::after,
-.file-control-group .file-open-btn:hover:not(:disabled)::after,
-.file-control-group .dropdown-toggle:hover:not(:disabled)::after,
-.toolbar-button-group > button:hover:not(:disabled)::after {
-  opacity: 1;
 }
 
 .toolbar-actions button:active:not(:disabled),
 .file-control-group .file-open-btn:active:not(:disabled),
 .file-control-group .dropdown-toggle:active:not(:disabled),
 .toolbar-button-group > button:active:not(:disabled) {
-  background: var(--toolbar-secondary-active);
-  border-color: var(--toolbar-secondary-active);
+  background: var(--interactive-surface-active);
+  border-color: var(--interactive-border-hover);
   transform: translateY(0);
   box-shadow: var(--shadow-inset);
 }
 
+.toolbar-actions button:focus,
 .toolbar-actions button:focus-visible,
+.file-control-group .file-open-btn:focus,
 .file-control-group .file-open-btn:focus-visible,
+.file-control-group .dropdown-toggle:focus,
 .file-control-group .dropdown-toggle:focus-visible,
+.toolbar-button-group > button:focus,
 .toolbar-button-group > button:focus-visible {
   outline: none;
-  border-color: var(--toolbar-secondary-border);
-  box-shadow: 0 8px 18px -12px var(--toolbar-secondary-shadow);
+  border-color: var(--interactive-border-hover);
+  box-shadow: none;
 }
 
 .toolbar-actions button:disabled,
 .file-control-group .file-open-btn:disabled,
 .file-control-group .dropdown-toggle:disabled,
 .toolbar-button-group > button:disabled {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.toolbar-section > button:not(.btn-primary):not(.btn-danger):not(.btn-locked),
+.file-control-group .dropdown-toggle:not(.btn-primary):not(.btn-danger):not(.btn-locked),
+.file-control-group .file-open-btn:not(.btn-primary):not(.btn-danger):not(.btn-locked) {
+  background: var(--toolbar-secondary-bg);
+  border-color: var(--toolbar-secondary-border);
+  color: var(--toolbar-secondary-text);
+  box-shadow: 0 8px 18px -12px var(--toolbar-secondary-shadow);
+}
+
+.toolbar-section > button:not(.btn-primary):not(.btn-danger):not(.btn-locked):hover,
+.file-control-group .dropdown-toggle:not(.btn-primary):not(.btn-danger):not(.btn-locked):hover,
+.file-control-group .file-open-btn:not(.btn-primary):not(.btn-danger):not(.btn-locked):hover {
+  background: var(--toolbar-secondary-hover);
+  border-color: var(--toolbar-secondary-border);
+  transform: translateY(-1px);
+}
+
+.toolbar-section > button:not(.btn-primary):not(.btn-danger):not(.btn-locked):active,
+.file-control-group .dropdown-toggle:not(.btn-primary):not(.btn-danger):not(.btn-locked):active,
+.file-control-group .file-open-btn:not(.btn-primary):not(.btn-danger):not(.btn-locked):active {
+  background: var(--toolbar-secondary-active);
+  border-color: var(--toolbar-secondary-active);
+  transform: translateY(0);
+  box-shadow: var(--shadow-inset);
+}
+
+.toolbar-section > button:not(.btn-primary):not(.btn-danger):not(.btn-locked):focus,
+.toolbar-section > button:not(.btn-primary):not(.btn-danger):not(.btn-locked):focus-visible,
+.file-control-group .dropdown-toggle:not(.btn-primary):not(.btn-danger):not(.btn-locked):focus,
+.file-control-group .dropdown-toggle:not(.btn-primary):not(.btn-danger):not(.btn-locked):focus-visible,
+.file-control-group .file-open-btn:not(.btn-primary):not(.btn-danger):not(.btn-locked):focus,
+.file-control-group .file-open-btn:not(.btn-primary):not(.btn-danger):not(.btn-locked):focus-visible {
+  outline: none;
+  border-color: var(--toolbar-secondary-active);
+  box-shadow: none;
+}
+
+.toolbar-section > button:not(.btn-primary):not(.btn-danger):not(.btn-locked):disabled,
+.file-control-group .dropdown-toggle:not(.btn-primary):not(.btn-danger):not(.btn-locked):disabled,
+.file-control-group .file-open-btn:not(.btn-primary):not(.btn-danger):not(.btn-locked):disabled {
+  opacity: 0.45;
   transform: none;
   box-shadow: none;
 }
@@ -156,25 +187,52 @@
 .toolbar-actions button.btn-primary,
 .file-control-group .file-open-btn.btn-primary,
 .file-control-group .dropdown-toggle.btn-primary {
-  background: var(--toolbar-primary-bg);
-  border-color: var(--toolbar-primary-border);
-  color: var(--toolbar-primary-text);
-  box-shadow: 0 8px 24px -10px var(--toolbar-primary-shadow);
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+  color: var(--text-on-primary);
+  box-shadow: 0 10px 24px -14px var(--accent-shadow);
+  position: relative;
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.toolbar-actions button.btn-primary::before,
+.file-control-group .file-open-btn.btn-primary::before,
+.file-control-group .dropdown-toggle.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0);
+  border-radius: inherit;
+  transition: background var(--transition-fast);
+  pointer-events: none;
 }
 
 .toolbar-actions button.btn-primary:hover:not(:disabled),
 .file-control-group .file-open-btn.btn-primary:hover:not(:disabled),
 .file-control-group .dropdown-toggle.btn-primary:hover:not(:disabled) {
-  background: var(--toolbar-primary-hover);
-  border-color: var(--toolbar-primary-hover);
-  box-shadow: 0 12px 26px -12px var(--toolbar-primary-shadow);
+  transform: translateY(-1px);
+}
+
+.toolbar-actions button.btn-primary:hover:not(:disabled)::before,
+.file-control-group .file-open-btn.btn-primary:hover:not(:disabled)::before,
+.file-control-group .dropdown-toggle.btn-primary:hover:not(:disabled)::before {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .toolbar-actions button.btn-primary:active:not(:disabled),
 .file-control-group .file-open-btn.btn-primary:active:not(:disabled),
 .file-control-group .dropdown-toggle.btn-primary:active:not(:disabled) {
-  background: var(--toolbar-primary-active);
-  border-color: var(--toolbar-primary-active);
+  transform: translateY(0);
+  box-shadow: var(--shadow-inset);
+}
+
+.toolbar-actions button.btn-primary:active:not(:disabled)::before,
+.file-control-group .file-open-btn.btn-primary:active:not(:disabled)::before,
+.file-control-group .dropdown-toggle.btn-primary:active:not(:disabled)::before {
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .toolbar-actions button.btn-danger {
@@ -240,8 +298,9 @@
 .file-control-group {
   display: inline-flex;
   border-radius: 6px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: var(--shadow-sm);
+  position: relative;
 }
 
 .file-control-group .file-open-btn {
@@ -277,76 +336,6 @@
   border-radius: 0 6px 6px 0;
   min-width: 40px;
   padding: 0.55rem 0.75rem;
-}
-
-.dropdown {
-  position: relative;
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  min-width: 240px;
-  background: var(--panel-elevated-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  box-shadow: var(--shadow-lg);
-  padding: 0.5rem 0;
-  z-index: 1000;
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
-}
-
-.dropdown-menu.save-dropdown {
-  min-width: 220px;
-}
-
-.dropdown-header {
-  padding: 0.4rem 1rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-}
-
-.dropdown-divider {
-  height: 1px;
-  margin: 0.35rem 1rem;
-  background: var(--border-color-light);
-}
-
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.45rem 1rem;
-  font-size: 0.85rem;
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
-}
-
-.dropdown-item:hover {
-  background: var(--hover-bg);
-  color: var(--text-primary);
-}
-
-.dropdown-item.dropdown-clear {
-  color: var(--error-color);
-}
-
-.dropdown-item.dropdown-clear:hover {
-  background: var(--error-color);
-  color: var(--text-on-primary);
-}
-
-.dropdown-empty {
-  padding: 0.65rem 1rem;
-  font-size: 0.8rem;
-  color: var(--text-muted);
 }
 
 .toolbar-actions .tooltip {

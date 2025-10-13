@@ -11,22 +11,21 @@
   background: var(--status-bar-bg);
   border-top: 1px solid var(--border-color);
   font-size: 0.75rem;
-  color: var(--text-muted);
-  box-shadow: 0 -8px 24px -12px var(--shadow-md);
-  transition: all var(--transition-normal);
+  color: var(--text-secondary);
+  box-shadow: none;
 }
 
 .status-indicator {
   padding: 3px 10px;
-  border-radius: 6px;
+  border-radius: 999px;
   font-weight: 500;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  transition: all var(--transition-normal);
+  transition: color var(--transition-normal), border-color var(--transition-normal);
   animation: slideIn 300ms ease-out;
-  background-color: var(--panel-bg);
-  border: 1px solid var(--border-color);
+  background-color: var(--interactive-surface);
+  border: var(--border-width) solid var(--interactive-border);
   color: var(--text-secondary);
 }
 

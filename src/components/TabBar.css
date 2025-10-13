@@ -12,7 +12,7 @@
   align-items: center;
   justify-content: space-between;
   overflow-x: auto;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none;
@@ -53,8 +53,8 @@
   align-items: center;
   padding: 0 16px;
   height: 36px;
-  background: var(--button-bg);
-  border: var(--border-width) solid var(--border-color);
+  background: var(--interactive-surface);
+  border: var(--border-width) solid var(--interactive-border);
   border-bottom: none;
   border-radius: 6px 6px 0 0;
   margin-right: 0;
@@ -67,7 +67,7 @@
   font-size: 0.85rem;
   font-weight: 500;
   color: var(--text-muted);
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
 }
 
 .tab::before {
@@ -82,11 +82,10 @@
 }
 
 .tab:hover:not(.active) {
-  background: var(--button-bg-hover);
-  border-color: var(--border-hover);
+  background: var(--interactive-surface-hover);
+  border-color: var(--interactive-border-hover);
   color: var(--text-secondary);
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
 }
 
 .tab:focus-visible {
@@ -94,13 +93,13 @@
 }
 
 .tab.active {
-  background: var(--panel-elevated-bg);
-  border-color: var(--border-color);
+  background: var(--surface-raised);
+  border-color: var(--border-strong);
   color: var(--text-color);
   font-weight: 600;
   position: relative;
   z-index: 1;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .tab.active::before {
@@ -167,56 +166,48 @@
   white-space: nowrap;
 }
 
+/* Help button - same base color as Open, but simple brightness hover */
 .tab-button {
-  background: linear-gradient(135deg, var(--success-color), var(--success-color-hover));
-  color: var(--text-on-primary);
-  border: 1px solid var(--success-color-hover);
-  border-radius: 5px;
-  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.85rem;
   margin-left: 6px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  transition: all var(--transition-normal);
-  box-shadow: 0 6px 14px -6px var(--success-bg);
-  position: relative;
-  overflow: hidden;
+  line-height: 1;
   outline: none;
-}
 
-.tab-button::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: var(--ripple-color);
-  transform: translate(-50%, -50%);
-  transition: width 0.5s, height 0.5s;
-}
+  /* Same base color as Open button (#4e7660) */
+  background: var(--toolbar-secondary-bg);
+  border: 1px solid var(--toolbar-secondary-border);
+  color: var(--toolbar-secondary-text);
+  box-shadow: 0 8px 18px -12px var(--toolbar-secondary-shadow);
 
-.tab-button:active::before {
-  width: 150px;
-  height: 150px;
+  transition: filter var(--transition-fast), transform var(--transition-fast);
 }
 
 .tab-button:hover {
-  background: linear-gradient(135deg, var(--success-color-hover), var(--success-color-active));
-  box-shadow: 0 8px 18px -6px var(--success-bg);
+  background: var(--toolbar-secondary-bg) !important;
+  filter: brightness(1.2);
   transform: translateY(-1px);
 }
 
 .tab-button:active {
+  background: var(--toolbar-secondary-bg) !important;
+  filter: brightness(0.9);
   transform: translateY(0);
   box-shadow: var(--shadow-inset);
 }
 
+.tab-button:focus,
 .tab-button:focus-visible {
   outline: none;
-  border-color: var(--success-color-hover);
-  box-shadow: 0 6px 14px -6px var(--success-bg);
+  border-color: var(--toolbar-secondary-active);
+  box-shadow: none;
 }
 
 .tab-container::-webkit-scrollbar {

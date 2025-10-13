@@ -82,9 +82,9 @@
 
 /* Design button styling */
 .pdf-preview-header button[title*="Design"] {
-  background: var(--bg-white);
+  background: var(--interactive-surface);
   color: var(--text-primary);
-  border: var(--border-width) solid var(--border-color);
+  border: var(--border-width) solid var(--interactive-border);
   border-radius: var(--border-radius);
   padding: 0.4rem 0.55rem;
   font-size: var(--font-md);
@@ -117,9 +117,9 @@
 }
 
 .pdf-preview-header button[title*="Design"]:hover {
-  background: var(--bg-light);
-  border-color: var(--border-color-hover);
-  box-shadow: var(--shadow-md);
+  background: var(--interactive-surface-hover);
+  border-color: var(--interactive-border-hover);
+  box-shadow: none;
   transform: translateY(-1px);
 }
 
@@ -140,17 +140,16 @@
   align-items: center;
   gap: 0.15rem;
   padding: 2px 4px;
-  background: var(--bg-white);
-  border: var(--border-width) solid var(--border-color);
+  background: var(--interactive-surface);
+  border: var(--border-width) solid var(--interactive-border);
   border-radius: var(--border-radius);
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
   transition: all var(--transition-normal);
 }
 
 .zoom-controls:hover {
-  background: var(--bg-light);
-  border-color: var(--border-color-hover);
-  box-shadow: var(--shadow-md);
+  background: var(--interactive-surface-hover);
+  border-color: var(--interactive-border-hover);
 }
 
 .zoom-btn {
@@ -160,9 +159,9 @@
   font-size: 0.9rem;
   font-weight: bold;
   line-height: 1;
-  background: var(--bg-light);
+  background: var(--interactive-surface);
   color: var(--text-primary);
-  border: var(--border-width) solid var(--border-color-light);
+  border: var(--border-width) solid var(--interactive-border);
   border-radius: var(--border-radius-sm);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -193,13 +192,13 @@
 }
 
 .zoom-btn:hover:not(:disabled) {
-  background: var(--bg-lighter);
-  border-color: var(--border-color);
+  background: var(--interactive-surface-hover);
+  border-color: var(--interactive-border-hover);
   transform: translateY(-1px);
 }
 
 .zoom-btn:active:not(:disabled) {
-  background: var(--border-color-light);
+  background: var(--interactive-surface-active);
   transform: translateY(0);
 }
 
@@ -219,7 +218,7 @@
   padding: 6px 12px;
   font-size: 0.875rem;
   font-weight: 500;
-  border: var(--border-width) solid var(--border-color);
+  border: var(--border-width) solid var(--interactive-border);
   border-radius: 6px;
   cursor: pointer;
   transition: all var(--transition-normal);
@@ -278,9 +277,9 @@
   font-size: 0.65rem;
   padding: 3px 6px;
   line-height: 1;
-  background: var(--panel-bg);
+  background: var(--interactive-surface);
   color: var(--text-primary);
-  border: var(--border-width) solid var(--border-color);
+  border: var(--border-width) solid var(--interactive-border);
   border-radius: var(--border-radius-sm);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -310,8 +309,8 @@
 }
 
 .zoom-reset-btn:hover:not(:disabled) {
-  background: var(--panel-hover-bg);
-  border-color: var(--border-hover);
+  background: var(--interactive-surface-hover);
+  border-color: var(--interactive-border-hover);
   transform: translateY(-1px);
 }
 
@@ -361,8 +360,8 @@
 
 .sync-toggle-btn:hover {
   background: transparent;
-  border-color: var(--border-hover);
-  box-shadow: var(--shadow-md);
+  border-color: var(--interactive-border-hover);
+  box-shadow: none;
   transform: translateY(-1px);
 }
 
@@ -373,7 +372,7 @@
 
 .sync-toggle-btn:focus,
 .sync-toggle-btn:focus-visible {
-  border-color: var(--border-color);
+  border-color: var(--interactive-border-hover);
   box-shadow: none;
   outline: none;
 }
@@ -434,9 +433,9 @@
 }
 
 .pdf-preview-header .toolbar-button-group button {
-  background: var(--panel-bg);
+  background: var(--interactive-surface);
   color: var(--text-primary);
-  border: var(--border-width) solid var(--border-color);
+  border: var(--border-width) solid var(--interactive-border);
   border-radius: 0;
   padding: 0.35rem 0.5rem;
   font-size: 0.8rem;
@@ -472,12 +471,12 @@
 }
 
 .pdf-preview-header .toolbar-button-group button:last-child {
-  border-right: 1px solid var(--border-color);
+  border-right: 1px solid var(--interactive-border);
 }
 
 .pdf-preview-header .toolbar-button-group button:hover:not(:disabled) {
-  background: var(--panel-hover-bg);
-  border-color: var(--border-hover);
+  background: var(--interactive-surface-hover);
+  border-color: var(--interactive-border-hover);
   z-index: 1;
   transform: translateY(-1px);
 }
@@ -485,11 +484,12 @@
 .pdf-preview-header .toolbar-button-group button:active:not(:disabled) {
   transform: translateY(0);
   box-shadow: var(--shadow-inset);
+  background: var(--interactive-surface-active);
 }
 
 .pdf-preview-header .toolbar-button-group button:focus,
 .pdf-preview-header .toolbar-button-group button:focus-visible {
-  border-color: var(--border-color);
+  border-color: var(--interactive-border-hover);
   box-shadow: none;
   outline: none;
   z-index: 2;
@@ -499,9 +499,9 @@
 .sync-mode-btn,
 .pause-btn,
 .fullscreen-btn {
-  background: var(--panel-bg);
+  background: var(--interactive-surface);
   color: var(--text-primary);
-  border: var(--border-width) solid var(--border-color);
+  border: var(--border-width) solid var(--interactive-border);
   border-radius: var(--border-radius);
   padding: 0.4rem 0.55rem;
   font-size: 0.8rem;
@@ -542,8 +542,8 @@
 .sync-mode-btn:hover:not(:disabled),
 .pause-btn:hover:not(:disabled),
 .fullscreen-btn:hover:not(:disabled) {
-  background: var(--panel-hover-bg);
-  border-color: var(--border-hover);
+  background: var(--interactive-surface-hover);
+  border-color: var(--interactive-border-hover);
   box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
@@ -551,8 +551,8 @@
 .sync-mode-btn:active:not(:disabled),
 .pause-btn:active:not(:disabled),
 .fullscreen-btn:active:not(:disabled) {
-  background: var(--panel-active-bg);
-  box-shadow: var(--shadow-sm);
+  background: var(--interactive-surface-active);
+  box-shadow: var(--shadow-inset);
   transform: translateY(0);
 }
 
