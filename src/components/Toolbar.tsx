@@ -338,7 +338,7 @@ const Toolbar: React.FC = () => {
           <button
             type="button"
             onClick={() => {
-              setSettingsModalActiveTab('advanced');
+              setSettingsModalActiveTab('general' as any);
               setSettingsModalOpen(true);
             }}
             title="Settings"
