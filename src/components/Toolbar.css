@@ -184,15 +184,30 @@
   box-shadow: none;
 }
 
+
 .toolbar-actions button.btn-primary,
 .file-control-group .file-open-btn.btn-primary,
 .file-control-group .dropdown-toggle.btn-primary {
-  background: var(--toolbar-primary-bg);
-  border-color: var(--toolbar-primary-border);
-  color: var(--toolbar-primary-text);
+  background: var(--toolbar-primary-bg) !important;
+  border-color: var(--toolbar-primary-border) !important;
+  color: var(--toolbar-primary-text) !important;
   box-shadow: 0 10px 24px -14px var(--toolbar-primary-shadow);
   position: relative;
   transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.toolbar-actions button.btn-primary:hover:not(:disabled),
+.file-control-group .file-open-btn.btn-primary:hover:not(:disabled),
+.file-control-group .dropdown-toggle.btn-primary:hover:not(:disabled) {
+  background: var(--toolbar-primary-hover) !important;
+  border-color: var(--toolbar-primary-border) !important;
+}
+
+.toolbar-actions button.btn-primary:active:not(:disabled),
+.file-control-group .file-open-btn.btn-primary:active:not(:disabled),
+.file-control-group .dropdown-toggle.btn-primary:active:not(:disabled) {
+  background: var(--toolbar-primary-active) !important;
+  border-color: var(--toolbar-primary-border) !important;
 }
 
 .toolbar-actions button.btn-primary::before,
