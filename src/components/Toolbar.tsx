@@ -3,7 +3,7 @@ import { useEditorStore } from '../stores/editorStore';
 import { useUIStore } from '../stores/uiStore';
 import DesignModal from './DesignModal';
 import SettingsModal from './SettingsModal';
-import BatchExportModal from './BatchExportModal';
+
 import Dropdown from './Dropdown';
 import { invoke } from '@tauri-apps/api/core';
 import { save, open } from '@tauri-apps/plugin-dialog';
@@ -31,7 +31,7 @@ const Toolbar: React.FC = () => {
     clearRecentFiles,
     setSettingsModalOpen,
     setSettingsModalActiveTab,
-    setBatchExportModalOpen,
+    
   } = useUIStore();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [recentDropdownOpen, setRecentDropdownOpen] = useState(false);
@@ -393,11 +393,14 @@ const Toolbar: React.FC = () => {
           </div>
             <button
             type="button"
-            onClick={() => setBatchExportModalOpen(true)}
-            title="Batch Export (Pro Feature)"
+            onClick={() => {
+              setSettingsModalActiveTab('about');
+              setSettingsModalOpen(true);
+            }}
+            title="Batch Export is a Pro feature. Click to learn more."
             className="btn-primary"
           >
-            📦 Batch Export
+            🔒 Batch Export
           </button>
           <button
             onClick={handleExportPDF}
@@ -411,7 +414,7 @@ const Toolbar: React.FC = () => {
       </div>
       {designModalOpen && <DesignModal />}
       <SettingsModal />
-      <BatchExportModal />
+      
     </div>
   );
 };

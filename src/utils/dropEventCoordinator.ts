@@ -1,7 +1,6 @@
 /**
  * Drop Event Coordinator
  * Prevents conflicts between multiple Tauri file-drop listeners
- * Used by BatchExportModal to claim drop events when modal is open
  */
 
 type DropEventListener = (shouldHandle: boolean) => void;
