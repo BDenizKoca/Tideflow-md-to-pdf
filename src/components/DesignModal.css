@@ -846,19 +846,19 @@
 }
 
 .btn-preset-export {
-  background: var(--info-color) !important;
+  background: var(--toolbar-primary-hover) !important;
 }
 
 .btn-preset-export:hover {
-  background: var(--info-color-hover) !important;
+  background: var(--info-color-strong) !important;
 }
 
 .btn-preset-import {
-  background: var(--warning-color) !important;
+  background: var(--toolbar-primary-hover) !important;
 }
 
 .btn-preset-import:hover {
-  background: var(--warning-color-hover) !important;
+  background: var(--info-color-strong) !important;
 }
 
 .action-description {
@@ -873,7 +873,7 @@
 }
 
 .btn-save-preset:hover:not(:disabled) {
-  background: var(--success-color-hover) !important;
+  background: var(--success-color-active) !important;
 }
 
 .btn-save-preset:disabled {
