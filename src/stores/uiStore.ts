@@ -30,6 +30,10 @@ interface UIStoreState {
   settingsModalActiveTab: SettingsTabSection | null;
   setSettingsModalActiveTab: (tab: SettingsTabSection | null) => void;
 
+  // Batch Export modal (Pro feature)
+  batchExportModalOpen: boolean;
+  setBatchExportModalOpen: (open: boolean) => void;
+
   // Toast notifications
   toasts: Toast[];
   addToast: (toast: Omit<Toast, 'id'>) => void;
@@ -68,6 +72,10 @@ export const useUIStore = create<UIStoreState>((set) => ({
   setSettingsModalOpen: (open: boolean) => set({ settingsModalOpen: open }),
   settingsModalActiveTab: null,
   setSettingsModalActiveTab: (tab: SettingsTabSection | null) => set({ settingsModalActiveTab: tab }),
+
+  // Batch Export modal (Pro feature)
+  batchExportModalOpen: false,
+  setBatchExportModalOpen: (open: boolean) => set({ batchExportModalOpen: open }),
 
   // Toast notifications
   toasts: [],
