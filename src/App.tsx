@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   Panel,
   PanelGroup,
-  PanelResizeHandle
+  PanelResizeHandle,
 } from 'react-resizable-panels';
+import type { ImperativePanelHandle } from 'react-resizable-panels';
 import { useEditorStore } from './stores/editorStore';
 import { useUIStore } from './stores/uiStore';
 import { loadSession, saveSession } from './utils/session';
@@ -27,14 +28,11 @@ const appLogger = logger.createScoped('App');
 
 function App() {
   const [loading, setLoading] = useState(true);
-  const previewVisible = useUIStore((state) => state.previewVisible);
+  const { previewVisible, setPreviewVisible } = useUIStore();
   const editor = useEditorStore((state) => state.editor);
   const isTyping = useEditorStore((state) => state.isTyping);
-
-  // Simple collapse flag; no persistence
-  const previewCollapsed = !previewVisible;
-
-  // Removed all panel persistence logic for fixed layout.
+  const previewPanelRef = useRef<ImperativePanelHandle>(null);
+  const isDraggingRef = useRef(false);
 
   // Initialize app with extracted hook
   useAppInitialization();
@@ -42,44 +40,56 @@ function App() {
   // Window management and fullscreen logic
   useWindowManagement(setLoading);
 
-  // Autosave session when key state changes (debounced to prevent corruption)
+  // Effect to control PDF preview panel visibility and size
+  useEffect(() => {
+    const panel = previewPanelRef.current;
+    if (!panel) return;
+
+    if (previewVisible) {
+      if (panel.isCollapsed()) {
+        panel.expand();
+      }
+      panel.resize(50); // Always reset to 50% when shown
+    } else {
+      if (!panel.isCollapsed()) {
+        panel.collapse();
+      }
+    }
+  }, [previewVisible]);
+
+  // Autosave session when key state changes
   const openFiles = useEditorStore((state) => state.editor.openFiles);
   const currentFile = useEditorStore((state) => state.editor.currentFile);
-  const previewVisibleState = useUIStore((state) => state.previewVisible);
-
-  // Load instructions.md content when it's set as current file
-  useEffect(() => {
-    const loadInstructionsContent = async () => {
-      const editorState = useEditorStore.getState();
-      if (currentFile === 'instructions.md' && editorState.editor.content === '# Loading instructions...') {
-        editorState.setContent(INSTRUCTIONS_DOC);
-      }
-    };
-    loadInstructionsContent();
-  }, [currentFile]);
 
   useEffect(() => {
-    // Debounce session saves to prevent high-frequency localStorage writes
     const timeoutId = setTimeout(() => {
       try {
-        // Read current session once at the start for atomic update
         const currentSession = loadSession();
         saveSession({
           openFiles,
           currentFile,
-          previewVisible: previewVisibleState,
-          // Preserve fullscreen from current session (it's saved separately on fullscreen event)
+          previewVisible,
           fullscreen: currentSession?.fullscreen ?? false,
         });
       } catch (error) {
         appLogger.warn('Failed to save session', error);
       }
-    }, 500); // 500ms debounce
+    }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [openFiles, currentFile, previewVisibleState]);
+  }, [openFiles, currentFile, previewVisible]);
 
-  // Simplified toggle: no remount side effects needed.
+  // Load instructions.md content
+  useEffect(() => {
+    const loadInstructions = async () => {
+      const editorState = useEditorStore.getState();
+      if (currentFile === 'instructions.md' && editorState.editor.content === '# Loading instructions...') {
+        editorState.setContent(INSTRUCTIONS_DOC);
+      }
+    };
+    loadInstructions();
+  }, [currentFile]);
+
   if (loading) {
     return (
       <div className="loading">
@@ -88,12 +98,6 @@ function App() {
       </div>
     );
   }
-  // Compute default sizes: if collapsed -> editor 100%, else restored or fallback (55/45)
-  const defaultEditorSize = previewCollapsed ? 100 : 50;
-  const defaultPreviewSize = previewCollapsed ? 0 : 50;
-  // Keep PanelGroup stable so toggling preview does not remount children.
-  // Previously this used a dynamic key derived from previewCollapsed which
-  // caused React to remount the whole group and reset editor scroll state.
 
   return (
     <div className="app">
@@ -101,42 +105,32 @@ function App() {
       <TabBar />
       <div className="address-bar">
         <span className="current-file-path">{editor.currentFile || 'No file open'}</span>
-        {isTyping && (
-          <span className="typing-indicator">
-            ⌨️ Typing
-          </span>
-        )}
+        {isTyping && <span className="typing-indicator">⌨️ Typing</span>}
       </div>
       <div className="main-content">
-      <PanelGroup direction="horizontal" style={{ height: '100%', overflow: 'hidden' }}>
-          <Panel
-            defaultSize={defaultEditorSize}
-            minSize={25}
-            maxSize={previewCollapsed ? 100 : 75}
-            style={{ overflow: 'hidden', minWidth: 0 }}
-          >
+        <PanelGroup direction="horizontal" style={{ height: '100%', overflow: 'hidden' }}>
+          <Panel defaultSize={50} minSize={25}>
             <Editor key={editor.currentFile || 'no-file'} />
           </Panel>
-          <PanelResizeHandle className="resize-handle" />
+          <PanelResizeHandle
+            className="resize-handle"
+            onDragging={(isDragging) => (isDraggingRef.current = isDragging)}
+          />
           <Panel
-            // Keep panel mounted so preview state (scroll, last PDF) is preserved.
-            // We visually hide the preview when collapsed rather than unmounting it.
-            defaultSize={defaultPreviewSize}
-            minSize={previewCollapsed ? 0 : 20}
-            maxSize={previewCollapsed ? 0 : 75}
-            style={{
-              overflow: 'hidden',
-              minWidth: 0,
-              // Let the element remain in the DOM but hidden when collapsed.
-              display: 'block'
+            ref={previewPanelRef}
+            collapsible
+            defaultSize={50}
+            minSize={20}
+            onCollapse={() => {
+              // Sync state if user manually collapses panel by dragging
+              if (isDraggingRef.current && previewVisible) {
+                setPreviewVisible(false);
+              }
             }}
           >
-            {/* Keep PDFPreview mounted to preserve internal state; hide via CSS. */}
-            <div className={`pdf-preview-wrapper ${previewCollapsed ? 'hidden' : ''}`}>
-              <PDFErrorBoundary>
-                <PDFPreview key={editor.currentFile || 'no-file'} />
-              </PDFErrorBoundary>
-            </div>
+            <PDFErrorBoundary>
+              <PDFPreview key={editor.currentFile || 'no-file'} />
+            </PDFErrorBoundary>
           </Panel>
         </PanelGroup>
       </div>
