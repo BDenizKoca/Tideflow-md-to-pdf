@@ -5,6 +5,8 @@ import { logger } from '../utils/logger';
 
 const uiLogger = logger.createScoped('UIStore');
 
+export type SettingsTabSection = 'general' | 'about';
+
 // UI-specific store state
 interface UIStoreState {
   // Preview state
@@ -25,8 +27,8 @@ interface UIStoreState {
   // Settings modal
   settingsModalOpen: boolean;
   setSettingsModalOpen: (open: boolean) => void;
-  settingsModalActiveTab: TabSection | null;
-  setSettingsModalActiveTab: (tab: TabSection | null) => void;
+  settingsModalActiveTab: SettingsTabSection | null;
+  setSettingsModalActiveTab: (tab: SettingsTabSection | null) => void;
 
   // Toast notifications
   toasts: Toast[];
@@ -65,7 +67,7 @@ export const useUIStore = create<UIStoreState>((set) => ({
   settingsModalOpen: false,
   setSettingsModalOpen: (open: boolean) => set({ settingsModalOpen: open }),
   settingsModalActiveTab: null,
-  setSettingsModalActiveTab: (tab: TabSection | null) => set({ settingsModalActiveTab: tab }),
+  setSettingsModalActiveTab: (tab: SettingsTabSection | null) => set({ settingsModalActiveTab: tab }),
 
   // Toast notifications
   toasts: [],

@@ -323,7 +323,7 @@ const Toolbar: React.FC = () => {
           <button
             onClick={handleTogglePreview}
             className={previewVisible ? 'active' : 'inactive'}
-            title={previewVisible ? 'Hide Preview (Ctrl+\\)' : 'Show Preview (Ctrl+\\'}
+            title={previewVisible ? 'Hide Preview (Ctrl+\\)' : 'Show Preview (Ctrl+\')'}
           >
             {previewVisible ? '👁️ Preview' : '👁️‍🗨️ Preview'}
           </button>
@@ -338,7 +338,7 @@ const Toolbar: React.FC = () => {
           <button
             type="button"
             onClick={() => {
-              setSettingsModalActiveTab('general' as any);
+              setSettingsModalActiveTab('general');
               setSettingsModalOpen(true);
             }}
             title="Settings"
@@ -389,14 +389,14 @@ const Toolbar: React.FC = () => {
               </button>
             </Dropdown>
           </div>
-          <button
+            <button
             type="button"
             onClick={() => {
               setSettingsModalActiveTab('about');
               setSettingsModalOpen(true);
             }}
             title="Batch Export (Pro Feature)"
-            className="btn-primary btn-locked"
+            className="btn-locked btn-primary"
           >
             <div className="pro-feature-text">Batch Export</div>
           </button>

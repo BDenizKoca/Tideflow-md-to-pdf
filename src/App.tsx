@@ -91,7 +91,9 @@ function App() {
   // Compute default sizes: if collapsed -> editor 100%, else restored or fallback (55/45)
   const defaultEditorSize = previewCollapsed ? 100 : 50;
   const defaultPreviewSize = previewCollapsed ? 0 : 50;
-  const panelGroupKey = `pg-fixed-${previewCollapsed ? 'collapsed' : 'open'}`;
+  // Keep PanelGroup stable so toggling preview does not remount children.
+  // Previously this used a dynamic key derived from previewCollapsed which
+  // caused React to remount the whole group and reset editor scroll state.
 
   return (
     <div className="app">
@@ -106,33 +108,35 @@ function App() {
         )}
       </div>
       <div className="main-content">
-        <PanelGroup key={panelGroupKey} direction="horizontal" style={{ height: '100%', overflow: 'hidden' }}>
+      <PanelGroup direction="horizontal" style={{ height: '100%', overflow: 'hidden' }}>
           <Panel
             defaultSize={defaultEditorSize}
             minSize={25}
             maxSize={previewCollapsed ? 100 : 75}
             style={{ overflow: 'hidden', minWidth: 0 }}
           >
-            <Editor />
+            <Editor key={editor.currentFile || 'no-file'} />
           </Panel>
           <PanelResizeHandle className="resize-handle" />
           <Panel
-            // When collapsed, force a tiny size
+            // Keep panel mounted so preview state (scroll, last PDF) is preserved.
+            // We visually hide the preview when collapsed rather than unmounting it.
             defaultSize={defaultPreviewSize}
             minSize={previewCollapsed ? 0 : 20}
             maxSize={previewCollapsed ? 0 : 75}
             style={{
               overflow: 'hidden',
               minWidth: 0,
-              display: previewCollapsed ? 'none' : 'block'
+              // Let the element remain in the DOM but hidden when collapsed.
+              display: 'block'
             }}
           >
-            {/* Only mount PDFPreview when not collapsed to avoid wasted renders */}
-            {!previewCollapsed && (
+            {/* Keep PDFPreview mounted to preserve internal state; hide via CSS. */}
+            <div className={`pdf-preview-wrapper ${previewCollapsed ? 'hidden' : ''}`}>
               <PDFErrorBoundary>
                 <PDFPreview key={editor.currentFile || 'no-file'} />
               </PDFErrorBoundary>
-            )}
+            </div>
           </Panel>
         </PanelGroup>
       </div>

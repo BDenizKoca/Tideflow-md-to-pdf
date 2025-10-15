@@ -1,4 +1,5 @@
 import React from 'react';
+import { useUIStore } from '../../stores/uiStore';
 import type { Preferences, Toast } from '../../types';
 
 interface PresetsTabProps {
@@ -26,25 +27,60 @@ const PresetsTab: React.FC<PresetsTabProps> = ({
   deleteCustomPreset,
   renameCustomPreset
 }) => {
+  const setSettingsModalOpen = useUIStore((state) => state.setSettingsModalOpen);
+  const setSettingsModalActiveTab = useUIStore((state) => state.setSettingsModalActiveTab);
   return (
     <div className="tab-panel">
       <h3>Custom Presets</h3>
       <div className="form-grid one-col">
-        <button
-          type="button"
-          className="btn-save-preset"
-          disabled={themeSelection !== 'custom'}
-          onClick={() => {
-            setPresetNameInput('');
-            setShowPresetNameModal(true);
-          }}
-        >
-          💾 Save Current Settings as Preset
-        </button>
-        <div className="helper-text">
-          {themeSelection !== 'custom'
-            ? 'Switch to Custom theme to save your settings as a preset'
-            : 'Save your current design settings as a reusable preset'}
+        <div className="preset-actions-grid">
+          <div className="preset-action-item">
+            <button
+              type="button"
+              className="btn-preset-export"
+              onClick={() => {
+                setSettingsModalActiveTab('about');
+                setSettingsModalOpen(true);
+              }}
+              title="Export current theme as a preset file"
+            >
+              📤 Export Theme
+            </button>
+            <p className="action-description">Save the current theme settings to a file that you can share or import later.</p>
+          </div>
+          <div className="preset-action-item">
+            <button
+              type="button"
+              className="btn-preset-import"
+              onClick={() => {
+                setSettingsModalActiveTab('about');
+                setSettingsModalOpen(true);
+              }}
+              title="Import custom preset as a theme"
+            >
+              📥 Import Theme
+            </button>
+            <p className="action-description">Load a theme from a preset file. This will overwrite your current settings.</p>
+          </div>
+          <div className="preset-action-item">
+            <button
+              type="button"
+              className="btn-save-preset"
+              disabled={themeSelection !== 'custom'}
+              onClick={() => {
+                setPresetNameInput('');
+                setShowPresetNameModal(true);
+              }}
+              title="Save current settings as a preset"
+            >
+              💾 Save as Preset
+            </button>
+            <p className="action-description">
+              {themeSelection !== 'custom'
+                ? 'Switch to the Custom theme to save your settings as a new preset.'
+                : 'Save your current design settings as a reusable preset for easy access.'}
+            </p>
+          </div>
         </div>
       </div>
 

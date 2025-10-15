@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useEditorStore } from '../stores/editorStore';
 import { useUIStore } from '../stores/uiStore';
 import { usePreferencesStore } from '../stores/preferencesStore';
@@ -52,6 +52,8 @@ const Editor: React.FC = () => {
   const [, setIsSaving] = useState(false);
   const [selectedFont, setSelectedFont] = useState<string>("New Computer Modern");
   const [editorReady, setEditorReady] = useState(false);
+  const listenerSetupRef = useRef(false);
+  const lastProcessedFileRef = useRef<string | null>(null);
 
   // Use editor state hook - consolidates all refs
   const editorStateRefs = useEditorState({
@@ -169,6 +171,7 @@ const Editor: React.FC = () => {
 
   // Listen for Tauri file drop events
   React.useEffect(() => {
+    if (listenerSetupRef.current) return;
     let unlisten: (() => void) | undefined;
 
     const setupListener = async () => {
@@ -185,6 +188,13 @@ const Editor: React.FC = () => {
         if (paths && paths.length > 0) {
           const filePath = paths[0];
           console.log('[Editor] Processing dropped file:', filePath);
+
+          // Prevent duplicate processing of the same file
+          if (lastProcessedFileRef.current === filePath) {
+            console.log('[Editor] Skipping duplicate drop for file:', filePath);
+            return;
+          }
+          lastProcessedFileRef.current = filePath;
 
           // Check if it's a markdown file
           if (filePath.endsWith('.md') || filePath.endsWith('.markdown')) {
@@ -241,6 +251,7 @@ const Editor: React.FC = () => {
     };
 
     setupListener();
+    listenerSetupRef.current = true;
 
     return () => {
       if (unlisten) {
@@ -248,7 +259,17 @@ const Editor: React.FC = () => {
         unlisten();
       }
     };
-  }, [addOpenFile, setCurrentFile, setContent, addRecentFile, addToast, promptImageProps, preferences, editorStateRefs]);
+  }, [
+    addOpenFile, 
+    setCurrentFile, 
+    setContent, 
+    addRecentFile, 
+    addToast, 
+    promptImageProps, 
+    editorStateRefs.editorViewRef, 
+    preferences.default_image_width, 
+    preferences.default_image_alignment
+  ]);
 
   // Handle search toggle
   const handleSearchToggle = React.useCallback(() => {
