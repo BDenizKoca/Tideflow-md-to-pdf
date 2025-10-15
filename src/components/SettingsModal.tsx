@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useUIStore } from '../stores/uiStore';
+import { useUIStore, type SettingsTabSection } from '../stores/uiStore';
 import { usePreferencesStore, defaultPreferences } from '../stores/preferencesStore';
 import type { Preferences } from '../types';
 import './DesignModal.css';
 import { AdvancedTab } from './DesignModal/index';
 import AboutTab from './DesignModal/AboutTab';
-
-// Settings has its own tab types separate from Design Modal
-type SettingsTabSection = 'general' | 'about';
 
 const clonePreferences = (prefs: Preferences): Preferences => ({
   ...prefs,
@@ -51,9 +48,7 @@ const SettingsModal: React.FC = () => {
     if (settingsModalActiveTab) {
       // Settings modal only has 'general' and 'about' tabs
       // If Design Modal tries to open a different tab, default to 'general'
-      const tabString = settingsModalActiveTab as string;
-      const mappedTab: SettingsTabSection = tabString === 'about' ? 'about' : 'general';
-      setActiveTab(mappedTab);
+      setActiveTab(settingsModalActiveTab);
       setSettingsModalActiveTab(null);
     } else {
       setActiveTab('general');
@@ -67,9 +62,7 @@ const SettingsModal: React.FC = () => {
 
   useEffect(() => {
     if (!settingsModalOpen || !settingsModalActiveTab) return;
-    const tabString = settingsModalActiveTab as string;
-    const mappedTab: SettingsTabSection = tabString === 'about' ? 'about' : 'general';
-    setActiveTab(mappedTab);
+    setActiveTab(settingsModalActiveTab);
     setSettingsModalActiveTab(null);
   }, [settingsModalOpen, settingsModalActiveTab, setSettingsModalActiveTab]);
 

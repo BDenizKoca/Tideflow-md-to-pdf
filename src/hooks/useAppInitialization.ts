@@ -69,8 +69,8 @@ export function useAppInitialization() {
             const restored = Array.from(new Set(session.openFiles || [])).filter(f => {
               // Filter out invalid paths
               if (!f || f === 'instructions.md' || f === 'sample.md') return false;
-              // Basic path validation - must have a proper extension
-              if (!f.match(/\.(md|qmd)$/i)) return false;
+              // Basic path validation - must have a proper extension and be a path
+              if (!f.match(/\.(md|qmd)$/i) || !f.includes('/') && !f.includes('\\')) return false;
               return true;
             });
 

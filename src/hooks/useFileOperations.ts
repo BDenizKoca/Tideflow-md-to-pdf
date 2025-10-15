@@ -124,6 +124,11 @@ export function useFileOperations(params: UseFileOperationsParams) {
   // Load file content ONLY when switching to a different file, not on every keystroke.
   // Use generation tracking to prevent race conditions on rapid file switches.
   useEffect(() => {
+    // Wait until CodeMirror/editor is initialized before attempting content sync.
+    if (!editorReady) {
+      fileOpsLogger.debug('Editor not ready, skipping content sync');
+      return;
+    }
     if (!editorViewRef.current) {
       fileOpsLogger.debug('No editorView, skipping content sync');
       return;
@@ -206,17 +211,13 @@ export function useFileOperations(params: UseFileOperationsParams) {
       });
     }
   }, [
+    editorReady,
     currentFile,
     content,
     handleAutoRender,
     setEditorScrollPosition,
     getEditorScrollPosition,
     computeAnchorFromViewport,
-    editorViewRef,
-    prevFileRef,
-    lastLoadedContentRef,
-    programmaticScrollRef,
-    programmaticUpdateRef,
   ]);
 
   // If content in store changes for current file (e.g., loaded asynchronously) and differs from editor doc, update it.
