@@ -23,20 +23,12 @@ const StructureTab: React.FC<StructureTabProps> = ({ local, mutate, handleBrowse
           <input type="checkbox" checked={local.number_sections} onChange={e => mutate({ number_sections: e.target.checked })} />
           <span>Number Sections</span>
         </label>
-        <label className="checkbox-label">
-          <input type="checkbox" checked={local.toc} onChange={e => mutate({ toc: e.target.checked })} />
-          <span>Table of Contents</span>
-        </label>
-        {local.toc && (
-          <>
-            <label>TOC Title
-              <input
-                placeholder="Leave blank for no title"
-                value={local.toc_title}
-                onChange={e => mutate({ toc_title: e.target.value })}
-              />
-              <div className="helper-text">Optional heading above the table of contents</div>
-            </label>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <label className="checkbox-label">
+            <input type="checkbox" checked={local.toc} onChange={e => mutate({ toc: e.target.checked })} />
+            <span>Table of Contents</span>
+          </label>
+          {local.toc && (
             <label className="checkbox-label">
               <input
                 type="checkbox"
@@ -45,7 +37,17 @@ const StructureTab: React.FC<StructureTabProps> = ({ local, mutate, handleBrowse
               />
               <span>Two-Column TOC</span>
             </label>
-          </>
+          )}
+        </div>
+        {local.toc && (
+          <label>TOC Title
+            <input
+              placeholder="Leave blank for no title"
+              value={local.toc_title}
+              onChange={e => mutate({ toc_title: e.target.value })}
+            />
+            <div className="helper-text">Optional heading above the table of contents</div>
+          </label>
         )}
         <label className="checkbox-label">
           <input

@@ -152,6 +152,10 @@
   color: var(--toolbar-primary-text);
 }
 
+[data-ui-theme="light"] .close-btn:hover {
+  color: #333;
+}
+
 /* Tabbed Layout */
 .design-modal-body {
   display: flex;
@@ -706,7 +710,7 @@
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--toolbar-secondary-active) !important;
+  background: var(--toolbar-secondary-hover) !important;
 }
 
 .btn-primary:disabled {
@@ -763,7 +767,7 @@
   font-weight: 600;
   padding: 6px 8px !important;
   background: var(--select-bg) !important;
-  border: 1px solid var(--info-color) !important;
+  border: 1px solid var(--border-color) !important;
   color: var(--text-primary) !important;
 }
 
@@ -781,7 +785,7 @@
   padding: 4px;
   cursor: pointer;
   border-radius: 6px;
-  border: 2px solid var(--info-color);
+  border: 1px solid var(--border-color);
   background: var(--select-bg);
 }
 
@@ -792,7 +796,7 @@
   text-transform: uppercase;
   font-weight: 600;
   background: var(--select-bg) !important;
-  border: 1px solid var(--info-color) !important;
+  border: 1px solid var(--border-color) !important;
   color: var(--text-primary) !important;
 }
 
@@ -869,11 +873,11 @@
 }
 
 .btn-save-preset {
-  background: var(--success-color) !important;
+  background: var(--success-color-active) !important;
 }
 
 .btn-save-preset:hover:not(:disabled) {
-  background: var(--success-color-active) !important;
+  background: var(--success-color) !important;
 }
 
 .btn-save-preset:disabled {

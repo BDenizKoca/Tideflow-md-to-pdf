@@ -81,9 +81,11 @@ interface PreferencesStoreState {
   themeSelection: string;
   setThemeSelection: (theme: string) => void;
   lastCustomPreferences: Preferences;
+  autoApply: boolean;
+  setAutoApply: (autoApply: boolean) => void;
 
   // Custom presets (persisted to localStorage)
-  customPresets: Record<string, { name: string; preferences: Preferences }>;
+  customPresets: Record<string, { name: string; preferences: Preferences }>[];
   saveCustomPreset: (id: string, name: string, preferences: Preferences) => void;
   deleteCustomPreset: (id: string) => void;
   renameCustomPreset: (id: string, newName: string) => void;
@@ -134,6 +136,9 @@ export const usePreferencesStore = create<PreferencesStoreState>((set) => ({
     margin: { ...defaultPreferences.margin },
     fonts: { ...defaultPreferences.fonts },
   },
+
+  autoApply: (() => { try { const stored = localStorage.getItem('autoApply'); return stored ? JSON.parse(stored) : true; } catch { return true; } })(),
+  setAutoApply: (autoApply: boolean) => set(() => { try { localStorage.setItem('autoApply', JSON.stringify(autoApply)); } catch (e) { prefsLogger.warn('Failed to save autoApply', e); } return { autoApply }; }),
 
   // Custom presets (persisted to localStorage)
   customPresets: (() => {

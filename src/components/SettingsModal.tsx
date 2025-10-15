@@ -5,6 +5,7 @@ import type { Preferences } from '../types';
 import './DesignModal.css';
 import { AdvancedTab } from './DesignModal/index';
 import AboutTab from './DesignModal/AboutTab';
+import { useState as useReactState } from 'react';
 
 const clonePreferences = (prefs: Preferences): Preferences => ({
   ...prefs,
@@ -19,13 +20,13 @@ const SETTINGS_TABS: { id: SettingsTabSection; label: string; icon: string }[] =
 
 const SettingsModal: React.FC = () => {
   const { settingsModalOpen, setSettingsModalOpen, settingsModalActiveTab, setSettingsModalActiveTab } = useUIStore();
-  const { preferences, setPreferences } = usePreferencesStore();
+  const { preferences, setPreferences, autoApply, setAutoApply } = usePreferencesStore();
   const [activeTab, setActiveTab] = useState<SettingsTabSection>('general');
   const [local, setLocal] = useState<Preferences>(() => clonePreferences(preferences));
   const [dirty, setDirty] = useState(false);
-  const [autoApply, setAutoApply] = useState(true);
   const originalRef = React.useRef<Preferences>(clonePreferences(preferences));
   const hasBeenOpenRef = React.useRef(false);
+  const [pendingUITheme, setPendingUITheme] = useReactState<string | null>(null);
 
   useEffect(() => {
     if (!settingsModalOpen) {
@@ -42,7 +43,7 @@ const SettingsModal: React.FC = () => {
     setLocal(snapshot);
     originalRef.current = snapshot;
     setDirty(false);
-    setAutoApply(true);
+  // Do not force autoApply to true; preserve last state
 
     // Map from Design Modal TabSection to Settings tabs if needed
     if (settingsModalActiveTab) {
@@ -53,12 +54,15 @@ const SettingsModal: React.FC = () => {
     } else {
       setActiveTab('general');
     }
-  }, [settingsModalOpen, preferences, settingsModalActiveTab, setSettingsModalActiveTab]);
+  }, [settingsModalOpen, preferences, settingsModalActiveTab, setSettingsModalActiveTab, setAutoApply]);
 
   useEffect(() => {
     if (!settingsModalOpen || dirty) return;
-    setLocal(clonePreferences(preferences));
-  }, [preferences, settingsModalOpen, dirty]);
+    // Only update local state from preferences if autoApply is on
+    if (autoApply) {
+      setLocal(clonePreferences(preferences));
+    }
+  }, [preferences, settingsModalOpen, dirty, autoApply]);
 
   useEffect(() => {
     if (!settingsModalOpen || !settingsModalActiveTab) return;
@@ -146,6 +150,9 @@ const SettingsModal: React.FC = () => {
                     setDirty(true);
                   }
                 }}
+                setDirty={setDirty}
+                pendingUITheme={pendingUITheme}
+                setPendingUITheme={setPendingUITheme}
               />
             )}
             {activeTab === 'about' && <AboutTab />}
@@ -196,6 +203,11 @@ const SettingsModal: React.FC = () => {
               onClick={() => {
                 const snapshot = clonePreferences(local);
                 setPreferences(snapshot);
+                if (pendingUITheme) {
+                  // @ts-expect-error: setUITheme expects UIThemeId
+                  usePreferencesStore.getState().setUITheme(pendingUITheme);
+                  setPendingUITheme(null);
+                }
                 setLocal(snapshot);
                 originalRef.current = snapshot;
                 setDirty(false);

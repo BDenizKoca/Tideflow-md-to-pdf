@@ -34,13 +34,12 @@ const DESIGN_TABS: { id: TabSection; label: string; icon: string }[] = [
 ];
 
 const DesignModal: React.FC = () => {
-  const { preferences, setPreferences, themeSelection, setThemeSelection, customPresets, saveCustomPreset, deleteCustomPreset, renameCustomPreset } = usePreferencesStore();
+  const { preferences, setPreferences, themeSelection, setThemeSelection, customPresets, saveCustomPreset, deleteCustomPreset, renameCustomPreset, autoApply, setAutoApply } = usePreferencesStore();
   const { designModalOpen, setDesignModalOpen, designModalActiveTab, setDesignModalActiveTab, addToast } = useUIStore();
   const currentFile = useEditorStore(s => s.editor.currentFile);
   const setCompileStatus = useEditorStore(s => s.setCompileStatus);
   const [local, setLocal] = useState<Preferences>(preferences);
   const [dirty, setDirty] = useState(false);
-  const [autoApply, setAutoApply] = useState(true);
   const [activeTab, setActiveTab] = useState<TabSection>('document');
   const [showPresetNameModal, setShowPresetNameModal] = useState(false);
   const [presetNameInput, setPresetNameInput] = useState('');

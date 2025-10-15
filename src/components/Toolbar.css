@@ -187,10 +187,10 @@
 .toolbar-actions button.btn-primary,
 .file-control-group .file-open-btn.btn-primary,
 .file-control-group .dropdown-toggle.btn-primary {
-  background: var(--accent-color);
-  border-color: var(--accent-color);
-  color: var(--text-on-primary);
-  box-shadow: 0 10px 24px -14px var(--accent-shadow);
+  background: var(--toolbar-primary-bg);
+  border-color: var(--toolbar-primary-border);
+  color: var(--toolbar-primary-text);
+  box-shadow: 0 10px 24px -14px var(--toolbar-primary-shadow);
   position: relative;
   transition: box-shadow var(--transition-fast), transform var(--transition-fast);
 }
@@ -219,7 +219,7 @@
 .toolbar-actions button.btn-primary:hover:not(:disabled)::before,
 .file-control-group .file-open-btn.btn-primary:hover:not(:disabled)::before,
 .file-control-group .dropdown-toggle.btn-primary:hover:not(:disabled)::before {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .toolbar-actions button.btn-primary:active:not(:disabled),
@@ -269,8 +269,19 @@
 }
 
 .toolbar-actions button.btn-locked::before {
-  /* removed inline text badge; visual indicator provided by theme overrides */
   content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 5px,
+    rgba(0, 0, 0, 0.2) 5px,
+    rgba(0, 0, 0, 0.2) 10px
+  );
 }
 
 .toolbar-button-group {

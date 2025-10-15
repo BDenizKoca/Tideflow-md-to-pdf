@@ -1,18 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import type { TabProps } from './types';
 import * as api from '../../api';
-import { usePreferencesStore } from '../../stores/preferencesStore';
 import type { UIThemeId } from '../../styles/themes';
 import './AdvancedTab.css';
 
-const AdvancedTab: React.FC<TabProps> = ({ local, mutate }) => {
+import { usePreferencesStore } from '../../stores/preferencesStore';
+interface AdvancedTabProps extends TabProps {
+  setDirty: (dirty: boolean) => void;
+  pendingUITheme: string | null;
+  setPendingUITheme: (theme: string) => void;
+}
+const AdvancedTab: React.FC<AdvancedTabProps> = ({ local, mutate, setDirty, pendingUITheme, setPendingUITheme }) => {
+  const autoApply = usePreferencesStore((state) => state.autoApply);
+  const setPreferences = usePreferencesStore((state) => state.setPreferences);
   const [typstPath, setTypstPath] = useState<string | undefined>(local.typst_path || '');
   const [diag, setDiag] = useState<string>('');
   const [detected, setDetected] = useState<string | null>(null);
   const [status, setStatus] = useState<'ok' | 'warn' | 'error' | null>(null);
   const [saving, setSaving] = useState(false);
-  const uiTheme = usePreferencesStore((state) => state.uiTheme);
+  const globalUITheme = usePreferencesStore((state) => state.uiTheme);
   const setUITheme = usePreferencesStore((state) => state.setUITheme);
+  const [localTheme, setLocalTheme] = useState<UIThemeId>(globalUITheme);
+
+  useEffect(() => {
+    if (autoApply) {
+      setLocalTheme(globalUITheme);
+    }
+  }, [autoApply, globalUITheme]);
+
+  useEffect(() => {
+    if (pendingUITheme && !autoApply) {
+      setLocalTheme(pendingUITheme as UIThemeId);
+    }
+  }, [pendingUITheme, autoApply]);
 
   const pickFile = async () => {
     const picked = await api.showOpenDialog([{ name: 'Executable', extensions: ['*'] }], false);
@@ -98,14 +118,22 @@ const AdvancedTab: React.FC<TabProps> = ({ local, mutate }) => {
               <label
                 key={themeId}
                 className="theme-toggle-option"
-                data-active={uiTheme === themeId}
+                data-active={(autoApply ? globalUITheme : localTheme) === themeId}
               >
                 <input
                   type="radio"
                   name="ui-theme-toggle"
                   value={themeId}
-                  checked={uiTheme === themeId}
-                  onChange={() => setUITheme(themeId)}
+                  checked={(autoApply ? globalUITheme : localTheme) === themeId}
+                  onChange={() => {
+                    if (autoApply) {
+                      setUITheme(themeId);
+                    } else {
+                      setDirty(true);
+                      setLocalTheme(themeId);
+                      setPendingUITheme(themeId);
+                    }
+                  }}
                 />
                 <span>{themeId === 'dark' ? 'Dark' : 'Light'}</span>
               </label>
@@ -117,11 +145,29 @@ const AdvancedTab: React.FC<TabProps> = ({ local, mutate }) => {
         <div className="design-section">
           <h4>Editor Behavior</h4>
           <label className="checkbox-label">
-            <input type="checkbox" checked={local.preserve_scroll_position} onChange={e => mutate({ preserve_scroll_position: (e.target as HTMLInputElement).checked })} />
+            <input type="checkbox" checked={local.preserve_scroll_position} onChange={e => {
+              const checked = (e.target as HTMLInputElement).checked;
+              if (autoApply) {
+                mutate({ preserve_scroll_position: checked });
+                setPreferences({ ...local, preserve_scroll_position: checked });
+              } else {
+                mutate({ preserve_scroll_position: checked });
+                setDirty(true);
+              }
+            }} />
             <span>Preserve scroll position after re-render</span>
           </label>
           <label className="checkbox-label">
-            <input type="checkbox" checked={local.confirm_exit_on_unsaved} onChange={e => mutate({ confirm_exit_on_unsaved: (e.target as HTMLInputElement).checked })} />
+            <input type="checkbox" checked={local.confirm_exit_on_unsaved} onChange={e => {
+              const checked = (e.target as HTMLInputElement).checked;
+              if (autoApply) {
+                mutate({ confirm_exit_on_unsaved: checked });
+                setPreferences({ ...local, confirm_exit_on_unsaved: checked });
+              } else {
+                mutate({ confirm_exit_on_unsaved: checked });
+                setDirty(true);
+              }
+            }} />
             <span>Confirm before closing with unsaved changes</span>
           </label>
         </div>

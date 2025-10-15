@@ -398,7 +398,7 @@ const Toolbar: React.FC = () => {
               setSettingsModalOpen(true);
             }}
             title="Batch Export is a Pro feature. Click to learn more."
-            className="btn-primary"
+            className="btn-primary btn-locked"
           >
             🔒 Batch Export
           </button>
