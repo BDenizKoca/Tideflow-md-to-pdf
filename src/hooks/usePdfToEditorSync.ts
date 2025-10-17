@@ -256,7 +256,8 @@ export function usePdfToEditorSync(params: UsePdfToEditorSyncParams): void {
         syncLogger.debug('scroll listener removed');
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Dependencies: rendering state and sync functions
+    // Re-attach listener when PDF is ready (rendering completes)
   }, [
     // Key dependency: rendering state triggers re-attachment when PDF ready
     rendering,

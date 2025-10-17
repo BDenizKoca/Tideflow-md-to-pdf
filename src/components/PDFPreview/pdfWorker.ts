@@ -27,8 +27,8 @@ export function initializePdfWorker(): void {
     const lib = pdfjsLib as unknown as PdfJsLibWithWorker;
     if (lib.GlobalWorkerOptions && !lib.GlobalWorkerOptions.workerPort) {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        lib.GlobalWorkerOptions.workerPort = new (PdfJsWorker as any)();
+        // Worker constructor requires dynamic instantiation
+        lib.GlobalWorkerOptions.workerPort = new (PdfJsWorker as unknown as new () => Worker)();
         workerLogger.debug('pdf.js workerPort initialized');
       } catch (inner) {
         workerLogger.warn('Worker construction failed, continuing with fake worker', inner);

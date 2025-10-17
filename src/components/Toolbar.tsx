@@ -36,6 +36,7 @@ const Toolbar: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [recentDropdownOpen, setRecentDropdownOpen] = useState(false);
   const [saveDropdownOpen, setSaveDropdownOpen] = useState(false);
+  const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = React.useState(false);
 
   React.useEffect(() => {
@@ -80,17 +81,12 @@ const Toolbar: React.FC = () => {
 
   const handleOpenFile = async () => {
     try {
-      console.log('[Toolbar] Opening file dialog...');
       const result = await open({ multiple: false, filters: [{ name: 'Markdown Files', extensions: ['md'] }] });
       const filePath = Array.isArray(result) ? result?.[0] : result;
 
-      console.log('[Toolbar] File selected:', filePath);
-
       if (filePath) {
         try {
-          console.log('[Toolbar] Reading file content...');
           const content = await readMarkdownFile(filePath);
-          console.log('[Toolbar] File content read, length:', content.length);
           addOpenFile(filePath);
           setCurrentFile(filePath);
           setContent(content);
@@ -98,13 +94,12 @@ const Toolbar: React.FC = () => {
           addToast({ type: 'success', message: 'File opened successfully' });
           return;
         } catch (readError) {
-          console.error('[Toolbar] Failed to read file:', readError);
           addToast({ type: 'error', message: 'Failed to read file' });
           handleError(readError, { operation: 'read file', component: 'Toolbar' });
         }
       }
     } catch (err) {
-      console.error('[Toolbar] Error opening file, falling back to input:', err);
+      handleError(err, { operation: 'open file dialog', component: 'Toolbar' });
       fileInputRef.current?.click();
     }
   };
@@ -402,14 +397,56 @@ const Toolbar: React.FC = () => {
           >
             🔒 Batch Export
           </button>
-          <button
-            onClick={handleExportPDF}
-            disabled={!editor.compileStatus.pdf_path}
-            title="Export PDF (Ctrl+E)"
-            className="btn-primary"
-          >
-            📄 Export
-          </button>
+          <div className="file-control-group">
+            <button
+              onClick={handleExportPDF}
+              disabled={!editor.compileStatus.pdf_path}
+              title="Export PDF (Ctrl+E)"
+              className="btn-primary file-open-btn"
+            >
+              📄 Export
+            </button>
+            <Dropdown
+              trigger={
+                <button 
+                  type="button" 
+                  className="dropdown-toggle btn-primary" 
+                  title="Export options"
+                  disabled={!editor.compileStatus.pdf_path}
+                >
+                  ▼
+                </button>
+              }
+              isOpen={exportDropdownOpen}
+              onToggle={() => setExportDropdownOpen(!exportDropdownOpen)}
+              className="export-dropdown"
+            >
+              <button
+                type="button"
+                className="dropdown-item dropdown-item-locked"
+                onClick={() => {
+                  setExportDropdownOpen(false);
+                  setSettingsModalActiveTab('about');
+                  setSettingsModalOpen(true);
+                }}
+                title="PNG export is a Pro feature. Click to learn more."
+              >
+                🔒 Export as PNG
+              </button>
+              <button
+                type="button"
+                className="dropdown-item dropdown-item-locked"
+                onClick={() => {
+                  setExportDropdownOpen(false);
+                  setSettingsModalActiveTab('about');
+                  setSettingsModalOpen(true);
+                }}
+                title="SVG export is a Pro feature. Click to learn more."
+              >
+                🔒 Export as SVG
+              </button>
+            </Dropdown>
+          </div>
         </div>
       </div>
       {designModalOpen && <DesignModal />}

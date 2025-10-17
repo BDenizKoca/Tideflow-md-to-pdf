@@ -88,6 +88,8 @@
   text-decoration: none;
   transition: all var(--transition-normal);
   display: block;
+  width: 100%;
+  cursor: pointer;
 }
 
 .about-actions .btn-primary {

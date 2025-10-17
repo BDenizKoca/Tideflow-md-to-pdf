@@ -85,7 +85,7 @@ interface PreferencesStoreState {
   setAutoApply: (autoApply: boolean) => void;
 
   // Custom presets (persisted to localStorage)
-  customPresets: Record<string, { name: string; preferences: Preferences }>[];
+  customPresets: Record<string, { name: string; preferences: Preferences }>;
   saveCustomPreset: (id: string, name: string, preferences: Preferences) => void;
   deleteCustomPreset: (id: string) => void;
   renameCustomPreset: (id: string, newName: string) => void;

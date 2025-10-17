@@ -8,6 +8,7 @@ import type {
   RenderedDocument,
   SourceMap,
 } from './types';
+import { logger } from './utils/logger';
 
 // File operations
 export async function readMarkdownFile(path: string): Promise<string> {
@@ -386,7 +387,7 @@ export async function showOpenDialog(
       return result || null;
     }
   } catch (err) {
-    console.error('[API] showOpenDialog failed:', err);
+    logger.createScoped('API').error('showOpenDialog failed', err);
     return null;
   }
 }

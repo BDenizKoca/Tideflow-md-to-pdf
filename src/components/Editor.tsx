@@ -6,6 +6,7 @@ import './Editor.css';
 import ImagePropsModal, { type ImageProps } from './ImagePropsModal';
 import ImagePlusModal from './ImagePlusModal';
 import EditorToolbar from './EditorToolbar';
+import ErrorBoundary from './ErrorBoundary';
 import { useImageHandlers } from '../hooks/useImageHandlers';
 import { openSearchPanel, closeSearchPanel } from '@codemirror/search';
 import { importImage, importImageFromPath, generateImageMarkdown } from '../api';
@@ -175,11 +176,8 @@ const Editor: React.FC = () => {
     let unlisten: (() => void) | undefined;
 
     const setupListener = async () => {
-      console.log('[Editor] Setting up Tauri file drop listener');
 
       unlisten = await listen<{ paths: string[]; position: { x: number; y: number } } | string[]>('tauri://drag-drop', async (event) => {
-        console.log('[Editor] Tauri file drop event:', event.payload);
-
         // Handle both payload formats: object with paths property, or array directly
         const paths = (event.payload && typeof event.payload === 'object' && 'paths' in event.payload)
           ? event.payload.paths
@@ -187,11 +185,9 @@ const Editor: React.FC = () => {
 
         if (paths && paths.length > 0) {
           const filePath = paths[0];
-          console.log('[Editor] Processing dropped file:', filePath);
 
           // Prevent duplicate processing of the same file
           if (lastProcessedFileRef.current === filePath) {
-            console.log('[Editor] Skipping duplicate drop for file:', filePath);
             return;
           }
           lastProcessedFileRef.current = filePath;
@@ -255,7 +251,6 @@ const Editor: React.FC = () => {
 
     return () => {
       if (unlisten) {
-        console.log('[Editor] Removing Tauri file drop listener');
         unlisten();
       }
     };
@@ -346,14 +341,15 @@ const Editor: React.FC = () => {
   };
 
   return (
-    <div
-      ref={containerRef}
-      className="editor-container"
-      onPaste={handlePaste}
-    >
-      {/* Always render editor toolbar and content, but hide when no file */}
-      <div className={`editor-content-wrapper ${currentFile ? '' : 'hidden'}`}>
-        <EditorToolbar
+    <ErrorBoundary>
+      <div
+        ref={containerRef}
+        className="editor-container"
+        onPaste={handlePaste}
+      >
+        {/* Always render editor toolbar and content, but hide when no file */}
+        <div className={`editor-content-wrapper ${currentFile ? '' : 'hidden'}`}>
+          <EditorToolbar
           currentFile={currentFile || ''}
           preferences={preferences}
           selectedFont={selectedFont}
@@ -424,6 +420,7 @@ const Editor: React.FC = () => {
         }}
       />
     </div>
+    </ErrorBoundary>
   );
 };
 

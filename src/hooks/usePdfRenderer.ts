@@ -1,8 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { renderPdfPages } from '../utils/pdfRenderer';
 import { extractOffsetsFromPdfText } from '../utils/offsets';
 import { ANCHOR } from '../constants/timing';
 import type { SourceMap } from '../types';
+import { logger } from '../utils/logger';
+
+const pdfRendererLogger = logger.createScoped('usePdfRenderer');
 
 interface UsePdfRendererArgs {
   currentFile: string | null;
@@ -141,7 +144,7 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
           // This happens naturally when sourceMap.anchors.length === 0
           try {
             if (map.anchors.length === 0) {
-              if (process.env.NODE_ENV !== 'production') console.debug('[usePdfRenderer] no typst anchors, running PDF-text extraction fallback');
+              pdfRendererLogger.debug('no typst anchors, running PDF-text extraction fallback');
               try {
                 const extracted = await extractOffsetsFromPdfText(doc, metrics, map.anchors, renderScale);
                       if (extracted.size > 0) {
@@ -154,16 +157,16 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
                           if (anchorId) {
                             if (registerPendingAnchor) {
                               registerPendingAnchor(anchorId);
-                              if (process.env.NODE_ENV !== 'production') console.debug('[usePdfRenderer] pendingForcedAnchor registered (extraction, typst failed) via shared handler', { anchorId });
+                              pdfRendererLogger.debug('pendingForcedAnchor registered (extraction, typst failed) via shared handler', { anchorId });
                             } else {
                               pendingForcedAnchorRef.current = anchorId;
-                              if (process.env.NODE_ENV !== 'production') console.debug('[usePdfRenderer] pendingForcedAnchor registered (extraction, typst failed)', { anchorId });
+                              pdfRendererLogger.debug('pendingForcedAnchor registered (extraction, typst failed)', { anchorId });
                             }
                           }
                         }
                       }
               } catch (e) {
-                if (process.env.NODE_ENV !== 'production') console.debug('[usePdfRenderer] immediate extraction failed', e);
+                pdfRendererLogger.debug('immediate extraction failed', e);
               }
             }
           } catch (e) {
@@ -195,7 +198,7 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
                 }
               }
             } catch (_e) {
-              console.debug('[usePdfRenderer] extraction failed', _e);
+              pdfRendererLogger.debug('extraction failed', _e);
             }
 
             const anchors = sourceMapRef.current!.anchors;
@@ -203,14 +206,12 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
             if (el) {
               const avail = Math.max(0, el.scrollHeight - el.clientHeight);
               const fallback = new Map<string, number>();
-              if (process.env.NODE_ENV !== 'production') {
-                console.debug('[usePdfRenderer] creating fallback offsets', {
-                  anchors: anchors.length,
-                  avail,
-                  scrollHeight: el.scrollHeight,
-                  clientHeight: el.clientHeight
-                });
-              }
+              pdfRendererLogger.debug('creating fallback offsets', {
+                anchors: anchors.length,
+                avail,
+                scrollHeight: el.scrollHeight,
+                clientHeight: el.clientHeight
+              });
               for (let i = 0; i < anchors.length; i++) {
                 const frac = i / Math.max(1, anchors.length - 1);
                 let pos = Math.round(frac * avail);
@@ -224,14 +225,12 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
 
                 if (shouldApplyImmediately) {
                   anchorOffsetsRef.current = fallback;
-                  if (process.env.NODE_ENV !== 'production') {
-                    console.debug('[usePdfRenderer] applied fallback offsets immediately', {
-                      size: fallback.size,
-                      isTyping: isTypingRef.current,
-                      userInteracted: userInteractedRef.current,
-                      sample: Array.from(fallback.entries()).slice(0, 3)
-                    });
-                  }
+                  pdfRendererLogger.debug('applied fallback offsets immediately', {
+                    size: fallback.size,
+                    isTyping: isTypingRef.current,
+                    userInteracted: userInteractedRef.current,
+                    sample: Array.from(fallback.entries()).slice(0, 3)
+                  });
                   // Register pending anchor ONLY on true initial startup (no activeAnchorId yet AND no initial scroll done)
                   // Once initial scroll is done, normal sync handles all position updates
                   if (!args.activeAnchorId && !initialForcedScrollDoneRef.current) {
@@ -248,32 +247,28 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
                     }
 
                     if (anchorId) {
-                      if (process.env.NODE_ENV !== 'production') {
-                        console.debug('[usePdfRenderer] registering pending anchor', {
-                          anchorId,
-                          activeAnchorId: args.activeAnchorId,
-                          anchorCount: anchors.length,
-                          targetIndex,
-                          reason: 'true startup - smart fallback at 25% into doc'
-                        });
-                      }
+                      pdfRendererLogger.debug('registering pending anchor', {
+                        anchorId,
+                        activeAnchorId: args.activeAnchorId,
+                        anchorCount: anchors.length,
+                        targetIndex,
+                        reason: 'true startup - smart fallback at 25% into doc'
+                      });
                       if (registerPendingAnchor) registerPendingAnchor(anchorId);
                       else pendingForcedAnchorRef.current = anchorId;
                     }
-                  } else if (process.env.NODE_ENV !== 'production') {
-                    console.debug('[usePdfRenderer] skipping pending anchor - user has position', {
+                  } else {
+                    pdfRendererLogger.debug('skipping pending anchor - user has position', {
                       activeAnchorId: args.activeAnchorId
                     });
                   }
                 } else {
                   // Store fallback to be applied when typing stops (handled by useEditorToPdfSync)
                   pendingFallbackRef.current = fallback;
-                  if (process.env.NODE_ENV !== 'production') {
-                    console.debug('[usePdfRenderer] stored fallback for later (user actively typing)', {
-                      size: fallback.size,
-                      isTyping: isTypingRef.current
-                    });
-                  }
+                  pdfRendererLogger.debug('stored fallback for later (user actively typing)', {
+                    size: fallback.size,
+                    isTyping: isTypingRef.current
+                  });
                   // ONLY register pending anchor on true startup (no activeAnchorId AND no initial scroll done)
                   // Once initial scroll is done, normal sync handles all position updates
                   if (!args.activeAnchorId && !initialForcedScrollDoneRef.current) {
@@ -282,18 +277,16 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
                     const targetIndex = Math.floor(anchors.length * ANCHOR.SMART_FALLBACK_POSITION);
                     const anchorId = anchors[targetIndex]?.id ?? anchors[0]?.id ?? null;
                     if (anchorId) {
-                      if (process.env.NODE_ENV !== 'production') {
-                        console.debug('[usePdfRenderer] registering pending anchor (typing)', {
-                          anchorId,
-                          activeAnchorId: args.activeAnchorId,
-                          reason: 'true startup - no activeAnchorId'
-                        });
-                      }
+                      pdfRendererLogger.debug('registering pending anchor (typing)', {
+                        anchorId,
+                        activeAnchorId: args.activeAnchorId,
+                        reason: 'true startup - no activeAnchorId'
+                      });
                       if (registerPendingAnchor) registerPendingAnchor(anchorId);
                       else pendingForcedAnchorRef.current = anchorId;
                     }
-                  } else if (process.env.NODE_ENV !== 'production') {
-                    console.debug('[usePdfRenderer] skipping pending anchor - user has position (typing)', {
+                  } else {
+                    pdfRendererLogger.debug('skipping pending anchor - user has position (typing)', {
                       activeAnchorId: args.activeAnchorId
                     });
                   }
@@ -307,7 +300,7 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
           // If an earlier extraction/fallback registered a pending forced
           // anchor, perform that forced scroll now that rendering has
           // completed via the consumePendingAnchor handler (which uses a single RAF)
-          if (process.env.NODE_ENV !== 'production') console.debug('[usePdfRenderer] post-render check', { pending: pendingForcedAnchorRef.current, initialForced: initialForcedScrollDoneRef.current, isTyping: isTypingRef.current });
+          pdfRendererLogger.debug('post-render check', { pending: pendingForcedAnchorRef.current, initialForced: initialForcedScrollDoneRef.current, isTyping: isTypingRef.current });
           if (pendingForcedAnchorRef.current && !initialForcedScrollDoneRef.current) {
               if (consumePendingAnchor) {
                 consumePendingAnchor();
@@ -328,7 +321,8 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
       if (pendingFallbackTimerRef.current) { window.clearInterval(pendingFallbackTimerRef.current); pendingFallbackTimerRef.current = null; }
       if (pendingForcedTimerRef.current) { window.clearInterval(pendingForcedTimerRef.current); pendingForcedTimerRef.current = null; }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Dependencies: Values that should trigger PDF re-render
+    // Refs are stable - accessed via .current, don't need in deps
   }, [
     // Only include non-ref values that should trigger re-render
     currentFile,

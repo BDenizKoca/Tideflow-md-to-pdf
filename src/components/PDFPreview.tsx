@@ -91,7 +91,6 @@ const PDFPreview: React.FC = () => {
     activeAnchorRef,
     userInteractedRef,
     initialForcedScrollDoneRef,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }), []); // Empty deps - all values are refs which are stable
 
   // Use offset manager hook

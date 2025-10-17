@@ -575,7 +575,8 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
       initializedRef.current = false;
     };
   // Run only once when component mounts - component is now persistent
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Dependencies intentionally minimal: refs are stable, other values initialized once
+  // Adding deps would cause editor recreation on every preference change (undesirable)
   }, []);
 }
 
