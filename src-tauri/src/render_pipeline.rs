@@ -78,7 +78,7 @@ pub(crate) fn typst_package_env(config: &RenderConfig) -> Option<String> {
 }
 
 /// Ensure Windows users have a usable cmarker package when Typst relies on its LOCALAPPDATA cache.
-fn ensure_cmarker_assets(_config: &RenderConfig) {
+fn ensure_cmarker_assets(config: &RenderConfig) {
     #[cfg(target_os = "windows")]
     {
         if let Ok(local) = std::env::var("LOCALAPPDATA") {
