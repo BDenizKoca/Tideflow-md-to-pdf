@@ -118,6 +118,8 @@ jobs:
           releaseName: 'Tideflow ${{ github.ref_name }}'
           releaseDraft: true
           prerelease: false
+          includeRelease: true
+          includeUpdaterJson: false
           args: ${{ matrix.args }}
 
       - name: List produced bundles (Linux/macOS)
