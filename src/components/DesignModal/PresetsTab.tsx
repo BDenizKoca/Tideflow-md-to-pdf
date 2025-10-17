@@ -35,32 +35,32 @@ const PresetsTab: React.FC<PresetsTabProps> = ({
       <div className="form-grid one-col">
         <div className="preset-actions-grid">
           <div className="preset-action-item">
-            <button
-              type="button"
-              className="btn-preset-export"
-              onClick={() => {
-                setSettingsModalActiveTab('about');
-                setSettingsModalOpen(true);
-              }}
-              title="Export current theme as a preset file"
-            >
-              📤 Export Theme
-            </button>
-            <p className="action-description">Save the current theme settings to a file that you can share or import later.</p>
+              <button
+                type="button"
+                className="btn-preset-export btn-locked"
+                onClick={() => {
+                  setSettingsModalActiveTab('about');
+                  setSettingsModalOpen(true);
+                }}
+                title="Export Theme is a Pro feature. Click to learn more."
+              >
+                🔒 Export Theme
+              </button>
+              <p className="action-description">Export Theme is only available in Tideflow Pro.</p>
           </div>
           <div className="preset-action-item">
-            <button
-              type="button"
-              className="btn-preset-import"
-              onClick={() => {
-                setSettingsModalActiveTab('about');
-                setSettingsModalOpen(true);
-              }}
-              title="Import custom preset as a theme"
-            >
-              📥 Import Theme
-            </button>
-            <p className="action-description">Load a theme from a preset file. This will overwrite your current settings.</p>
+              <button
+                type="button"
+                className="btn-preset-import btn-locked"
+                onClick={() => {
+                  setSettingsModalActiveTab('about');
+                  setSettingsModalOpen(true);
+                }}
+                title="Import Theme is a Pro feature. Click to learn more."
+              >
+                🔒 Import Theme
+              </button>
+              <p className="action-description">Import Theme is only available in Tideflow Pro.</p>
           </div>
           <div className="preset-action-item">
             <button
