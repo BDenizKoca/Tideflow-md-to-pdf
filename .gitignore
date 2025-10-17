@@ -24,3 +24,21 @@ src-tauri/target/
 *.sln
 *.sw?
 .claude/settings.local.json
+
+# Windows metadata files
+*.Zone.Identifier
+Thumbs.db
+desktop.ini
+
+# macOS metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Tauri build artifacts
+src-tauri/target/
+src-tauri/WixTools/
+
+# Lock files (optional - uncomment if you want to ignore)
+# package-lock.json
+# Cargo.lock

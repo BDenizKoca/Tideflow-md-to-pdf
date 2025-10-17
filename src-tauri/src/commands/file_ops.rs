@@ -67,6 +67,29 @@ pub async fn write_markdown_file(path: &str, content: &str) -> Result<(), String
 }
 
 #[tauri::command]
+pub async fn read_binary_file(path: &str) -> Result<Vec<u8>, String> {
+    // Validate path format
+    if path.is_empty() {
+        return Err(AppError::InvalidPath("Empty path provided".to_string()).to_frontend_message());
+    }
+    
+    // Check if path exists first to give a better error message
+    let path_obj = Path::new(path);
+    if !path_obj.exists() {
+        return Err(AppError::FileNotFound(path_obj.to_path_buf()).to_frontend_message());
+    }
+    
+    // Read the file as binary
+    fs::read(path).map_err(|e| {
+        AppError::FileRead {
+            path: path_obj.to_path_buf(),
+            source: e,
+        }
+        .to_frontend_message()
+    })
+}
+
+#[tauri::command]
 pub async fn list_files(app_handle: AppHandle, dir_path: &str) -> Result<Vec<FileEntry>, String> {
     list_files_internal(app_handle, dir_path).await
 }

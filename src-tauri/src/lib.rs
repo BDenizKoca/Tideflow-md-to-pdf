@@ -22,6 +22,7 @@ pub fn run() {
     })
     .invoke_handler(tauri::generate_handler![
         commands::read_markdown_file,
+        commands::read_binary_file,
         commands::write_markdown_file,
         commands::list_files,
         commands::create_file,

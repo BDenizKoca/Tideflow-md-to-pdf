@@ -14,14 +14,18 @@ export interface SavedScrollPosition { top: number; left: number }
  * cancellation via the cancel token.
  */
 export async function renderPdfPages(
-  fileUrl: string,
+  fileUrlOrData: string | Uint8Array,
   container: HTMLElement,
   renderScale = 1.0,
   cancelToken: CancelToken,
   savedScrollPosition?: SavedScrollPosition,
   programmaticScrollRef?: React.MutableRefObject<boolean>
 ): Promise<{ doc: pdfjsLib.PDFDocumentProxy; metrics: PageMetric[] }> {
-  const doc = await pdfjsLib.getDocument({ url: fileUrl }).promise;
+  // Accept either URL or binary data - binary data works better with PDF.js worker
+  const docSource = typeof fileUrlOrData === 'string' 
+    ? { url: fileUrlOrData } 
+    : { data: fileUrlOrData };
+  const doc = await pdfjsLib.getDocument(docSource).promise;
   if (cancelToken.canceled) throw new Error('canceled');
 
   const frag = document.createDocumentFragment();

@@ -1,7 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { renderPdfPages } from '../utils/pdfRenderer';
 import { extractOffsetsFromPdfText } from '../utils/offsets';
-import { convertFileSrc } from '@tauri-apps/api/core';
 import { ANCHOR } from '../constants/timing';
 import type { SourceMap } from '../types';
 
@@ -114,36 +113,21 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
         initialForcedScrollDoneRef.current = false;
       }
       try {
-        // Ensure file paths are converted to a browser-loadable URL when
-        // running inside Tauri; convertFileSrc handles file:// -> http(s)
-        // served blob URLs required by pdf.js.
-        let fileUrl = convertFileSrc(compileStatus.pdf_path ?? '');
+        // Read the PDF file using Tauri command
+        // Pass binary data directly to PDF.js to avoid CORS issues
+        const pdfPath = compileStatus.pdf_path ?? '';
 
-        // Linux workaround: convertFileSrc on Linux can produce various problematic URLs
-        // Log the original URL for debugging
-        if (process.env.NODE_ENV !== 'production') {
-          console.debug('[usePdfRenderer] Original URL from convertFileSrc:', fileUrl);
-        }
+        // Use Tauri's read_binary_file command to get the PDF as bytes
+        const { invoke } = await import('@tauri-apps/api/core');
+        const pdfBytes = await invoke<number[]>('read_binary_file', { path: pdfPath });
+        
+        // Convert to Uint8Array for PDF.js
+        const uint8Array = new Uint8Array(pdfBytes);
 
-        // Handle various Linux URL patterns
-        if (fileUrl.startsWith('asset://localhost/')) {
-          // Pattern 1: asset://localhost/ -> https://asset.localhost/
-          fileUrl = fileUrl.replace('asset://localhost/', 'https://asset.localhost/');
-        } else if (fileUrl.startsWith('//localhost/')) {
-          // Pattern 2: //localhost/ (missing protocol) -> https://asset.localhost/
-          fileUrl = 'https://asset.localhost/' + fileUrl.substring('//localhost/'.length);
-        } else if (fileUrl.startsWith('asset:')) {
-          // Pattern 3: Other asset: URLs -> convert to https://asset.localhost/
-          fileUrl = fileUrl.replace(/^asset:\/*/g, 'https://asset.localhost/');
-        }
-
-        if (process.env.NODE_ENV !== 'production') {
-          console.debug('[usePdfRenderer] Final URL for PDF loading:', fileUrl);
-        }
-
-        fileUrl += `?v=${Date.now()}`;
         const renderScale = pdfZoom;
-        const { doc, metrics } = await renderPdfPages(fileUrl, containerRef.current, renderScale, localCancel, savedPosition, programmaticScrollRef);
+        // Pass binary data directly to PDF.js instead of blob URL
+        // This avoids worker context issues with blob URLs
+        const { doc, metrics } = await renderPdfPages(uint8Array, containerRef.current, renderScale, localCancel, savedPosition, programmaticScrollRef);
         if (localCancel.canceled) return;
         pdfMetricsRef.current = metrics;
 

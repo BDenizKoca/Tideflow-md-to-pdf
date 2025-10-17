@@ -1,43 +1,43 @@
 .about-tab {
   max-width: 800px;
   margin: 0 auto;
-  padding: 0.5rem 1rem;
+  padding: 0.25rem 0.5rem;
   color: var(--text-primary);
 }
 
 .about-tab h3 {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 0.75rem;
-  line-height: 1.3;
+  margin-bottom: 0.4rem;
+  line-height: 1.15;
 }
 
 .about-tab h4 {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin-top: 1.25rem;
-  margin-bottom: 0.5rem;
+  margin-top: 0.7rem;
+  margin-bottom: 0.3rem;
 }
 
 .about-description {
-  font-size: 0.95rem;
-  line-height: 1.5;
+  font-size: 0.92rem;
+  line-height: 1.3;
   color: var(--text-secondary);
-  margin-bottom: 0.65rem;
+  margin-bottom: 0.35rem;
 }
 
 .features-list {
   list-style: disc;
-  padding-left: 1.5rem;
-  margin: 1rem 0;
+  padding-left: 1.1rem;
+  margin: 0.4rem 0;
 }
 
 .features-list li {
-  padding: 0.5rem 0;
-  font-size: 0.9rem;
-  line-height: 1.5;
+  padding: 0.18rem 0;
+  font-size: 0.88rem;
+  line-height: 1.3;
   color: var(--text-secondary);
 }
 
@@ -55,27 +55,27 @@
   background: var(--panel-elevated-bg);
   border: var(--border-width) solid var(--border-color-light);
   border-radius: var(--border-radius);
-  padding: 1.25rem;
-  margin-top: 1.25rem;
+  padding: 0.7rem 0.7rem 0.6rem 0.7rem;
+  margin-top: 0.7rem;
   box-shadow: var(--shadow-sm);
 }
 
 .about-section h4 {
   margin-top: 0;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
 .about-section p {
-  font-size: 0.9rem;
-  line-height: 1.5;
+  font-size: 0.88rem;
+  line-height: 1.3;
   color: var(--text-secondary);
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .about-actions {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.3rem;
 }
 
 .about-actions .btn-primary,
@@ -118,16 +118,16 @@
 }
 
 .about-footer {
-  margin-top: 2rem;
-  padding-top: 1.25rem;
+  margin-top: 1.1rem;
+  padding-top: 0.7rem;
   border-top: var(--border-width) solid var(--border-color-light);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
 }
 
 .about-links {
-  margin-bottom: 0.75rem;
-  line-height: 1.6;
+  margin-bottom: 0.4rem;
+  line-height: 1.3;
 }
 
 .about-links a {
@@ -141,7 +141,7 @@
 }
 
 .about-credits {
-  line-height: 1.6;
+  line-height: 1.3;
 }
 
 .about-credits a {

@@ -21,15 +21,17 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' 'unsafe-inline' 'unsafe-eval' ipc: http://ipc.localhost https://tauri.localhost http://asset.localhost https://asset.localhost; connect-src 'self' ipc: http://ipc.localhost https://tauri.localhost http://asset.localhost https://asset.localhost; img-src 'self' asset: http://asset.localhost https://asset.localhost blob: data:; font-src 'self' asset: http://localhost data:;",
+      "csp": "default-src 'self' 'unsafe-inline' 'unsafe-eval' ipc: http://ipc.localhost https://tauri.localhost http://asset.localhost https://asset.localhost file:; connect-src 'self' ipc: http://ipc.localhost https://tauri.localhost http://asset.localhost https://asset.localhost file:; img-src 'self' asset: http://asset.localhost https://asset.localhost blob: data: file:; font-src 'self' asset: http://localhost data: file:;",
       "assetProtocol": {
         "enable": true,
         "scope": {
           "allow": [
-            "$APPDATA/assets/**",
             "$APPDATA/**",
+            "$APPDATA/assets/**",
             "$DOWNLOAD/*",
-            "$HOME/**"
+            "$HOME/**",
+            "$TEMP/**",
+            "$CACHE/**"
           ],
           "requireLiteralLeadingDot": false
         }

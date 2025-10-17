@@ -20,3 +20,13 @@
 *.ico -text
 *.icns -text
 *.svg -text
+
+# Typst binaries - mark as binary
+src-tauri/bin/typst/**/typst binary
+src-tauri/bin/typst/**/typst.exe binary
+
+# Additional binaries
+*.exe -text
+*.dylib -text
+*.so -text
+*.a -text

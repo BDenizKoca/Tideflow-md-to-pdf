@@ -10,14 +10,11 @@ const AboutTab: React.FC = () => {
         This version includes every feature you need for a powerful and focused writing experience.
       </p>
 
-      <p className="about-description">
-        The <strong>only difference</strong> between the free and Pro versions is the <strong>Batch Export</strong> feature.
-      </p>
+
 
       <p className="about-description">
         Some of the core features include:
       </p>
-
       <ul className="features-list">
         <li>
           <strong>Live PDF Preview:</strong> See your formatted document update in real-time as you type.
@@ -30,11 +27,20 @@ const AboutTab: React.FC = () => {
         </li>
       </ul>
 
+
       <div className="about-section">
-        <h4>Upgrade to Pro</h4>
+        <h4>Want even more?</h4>
         <p>
-          For users who work with multiple documents, Tideflow Pro unlocks the powerful Batch Export feature for a single, one-time payment.
+          Unlock a couple of extra powers with a <strong>one-time Tideflow Pro purchase</strong>:
         </p>
+        <ul className="features-list">
+          <li>
+            <strong>Batch Export:</strong> Export multiple documents at once for max productivity.
+          </li>
+          <li>
+            <strong>Import/Export Presets:</strong> Bring your custom themes anywhere, or share them with friends.
+          </li>
+        </ul>
         <div className="about-actions">
           <a
             href="https://github.com/BDenizKoca"
@@ -42,7 +48,7 @@ const AboutTab: React.FC = () => {
             rel="noopener noreferrer"
             className="btn-primary"
           >
-            Buy Tideflow Pro for $10
+            Get Tideflow Pro ($10)
           </a>
           <a
             href="https://tideflow.bdenizkoca.studio"
@@ -50,7 +56,7 @@ const AboutTab: React.FC = () => {
             rel="noopener noreferrer"
             className="btn-secondary"
           >
-            Learn more at tideflow.bdenizkoca.studio
+            See all Pro details
           </a>
         </div>
       </div>

@@ -78,7 +78,7 @@ pub(crate) fn typst_package_env(config: &RenderConfig) -> Option<String> {
 }
 
 /// Ensure Windows users have a usable cmarker package when Typst relies on its LOCALAPPDATA cache.
-fn ensure_cmarker_assets(config: &RenderConfig) {
+fn ensure_cmarker_assets(_config: &RenderConfig) {
     #[cfg(target_os = "windows")]
     {
         if let Ok(local) = std::env::var("LOCALAPPDATA") {
@@ -134,13 +134,17 @@ fn ensure_cmarker_assets(config: &RenderConfig) {
 
 /// Helper to create a Command for Typst with Windows-specific flags to suppress console window
 pub fn typst_command<S: AsRef<std::ffi::OsStr>>(exe: S) -> Command {
-    let mut cmd = Command::new(exe);
     #[cfg(target_os = "windows")]
     {
         const CREATE_NO_WINDOW: u32 = 0x08000000;
+        let mut cmd = Command::new(exe);
         cmd.creation_flags(CREATE_NO_WINDOW);
+        cmd
     }
-    cmd
+    #[cfg(not(target_os = "windows"))]
+    {
+        Command::new(exe)
+    }
 }
 
 /// Recursively copy a directory
