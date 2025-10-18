@@ -420,16 +420,19 @@ pub async fn render_typst(
         assets_root_ref,
     );
     
-    // Filter out content that cmarker/Typst can't handle to prevent compilation errors
-    // Remove external image URLs that cmarker can't fetch (causes OS error 123)
+    // Filter out external image URLs that cmarker can't fetch
     let re_external_img = regex::Regex::new(r"!\[[^\]]*\]\(https?://[^)]+\)")
         .expect("BUG: Invalid regex pattern for external markdown images");
     processed = re_external_img.replace_all(&processed, "").to_string();
 
-    // Also remove HTML img tags with external URLs
     let re_external_html = regex::Regex::new(r#"<img[^>]*src=["']https?://[^"']+["'][^>]*>"#)
         .expect("BUG: Invalid regex pattern for external HTML images");
     processed = re_external_html.replace_all(&processed, "").to_string();
+    
+    // Remove citation references [@ref] that would cause "label does not exist" errors
+    let re_citations = regex::Regex::new(r"\[@[^\]]+\]")
+        .expect("BUG: Invalid regex pattern for citations");
+    processed = re_citations.replace_all(&processed, "").to_string();
     
     fs::write(&temp_content_path, &processed)?;
 
@@ -454,13 +457,15 @@ pub async fn render_typst(
     let output_file_name = format!("temp_{}.pdf", uuid);
     let output_path = build_dir.join(&output_file_name);
 
-    // Compile with Typst
-    render_pipeline::compile_typst(&config, &typst_path, &output_file_name)?;
-
+    // Compile with Typst - if it fails, just skip rendering silently
+    let compile_result = render_pipeline::compile_typst(&config, &typst_path, &output_file_name);
+    
     // Clean up the temporary content file
     let _ = fs::remove_file(&temp_content_path);
 
-    // Verify output was created
+    // If compilation failed or output not created, propagate error
+    compile_result?;
+    
     if !output_path.exists() {
         return Err(anyhow!("Output file was not created: {}", output_path.display()));
     }

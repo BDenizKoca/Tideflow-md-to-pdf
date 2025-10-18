@@ -7,7 +7,6 @@ import type { Preferences } from '../types';
 import { themePresets } from '../themes'; // Import themes
 import { logger } from '../utils/logger';
 import { handleError } from '../utils/errorHandler';
-import { useDragToScroll } from '../hooks/useDragToScroll';
 import './DesignModal.css';
 import {
   ThemesTab,
@@ -46,7 +45,6 @@ const DesignModal: React.FC = () => {
   const originalRef = useRef<Preferences | null>(null);
   const applyTimer = useRef<number | null>(null);
   const applySeq = useRef(0);
-  const designContentRef = useDragToScroll<HTMLDivElement>();
 
   const handleBrowseCoverImage = async () => {
     try {
@@ -341,7 +339,7 @@ const DesignModal: React.FC = () => {
             ))}
           </nav>
 
-          <div className="design-content" ref={designContentRef}>
+          <div className="design-content">
             {/* Themes Tab */}
             {activeTab === 'themes' && (
               <ThemesTab

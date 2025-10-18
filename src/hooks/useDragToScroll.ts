@@ -25,16 +25,15 @@ export const useDragToScroll = <T extends HTMLElement>(
       // Only handle left mouse button
       if (e.button !== 0) return;
 
-      // Don't start drag if clicking on interactive elements
+            // Don't start drag on inputs or elements with data-no-drag
       const target = e.target as HTMLElement;
-      if (
-        target.tagName === 'BUTTON' ||
-        target.tagName === 'A' ||
-        target.tagName === 'INPUT' ||
-        target.closest('button') ||
-        target.closest('a')
-      ) {
+      if (target.closest('[data-no-drag="true"]')) {
         return;
+      }
+
+      // Only prevent default if element is horizontally scrollable
+      if (element.scrollWidth > element.clientWidth) {
+        e.preventDefault();
       }
 
       isDragging.current = true;
@@ -46,6 +45,11 @@ export const useDragToScroll = <T extends HTMLElement>(
 
       element.style.cursor = 'grabbing';
       element.style.userSelect = 'none';
+    };
+
+    const handleDragStart = (e: DragEvent) => {
+      // Prevent native drag and drop (prevents red circle cursor on images/links)
+      e.preventDefault();
     };
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -107,19 +111,31 @@ export const useDragToScroll = <T extends HTMLElement>(
       }
     };
 
+    const handleWheel = (e: WheelEvent) => {
+      // For horizontal scroll containers, convert vertical wheel to horizontal scroll
+      if (element.scrollWidth > element.clientWidth) {
+        e.preventDefault();
+        element.scrollLeft += e.deltaY;
+      }
+    };
+
     element.addEventListener('mousedown', handleMouseDown);
+    element.addEventListener('dragstart', handleDragStart);
     element.addEventListener('mousemove', handleMouseMove);
     element.addEventListener('mouseup', handleMouseUp);
     element.addEventListener('mouseleave', handleMouseLeave);
+    element.addEventListener('wheel', handleWheel, { passive: false });
 
     // Set initial cursor
     element.style.cursor = 'grab';
 
     return () => {
       element.removeEventListener('mousedown', handleMouseDown);
+      element.removeEventListener('dragstart', handleDragStart);
       element.removeEventListener('mousemove', handleMouseMove);
       element.removeEventListener('mouseup', handleMouseUp);
       element.removeEventListener('mouseleave', handleMouseLeave);
+      element.removeEventListener('wheel', handleWheel);
       element.style.cursor = '';
       element.style.userSelect = '';
     };

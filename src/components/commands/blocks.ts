@@ -81,6 +81,10 @@ export const blockCommands = {
     // Strip any existing Typst wrappers to prevent nesting
     text = stripTypstWrappers(text);
 
+    // Strip markdown header markers (# ## ### etc) to prevent Typst parse errors
+    // Markdown headers inside Typst #align(...)[...] blocks cause "unclosed delimiter" errors
+    text = text.replace(/^(#{1,6})\s+/gm, '');
+
     const block = `<!--raw-typst #align(${where})[\n${text}\n] -->`;
     view.dispatch({ changes: { from: s.from, to: s.to, insert: block } });
   },

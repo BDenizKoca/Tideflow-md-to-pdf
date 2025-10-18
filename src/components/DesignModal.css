@@ -256,26 +256,8 @@
   background: var(--background-color);
 }
 
-.design-content.is-dragging {
-  cursor: grabbing !important;
-}
-
-.design-content.is-dragging * {
-  pointer-events: none !important;
-  cursor: grabbing !important;
-}
-
 .tab-panel {
   animation: fadeIn 200ms ease;
-}
-
-.tab-panel.is-dragging {
-  cursor: grabbing !important;
-}
-
-.tab-panel.is-dragging * {
-  pointer-events: none !important;
-  cursor: grabbing !important;
 }
 
 @keyframes fadeIn {
@@ -1222,26 +1204,78 @@
   to { transform: rotate(360deg); }
 }
 
-.theme-gallery {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.25rem;
+.theme-gallery-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-top: 1rem;
-  padding: 4px;
-  -webkit-user-select: none;
-  user-select: none;
 }
 
-.theme-gallery.is-dragging {
-  cursor: grabbing !important;
+.theme-gallery {
+  display: flex;
+  gap: 1.25rem;
+  padding: 10px 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  scrollbar-width: thin;
 }
 
-.theme-gallery.is-dragging * {
-  cursor: grabbing !important;
-  pointer-events: none;
+.theme-gallery::-webkit-scrollbar {
+  height: 8px;
+}
+
+.theme-gallery::-webkit-scrollbar-track {
+  background: var(--panel-bg);
+  border-radius: 4px;
+}
+
+.theme-gallery::-webkit-scrollbar-thumb {
+  background: var(--border-color-hover);
+  border-radius: 4px;
+}
+
+.theme-gallery::-webkit-scrollbar-thumb:hover {
+  background: var(--info-color);
+}
+
+.theme-nav-btn {
+  flex-shrink: 0;
+  width: 40px;
+  height: 48px;
+  border-radius: 8px;
+  background: var(--panel-elevated-bg);
+  border: 2px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 300;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 200ms ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.theme-nav-btn:hover {
+  background: var(--toolbar-primary-bg);
+  border-color: var(--info-color);
+  color: var(--info-color);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
+}
+
+.theme-nav-btn:active {
+  transform: scale(0.95);
 }
 
 .theme-card {
+  flex: 0 0 180px;
   background: var(--panel-elevated-bg);
   border: 2px solid var(--border-color);
   border-radius: 10px;
@@ -1252,6 +1286,14 @@
   position: relative;
   overflow: hidden;
   box-shadow: var(--shadow-md);
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
+.theme-card img {
+  -webkit-user-drag: none;
+  user-drag: none;
+  pointer-events: none;
 }
 
 .theme-card:hover {

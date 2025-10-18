@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { themePresets } from '../../themes';
 import type { Preferences, Toast } from '../../types';
 import ThemePreview from './ThemePreview';
@@ -156,6 +156,19 @@ const ThemesTab: React.FC<ThemesTabProps> = ({
     }));
   }, [customPresets]);
 
+  const themeGalleryRef = useRef<HTMLDivElement>(null);
+  const customGalleryRef = useRef<HTMLDivElement>(null);
+
+  const scrollGallery = (ref: React.RefObject<HTMLDivElement>, direction: 'left' | 'right') => {
+    if (!ref.current) return;
+    const scrollAmount = 200;
+    const currentScroll = ref.current.scrollLeft;
+    const targetScroll = direction === 'left' 
+      ? currentScroll - scrollAmount 
+      : currentScroll + scrollAmount;
+    ref.current.scrollTo({ left: targetScroll, behavior: 'smooth' });
+  };
+
   return (
     <div className="tab-panel themes-tab">
       <h3>Theme Gallery</h3>
@@ -163,7 +176,16 @@ const ThemesTab: React.FC<ThemesTabProps> = ({
         Choose a pre-designed theme as a starting point for your document
       </p>
 
-      <div className="theme-gallery">
+      <div className="theme-gallery-container">
+        <button 
+          type="button" 
+          className="theme-nav-btn theme-nav-left"
+          onClick={() => scrollGallery(themeGalleryRef, 'left')}
+          title="Scroll left"
+        >
+          ‹
+        </button>
+        <div className="theme-gallery" ref={themeGalleryRef}>
         {Object.entries(themePresets).map(([id, theme]) => (
           <button
             key={id}
@@ -185,12 +207,30 @@ const ThemesTab: React.FC<ThemesTabProps> = ({
             {themeSelection === id && <div className="theme-card-badge">✓</div>}
           </button>
         ))}
+        </div>
+        <button 
+          type="button" 
+          className="theme-nav-btn theme-nav-right"
+          onClick={() => scrollGallery(themeGalleryRef, 'right')}
+          title="Scroll right"
+        >
+          ›
+        </button>
       </div>
 
       {customPresetEntries.length > 0 && (
         <>
           <h3 className="custom-presets-heading">Custom Presets</h3>
-          <div className="theme-gallery">
+          <div className="theme-gallery-container">
+            <button 
+              type="button" 
+              className="theme-nav-btn theme-nav-left"
+              onClick={() => scrollGallery(customGalleryRef, 'left')}
+              title="Scroll left"
+            >
+              ‹
+            </button>
+            <div className="theme-gallery" ref={customGalleryRef}>
             {customPresetEntries.map(({ id, preset, preview }) => (
               <button
                 key={id}
@@ -207,6 +247,15 @@ const ThemesTab: React.FC<ThemesTabProps> = ({
                 {themeSelection === id && <div className="theme-card-badge">✓</div>}
               </button>
             ))}
+            </div>
+            <button 
+              type="button" 
+              className="theme-nav-btn theme-nav-right"
+              onClick={() => scrollGallery(customGalleryRef, 'right')}
+              title="Scroll right"
+            >
+              ›
+            </button>
           </div>
         </>
       )}

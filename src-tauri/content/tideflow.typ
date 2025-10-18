@@ -231,7 +231,12 @@
       // Read width safely; consider empty string as none
       let wraw = attrs.at("width", default: none)
       let w = if type(wraw) == str and wraw.trim() != "" { wraw } else { none }
-      let im = if w != none { builtin-image(path, width: parse-length(w)) } else { builtin-image(path) }
+      // Load the image directly
+      let im = if w != none { 
+        builtin-image(path, width: parse-length(w))
+      } else { 
+        builtin-image(path)
+      }
       // Alignment: data-align takes precedence, then align, default to center
       let a = attrs.at("data-align", default: attrs.at("align", default: "center"))
       if a == "center" { align(center, im) }

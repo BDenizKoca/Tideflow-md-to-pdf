@@ -186,10 +186,11 @@ pub fn rewrite_image_paths_in_markdown(
 
     // Replace Markdown image syntax: ![alt](path "title")
     // We'll conservatively capture inside the parentheses and split off a title if present.
-    let re_md_img = Regex::new(r"!\[[^\]]*\]\(([^)]+)\)")
+    let re_md_img = Regex::new(r"!\[([^\]]*)\]\(([^)]+)\)")
         .expect("BUG: Invalid regex pattern for markdown images");
     let result = re_md_img.replace_all(input, |caps: &regex::Captures| {
-        let inside = caps.get(1).map(|m| m.as_str()).unwrap_or("").trim();
+        let alt_text = caps.get(1).map(|m| m.as_str()).unwrap_or("");
+        let inside = caps.get(2).map(|m| m.as_str()).unwrap_or("").trim();
         
         // Extract path and optional title: path [whitespace title]
         let mut path_part = inside;
@@ -217,10 +218,35 @@ pub fn rewrite_image_paths_in_markdown(
         
         let abs = absolute_norm(base_dir, path_part, assets_root, true);
         
-        if let Some(title) = title_part {
-            format!("![]({} {})", abs, title)
+        // Check if the resolved file exists (strip angle brackets if present)
+        let check_path = abs.trim_start_matches('<').trim_end_matches('>');
+        let file_exists = if is_external(check_path) {
+            // External URLs are assumed to exist (we can't check them easily)
+            true
+        } else if check_path.starts_with('/') {
+            // Root-relative path - check against content root
+            if let Some(assets_dir) = assets_root {
+                if let Some(content_root) = assets_dir.parent() {
+                    let full_path = content_root.join(check_path.trim_start_matches('/'));
+                    full_path.exists()
+                } else {
+                    false
+                }
+            } else {
+                false
+            }
         } else {
-            format!("![]({})", abs)
+            // Absolute path - check directly
+            Path::new(check_path).exists()
+        };
+        
+        if !file_exists {
+            // Replace with a text placeholder that won't break Typst compilation
+            format!("[⚠ Image not found: {}]", if alt_text.is_empty() { path_part } else { alt_text })
+        } else if let Some(title) = title_part {
+            format!("![{}]({} {})", alt_text, abs, title)
+        } else {
+            format!("![{}]({})", alt_text, abs)
         }
     });
 
@@ -236,7 +262,37 @@ pub fn rewrite_image_paths_in_markdown(
         
         let abs = absolute_norm(base_dir, src, assets_root, false);
         
-        format!("<img{} src={}{}{}{}>", before, quote, abs, after_quote, after)
+        // Check if the resolved file exists
+        let check_path = abs.as_ref();
+        let file_exists = if is_external(check_path) {
+            true
+        } else if check_path.starts_with('/') {
+            if let Some(assets_dir) = assets_root {
+                if let Some(content_root) = assets_dir.parent() {
+                    let full_path = content_root.join(check_path.trim_start_matches('/'));
+                    full_path.exists()
+                } else {
+                    false
+                }
+            } else {
+                false
+            }
+        } else {
+            Path::new(check_path).exists()
+        };
+        
+        if !file_exists {
+            // Extract alt text from HTML attributes if present
+            let alt_match = Regex::new(r#"alt=([\"'])([^\"']*)\1"#).ok()
+                .and_then(|re| re.captures(before))
+                .and_then(|c| c.get(2))
+                .map(|m| m.as_str())
+                .unwrap_or("");
+            
+            format!("[⚠ Image not found: {}]", if alt_match.is_empty() { src } else { alt_match })
+        } else {
+            format!("<img{} src={}{}{}{}>", before, quote, abs, after_quote, after)
+        }
     });
 
     // Replace raw Typst calls: #fig("path" ...) and #image('path' ...)

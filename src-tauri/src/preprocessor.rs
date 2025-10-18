@@ -74,7 +74,12 @@ fn inject_anchors(markdown: &str) -> Result<PreprocessorOutput> {
 
     let parser = Parser::new_ext(
         markdown,
-        Options::ENABLE_FOOTNOTES | Options::ENABLE_TASKLISTS,
+        Options::ENABLE_FOOTNOTES 
+            | Options::ENABLE_TASKLISTS 
+            | Options::ENABLE_STRIKETHROUGH 
+            | Options::ENABLE_TABLES
+            | Options::ENABLE_SMART_PUNCTUATION
+            | Options::ENABLE_HEADING_ATTRIBUTES,
     );
     for (event, range) in parser.into_offset_iter() {
         if let Event::Start(tag) = event {
