@@ -159,7 +159,7 @@ const ThemesTab: React.FC<ThemesTabProps> = ({
   const themeGalleryRef = useRef<HTMLDivElement>(null);
   const customGalleryRef = useRef<HTMLDivElement>(null);
 
-  const scrollGallery = (ref: React.RefObject<HTMLDivElement>, direction: 'left' | 'right') => {
+  const scrollGallery = (ref: React.RefObject<HTMLDivElement | null>, direction: 'left' | 'right') => {
     if (!ref.current) return;
     const scrollAmount = 200;
     const currentScroll = ref.current.scrollLeft;
