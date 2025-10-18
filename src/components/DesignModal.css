@@ -1287,12 +1287,10 @@
   overflow: hidden;
   box-shadow: var(--shadow-md);
   -webkit-user-drag: none;
-  user-drag: none;
 }
 
 .theme-card img {
   -webkit-user-drag: none;
-  user-drag: none;
   pointer-events: none;
 }
 
