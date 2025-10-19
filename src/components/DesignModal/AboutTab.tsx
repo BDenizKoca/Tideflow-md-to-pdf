@@ -52,7 +52,7 @@ const AboutTab: React.FC = () => {
         </ul>
         <div className="about-actions">
           <button
-            onClick={handleExternalLink('https://github.com/BDenizKoca')}
+            onClick={handleExternalLink('https://payhip.com/b/TmIMF')}
             className="btn-primary"
           >
             Get Tideflow Pro ($10)

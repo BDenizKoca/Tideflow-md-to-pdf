@@ -179,9 +179,15 @@ const Editor: React.FC = () => {
 
       unlisten = await listen<{ paths: string[]; position: { x: number; y: number } } | string[]>('tauri://drag-drop', async (event) => {
         // Handle both payload formats: object with paths property, or array directly
-        const paths = (event.payload && typeof event.payload === 'object' && 'paths' in event.payload)
-          ? event.payload.paths
-          : Array.isArray(event.payload) ? event.payload : [];
+        const payload = event.payload;
+        const paths = (payload && typeof payload === 'object' && 'paths' in payload)
+          ? payload.paths
+          : Array.isArray(payload) ? payload : [];
+        
+        // Get drop position if available
+        const position = (payload && typeof payload === 'object' && 'position' in payload) 
+          ? payload.position 
+          : null;
 
         if (paths && paths.length > 0) {
           const filePath = paths[0];
@@ -192,21 +198,46 @@ const Editor: React.FC = () => {
           }
           lastProcessedFileRef.current = filePath;
 
+          // Check if file was dropped on the editor text area
+          const droppedOnEditor = position && editorStateRefs.editorViewRef.current?.dom && (() => {
+            const editorRect = editorStateRefs.editorViewRef.current.dom.getBoundingClientRect();
+            const isInBounds = position.x >= editorRect.left && 
+                   position.x <= editorRect.right && 
+                   position.y >= editorRect.top && 
+                   position.y <= editorRect.bottom;
+            console.log('[Editor] Drop position check:', { position, editorRect, isInBounds });
+            return isInBounds;
+          })();
+
+          console.log('[Editor] Dropped on editor:', droppedOnEditor);
+
           // Check if it's a markdown file
           if (filePath.endsWith('.md') || filePath.endsWith('.markdown')) {
             try {
-              const content = await readMarkdownFile(filePath);
-              const fileName = filePath.split(/[\\/]/).pop() || filePath;
-              addOpenFile(fileName);
-              setCurrentFile(fileName);
-              setContent(content);
-              addRecentFile(filePath);
-              addToast({ message: `Opened file: ${fileName}`, type: 'success' });
+              // If dropped on editor area, insert content at cursor
+              if (droppedOnEditor && editorStateRefs.editorViewRef.current) {
+                const content = await readMarkdownFile(filePath);
+                const state = editorStateRefs.editorViewRef.current.state;
+                const transaction = state.update({
+                  changes: { from: state.selection.main.head, insert: content }
+                });
+                editorStateRefs.editorViewRef.current.dispatch(transaction);
+                addToast({ message: `Inserted content from: ${filePath.split(/[\\/]/).pop()}`, type: 'success' });
+              } 
+              // Otherwise, open as new tab
+              else {
+                const content = await readMarkdownFile(filePath);
+                addOpenFile(filePath);
+                setCurrentFile(filePath);
+                setContent(content);
+                addRecentFile(filePath);
+                addToast({ message: `Opened file: ${filePath.split(/[\\/]/).pop()}`, type: 'success' });
+              }
             } catch (err) {
-              handleError(err, { operation: 'open dropped markdown file', component: 'Editor' });
+              handleError(err, { operation: 'handle dropped markdown file', component: 'Editor' });
             }
           }
-          // Check if it's an image
+          // Check if it's an image - always insert at cursor
           else if (filePath.match(/\.(png|jpg|jpeg|gif|bmp|webp|svg)$/i)) {
             try {
               const assetPath = await importImageFromPath(filePath);
