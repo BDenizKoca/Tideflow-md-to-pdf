@@ -6,8 +6,8 @@
 **Fast, offline-first Markdown → PDF desktop app powered by Typst**
 Write on the left, get a beautifully typeset PDF on the right – instantly.
 
-[![CI](https://github.com/BDenizKoca/Md-to-PDF/actions/workflows/ci.yml/badge.svg)](https://github.com/BDenizKoca/Md-to-PDF/actions/workflows/ci.yml)
-[![Release](https://github.com/BDenizKoca/Md-to-PDF/actions/workflows/release.yml/badge.svg)](https://github.com/BDenizKoca/Md-to-PDF/actions/workflows/release.yml)
+[![CI](https://github.com/BDenizKoca/Tideflow-md-to-pdf/actions/workflows/ci.yml/badge.svg)](https://github.com/BDenizKoca/Tideflow-md-to-pdf/actions/workflows/ci.yml)
+[![Release](https://github.com/BDenizKoca/Tideflow-md-to-pdf/actions/workflows/release.yml/badge.svg)](https://github.com/BDenizKoca/Tideflow-md-to-pdf/actions/workflows/release.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 </div>
@@ -59,7 +59,7 @@ https://github.com/user-attachments/assets/fea9562b-a315-44c1-abc9-1778ab4cd428
 ### Download Pre-built Binaries (Recommended)
 
 **Windows:**
-- Download `Tideflow_X.X.X_x64-setup.exe` from [Releases](https://github.com/BDenizKoca/Md-to-PDF/releases)
+- Download `Tideflow_X.X.X_x64-setup.exe` from [Releases](https://github.com/BDenizKoca/Tideflow-md-to-pdf/releases)
 - Run the installer
 
 **Linux:**
@@ -79,8 +79,8 @@ https://github.com/user-attachments/assets/fea9562b-a315-44c1-abc9-1778ab4cd428
 
 #### Clone & Run
 ```bash
-git clone https://github.com/BDenizKoca/Md-to-PDF.git
-cd Md-to-PDF
+git clone https://github.com/BDenizKoca/Tideflow-md-to-pdf.git
+cd Tideflow-md-to-pdf
 npm install
 npm run tauri:dev
 ```

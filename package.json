@@ -1,8 +1,13 @@
 {
-  "name": "mdtopdf",
+  "name": "tideflow-free",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.2.1",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BDenizKoca/Tideflow-md-to-pdf.git"
+  },
+  "author": "Burak Deniz Koca <b.denizkoca@gmail.com>",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

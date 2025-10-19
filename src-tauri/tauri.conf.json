@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Tideflow",
   "version": "1.2.1",
-  "identifier": "com.tideflow.app",
+  "identifier": "com.tideflow.app.free",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:3000",
@@ -18,7 +18,7 @@
         "resizable": true,
         "fullscreen": false,
         "center": true,
-        "dragDropEnabled": false
+        "dragDropEnabled": true
       }
     ],
     "security": {
@@ -56,6 +56,6 @@
       "styles/*",
       "bin/typst/**/*"
     ],
-    "copyright": "© 2025 Tideflow Team"
+    "copyright": "© 2025 Burak Deniz Koca"
   }
 }
