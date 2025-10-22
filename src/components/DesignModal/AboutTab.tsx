@@ -29,6 +29,9 @@ const AboutTab: React.FC = () => {
           <strong>Advanced Theming Engine:</strong> Take full control of your document's appearance with customizable themes, fonts, cover pages, and a table of contents.
         </li>
         <li>
+          <strong>Multiple Export Formats:</strong> Export your documents as PDF, high-quality PNG images, or scalable SVG vectors.
+        </li>
+        <li>
           <strong>Offline and Private:</strong> Your files stay on your machine, always.
         </li>
       </ul>
@@ -40,9 +43,6 @@ const AboutTab: React.FC = () => {
           Unlock a couple of extra powers with a <strong>one-time Tideflow Pro purchase</strong>:
         </p>
         <ul className="features-list">
-          <li>
-            <strong>Advanced Export (PNG/SVG):</strong> Export your documents as high-quality PNG images or scalable SVG vectors, perfect for presentations and web use.
-          </li>
           <li>
             <strong>Batch Export:</strong> Export multiple documents at once for max productivity.
           </li>
