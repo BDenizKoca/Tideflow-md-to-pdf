@@ -1,5 +1,6 @@
 /// Rendering operation commands: compile markdown/typst to PDF
 use crate::renderer::{self, RenderedDocument};
+use crate::image_export;
 use std::fs;
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Emitter};
@@ -97,4 +98,31 @@ pub async fn render_typst(
             Err(e.to_string())
         }
     }
+}
+
+/// Export the current document as PNG
+#[tauri::command]
+pub async fn export_as_png(
+    app_handle: AppHandle,
+    content: &str,
+    destination: &str,
+    ppi: Option<u32>,
+    current_file: Option<&str>,
+) -> Result<String, String> {
+    image_export::export_as_image(&app_handle, content, destination, "png", ppi, current_file)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+/// Export the current document as SVG
+#[tauri::command]
+pub async fn export_as_svg(
+    app_handle: AppHandle,
+    content: &str,
+    destination: &str,
+    current_file: Option<&str>,
+) -> Result<String, String> {
+    image_export::export_as_image(&app_handle, content, destination, "svg", None, current_file)
+        .await
+        .map_err(|e| e.to_string())
 }

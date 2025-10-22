@@ -446,3 +446,31 @@ export async function cleanupTempPdfs(keepLastN?: number): Promise<{
 export async function openPdfInViewer(pdfPath: string): Promise<void> {
   return invoke('open_pdf_in_viewer', { pdfPath });
 }
+
+// Export as PNG with optional PPI (pixels per inch) setting
+export async function exportAsPng(
+  content: string,
+  destination: string,
+  ppi?: number,
+  currentFile?: string | null
+): Promise<string> {
+  return invoke('export_as_png', {
+    content,
+    destination,
+    ppi: ppi || 144, // Default to 144 PPI for good quality
+    currentFile: currentFile || null
+  });
+}
+
+// Export as SVG (vector format)
+export async function exportAsSvg(
+  content: string,
+  destination: string,
+  currentFile?: string | null
+): Promise<string> {
+  return invoke('export_as_svg', {
+    content,
+    destination,
+    currentFile: currentFile || null
+  });
+}

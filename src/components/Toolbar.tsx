@@ -8,7 +8,7 @@ import Dropdown from './Dropdown';
 import { invoke } from '@tauri-apps/api/core';
 import { save, open } from '@tauri-apps/plugin-dialog';
 import { handleError, showSuccess } from '../utils/errorHandler';
-import { readMarkdownFile, createFile, writeMarkdownFile } from '../api';
+import { readMarkdownFile, createFile, writeMarkdownFile, exportAsPng, exportAsSvg } from '../api';
 import { scrubRawTypstAnchors } from '../utils/scrubAnchors';
 import './Toolbar.css';
 
@@ -225,6 +225,56 @@ const Toolbar: React.FC = () => {
     }
   };
 
+  const handleExportPNG = async () => {
+    try {
+      let dest = await save({
+        title: 'Export as PNG',
+        filters: [{ name: 'PNG Image', extensions: ['png'] }],
+        defaultPath: 'document.png'
+      }).catch(() => null);
+
+      if (!dest) return;
+      if (!dest.toLowerCase().endsWith('.png')) dest = dest + '.png';
+
+      // Export using current content (no file needed!)
+      await exportAsPng(editor.content, dest, 144, editor.currentFile);
+
+      // Extract base name for multi-page message
+      const baseName = dest.replace(/\.png$/i, '');
+      showSuccess(`Exported PNG files: ${baseName}-1.png, ${baseName}-2.png, ...`);
+      addToast({ type: 'success', message: 'PNG exported successfully! (multi-page documents create separate files)' });
+      setExportDropdownOpen(false);
+    } catch (err) {
+      addToast({ type: 'error', message: 'Failed to export PNG' });
+      handleError(err, { operation: 'export PNG', component: 'Toolbar' });
+    }
+  };
+
+  const handleExportSVG = async () => {
+    try {
+      let dest = await save({
+        title: 'Export as SVG',
+        filters: [{ name: 'SVG Vector', extensions: ['svg'] }],
+        defaultPath: 'document.svg'
+      }).catch(() => null);
+
+      if (!dest) return;
+      if (!dest.toLowerCase().endsWith('.svg')) dest = dest + '.svg';
+
+      // Export using current content (no file needed!)
+      await exportAsSvg(editor.content, dest, editor.currentFile);
+
+      // Extract base name for multi-page message
+      const baseName = dest.replace(/\.svg$/i, '');
+      showSuccess(`Exported SVG files: ${baseName}-1.svg, ${baseName}-2.svg, ...`);
+      addToast({ type: 'success', message: 'SVG exported successfully! (multi-page documents create separate files)' });
+      setExportDropdownOpen(false);
+    } catch (err) {
+      addToast({ type: 'error', message: 'Failed to export SVG' });
+      handleError(err, { operation: 'export SVG', component: 'Toolbar' });
+    }
+  };
+
   return (
     <div className="toolbar">
       <input
@@ -423,27 +473,19 @@ const Toolbar: React.FC = () => {
             >
               <button
                 type="button"
-                className="dropdown-item dropdown-item-locked"
-                onClick={() => {
-                  setExportDropdownOpen(false);
-                  setSettingsModalActiveTab('about');
-                  setSettingsModalOpen(true);
-                }}
-                title="PNG export is a Pro feature. Click to learn more."
+                className="dropdown-item"
+                onClick={handleExportPNG}
+                title="Export as PNG image"
               >
-                🔒 Export as PNG
+                🖼️ Export as PNG
               </button>
               <button
                 type="button"
-                className="dropdown-item dropdown-item-locked"
-                onClick={() => {
-                  setExportDropdownOpen(false);
-                  setSettingsModalActiveTab('about');
-                  setSettingsModalOpen(true);
-                }}
-                title="SVG export is a Pro feature. Click to learn more."
+                className="dropdown-item"
+                onClick={handleExportSVG}
+                title="Export as SVG vector"
               >
-                🔒 Export as SVG
+                🎨 Export as SVG
               </button>
             </Dropdown>
           </div>

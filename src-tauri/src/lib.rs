@@ -1,5 +1,6 @@
 mod commands;
 mod error;
+mod image_export;
 mod preferences;
 mod preprocessor;
 mod render_pipeline;
@@ -34,6 +35,8 @@ pub fn run() {
         commands::export_markdown,
         commands::save_pdf_as,
         commands::render_typst,
+        commands::export_as_png,
+        commands::export_as_svg,
         commands::typst_diagnostics,
         commands::get_cache_stats,
         commands::clear_render_cache,
