@@ -47,8 +47,17 @@ export async function renderPdfPages(
       canvas.className = 'pdfjs-page-canvas';
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
+
+      // Account for device pixel ratio for sharp rendering on high-DPI displays
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = viewport.width * dpr;
+      canvas.height = viewport.height * dpr;
+      canvas.style.width = `${viewport.width}px`;
+      canvas.style.height = `${viewport.height}px`;
+
+      // Scale the context to match the device pixel ratio
+      ctx.scale(dpr, dpr);
+
       tmpWrap.appendChild(canvas);
       await page.render({ canvasContext: ctx, viewport }).promise;
     })();
