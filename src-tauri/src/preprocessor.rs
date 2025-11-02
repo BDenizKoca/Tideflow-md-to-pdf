@@ -93,6 +93,13 @@ fn inject_anchors(markdown: &str) -> Result<PreprocessorOutput> {
             if matches!(tag, Tag::BlockQuote) {
                 continue;
             }
+
+            // SKIP table-related tags - injecting anchors inside tables breaks markdown table syntax.
+            // Tables need to be continuous without interruption. We'll get an anchor before the table
+            // starts, which is sufficient for scrolling to table content.
+            if matches!(tag, Tag::Table(_) | Tag::TableHead | Tag::TableRow | Tag::TableCell) {
+                continue;
+            }
             
             let insertion_offset = range.start;
             
