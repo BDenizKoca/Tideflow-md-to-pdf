@@ -215,8 +215,20 @@
 
 #render(md_content,
   smart-punctuation: false,
+  raw-typst: false,
+  // Enable math rendering - Typst math syntax is close enough to LaTeX
+  math: (block: false, body) => {
+    // Just wrap in $ delimiters and let Typst parse it
+    // Most common LaTeX math works in Typst with minor differences
+    if block {
+      // Block math - display style, centered
+      [$ #body $]
+    } else {
+      // Inline math
+      [$#body$]
+    }
+  },
   scope: (
-    // Override link to use our safe version
     link: safe-link,
   ),
   // Note: cmarker 0.1.6 follows standard Markdown line break rules:

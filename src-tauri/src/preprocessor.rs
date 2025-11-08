@@ -94,6 +94,12 @@ fn inject_anchors(markdown: &str) -> Result<PreprocessorOutput> {
                 continue;
             }
 
+            // SKIP code block tags - injecting anchors inside code blocks breaks syntax
+            // Code blocks must remain untouched. We'll get anchors before/after which is sufficient.
+            if matches!(tag, Tag::CodeBlock(_)) {
+                continue;
+            }
+
             // SKIP table-related tags - injecting anchors inside tables breaks markdown table syntax.
             // Tables need to be continuous without interruption. We'll get an anchor before the table
             // starts, which is sufficient for scrolling to table content.
