@@ -215,7 +215,7 @@
 
 #render(md_content,
   smart-punctuation: false,
-  raw-typst: false,
+  raw-typst: true,
   // Enable math rendering - Typst math syntax is close enough to LaTeX
   math: (block: false, body) => {
     // Just wrap in $ delimiters and let Typst parse it
