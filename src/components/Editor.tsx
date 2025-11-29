@@ -51,7 +51,7 @@ const Editor: React.FC = () => {
 
   // Local state
   const [, setIsSaving] = useState(false);
-  const [selectedFont, setSelectedFont] = useState<string>("New Computer Modern");
+  const [selectedFont, setSelectedFont] = useState<string>("Latin Modern Roman");
   const [editorReady, setEditorReady] = useState(false);
   const listenerSetupRef = useRef(false);
   const lastProcessedFileRef = useRef<string | null>(null);
@@ -310,17 +310,144 @@ const Editor: React.FC = () => {
     }
   }, [editorStateRefs.editorViewRef]);
 
-  // Global Ctrl+F handler - works even when editor doesn't have focus
+  // Global keyboard shortcuts handler
   React.useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      // Check for Ctrl+F (or Cmd+F on Mac)
-      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-        // Prevent default browser find
+      const isMod = e.ctrlKey || e.metaKey; // Ctrl on Windows/Linux, Cmd on Mac
+      const view = editorStateRefs.editorViewRef.current;
+
+      // File Operations
+      if (isMod && !e.shiftKey && e.key === 'n') {
         e.preventDefault();
         e.stopPropagation();
+        // Trigger new file - handled by Toolbar
+        const newBtn = document.querySelector<HTMLButtonElement>('button[title*="New File"]');
+        newBtn?.click();
+        return;
+      }
 
-        // Toggle search panel
+      if (isMod && !e.shiftKey && e.key === 'o') {
+        e.preventDefault();
+        e.stopPropagation();
+        // Trigger open file - handled by Toolbar
+        const openBtn = document.querySelector<HTMLButtonElement>('button[title*="Open File"]');
+        openBtn?.click();
+        return;
+      }
+
+      if (isMod && !e.shiftKey && e.key === 's') {
+        e.preventDefault();
+        e.stopPropagation();
+        // Save handled by file operations hook
+        handleSave();
+        return;
+      }
+
+      // Text Formatting (only when editor is available)
+      if (view) {
+        if (isMod && !e.shiftKey && e.key === 'b') {
+          e.preventDefault();
+          e.stopPropagation();
+          cmd.bold(view);
+          return;
+        }
+
+        if (isMod && !e.shiftKey && e.key === 'i') {
+          e.preventDefault();
+          e.stopPropagation();
+          cmd.italic(view);
+          return;
+        }
+
+        if (isMod && !e.shiftKey && e.key === 'u') {
+          e.preventDefault();
+          e.stopPropagation();
+          cmd.underline(view);
+          return;
+        }
+
+        if (isMod && !e.shiftKey && e.key === 'k') {
+          e.preventDefault();
+          e.stopPropagation();
+          cmd.link(view);
+          return;
+        }
+
+        if (isMod && e.shiftKey && e.key === 'K') {
+          e.preventDefault();
+          e.stopPropagation();
+          cmd.codeBlock(view);
+          return;
+        }
+
+        // Document Structure
+        if (isMod && !e.shiftKey && e.key === 'h') {
+          e.preventDefault();
+          e.stopPropagation();
+          cmd.heading(view, 1);
+          return;
+        }
+
+        if (isMod && !e.shiftKey && e.key === 'l') {
+          e.preventDefault();
+          e.stopPropagation();
+          cmd.ul(view);
+          return;
+        }
+
+        if (isMod && e.shiftKey && e.key === 'Q') {
+          e.preventDefault();
+          e.stopPropagation();
+          cmd.quote(view);
+          return;
+        }
+
+        if (isMod && e.shiftKey && e.key === 'T') {
+          e.preventDefault();
+          e.stopPropagation();
+          cmd.table(view);
+          return;
+        }
+      }
+
+      // View & Navigation
+      if (isMod && e.shiftKey && e.key === 'P') {
+        e.preventDefault();
+        e.stopPropagation();
+        setPreviewVisible(!useUIStore.getState().previewVisible);
+        return;
+      }
+
+      if (isMod && !e.shiftKey && e.key === 'f') {
+        e.preventDefault();
+        e.stopPropagation();
         handleSearchToggle();
+        return;
+      }
+
+      if (isMod && !e.shiftKey && e.key === ',') {
+        e.preventDefault();
+        e.stopPropagation();
+        const uiStore = useUIStore.getState();
+        uiStore.setDesignModalOpen(true);
+        return;
+      }
+
+      // Export & Actions
+      if (isMod && !e.shiftKey && e.key === 'e') {
+        e.preventDefault();
+        e.stopPropagation();
+        // Trigger export PDF - handled by Toolbar
+        const exportBtn = document.querySelector<HTMLButtonElement>('button[title*="Export PDF"]');
+        exportBtn?.click();
+        return;
+      }
+
+      if (isMod && !e.shiftKey && e.key === 'r') {
+        e.preventDefault();
+        e.stopPropagation();
+        handleRenderWithPreview();
+        return;
       }
     };
 
@@ -331,7 +458,7 @@ const Editor: React.FC = () => {
     return () => {
       window.removeEventListener('keydown', handleGlobalKeyDown, true);
     };
-  }, [handleSearchToggle]);
+  }, [handleSearchToggle, handleSave, handleRenderWithPreview, setPreviewVisible, editorStateRefs.editorViewRef]);
 
   // Handle font changes
   const handleFontChange = async (font: string) => {

@@ -15,6 +15,36 @@ export const formattingCommands = {
   /** Toggle strikethrough formatting */
   strike: (view: EditorView) => toggleInline(view, "~~", /^~~([\s\S]+)~~$/),
 
+  /** Toggle underline formatting */
+  underline: (view: EditorView) => {
+    const s = view.state.selection.main;
+    let text = view.state.sliceDoc(s.from, s.to) || "text";
+
+    // Strip Typst wrappers first
+    text = stripTypstWrappers(text);
+
+    // Check if already wrapped with raw-typst underline
+    const typstPattern = /^<!--raw-typst\s+#underline\[([\s\S]+?)\]\s*-->$/;
+    const directMatch = typstPattern.exec(text);
+
+    if (directMatch) {
+      // Unwrap - remove the Typst underline wrapper
+      view.dispatch({
+        changes: { from: s.from, to: s.to, insert: directMatch[1] },
+        selection: { anchor: s.from, head: s.from + directMatch[1].length }
+      });
+      return;
+    }
+
+    // Apply underline using Typst's native function
+    const cleanText = text.replace(/\s+/g, ' ').trim();
+    const wrapped = `<!--raw-typst #underline[${cleanText}] -->`;
+    view.dispatch({
+      changes: { from: s.from, to: s.to, insert: wrapped },
+      selection: { anchor: s.from, head: s.from + wrapped.length }
+    });
+  },
+
   /** Toggle inline code formatting */
   codeInline: (view: EditorView) => toggleInline(view, "`", /^`([\s\S]+)`$/),
 

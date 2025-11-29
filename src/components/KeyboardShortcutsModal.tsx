@@ -47,7 +47,7 @@ const shortcuts: ShortcutCategory[] = [
   {
     category: 'View & Navigation',
     shortcuts: [
-      { keys: 'Ctrl+\\', description: 'Toggle preview' },
+      { keys: 'Ctrl+Shift+P', description: 'Toggle preview' },
       { keys: 'Ctrl+F', description: 'Find in document' },
       { keys: 'Ctrl+,', description: 'Open Design settings' },
     ],
