@@ -17,7 +17,7 @@ pub fn run() {
     .setup(|app| {
         // Initialize app directories if needed
         let app_handle = app.handle();
-        utils::initialize_app_directories(&app_handle)?;
+        utils::initialize_app_directories(app_handle)?;
         
         Ok(())
     })

@@ -175,10 +175,10 @@ pub fn rewrite_image_paths_in_markdown(
         }
 
         // Re-wrap if original had angle brackets, or add if spaces/parens present
-        if wrap_for_markdown {
-            if had_angle || path_str.contains(' ') || path_str.contains('(') || path_str.contains(')') {
-                path_str = format!("<{}>", path_str);
-            }
+        if wrap_for_markdown
+            && (had_angle || path_str.contains(' ') || path_str.contains('(') || path_str.contains(')'))
+        {
+            path_str = format!("<{}>", path_str);
         }
         
         Cow::Owned(path_str)
@@ -283,10 +283,17 @@ pub fn rewrite_image_paths_in_markdown(
         
         if !file_exists {
             // Extract alt text from HTML attributes if present
-            let alt_match = Regex::new(r#"alt=([\"'])([^\"']*)\1"#).ok()
+            // Note: We match both quote styles separately since Rust regex doesn't support backreferences
+            let alt_match = Regex::new(r#"alt="([^"]*)""#).ok()
                 .and_then(|re| re.captures(before))
-                .and_then(|c| c.get(2))
+                .and_then(|c| c.get(1))
                 .map(|m| m.as_str())
+                .or_else(|| {
+                    Regex::new(r#"alt='([^']*)"#).ok()
+                        .and_then(|re| re.captures(before))
+                        .and_then(|c| c.get(1))
+                        .map(|m| m.as_str())
+                })
                 .unwrap_or("");
             
             format!("[⚠ Image not found: {}]", if alt_match.is_empty() { src } else { alt_match })

@@ -3,7 +3,7 @@
 #let default_theme(prefs, doc) = {
   // Extract preferences with defaults
   let main-font = prefs.fonts.at("main", default: "New Computer Modern")
-  let mono-font = prefs.fonts.at("mono", default: "Liberation Mono")
+  let mono-font = prefs.fonts.at("mono", default: "Latin Modern Mono")
   let font-size = prefs.at("font_size", default: 11) * 1pt
   let page-bg = rgb(prefs.at("page_bg_color", default: "#ffffff"))
   let font-color = rgb(prefs.at("font_color", default: "#000000"))

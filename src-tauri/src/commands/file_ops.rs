@@ -266,7 +266,7 @@ pub async fn open_pdf_in_viewer(pdf_path: &str) -> Result<(), String> {
         );
         
         let result = Command::new("powershell")
-            .args(&[
+            .args([
                 "-WindowStyle", "Hidden",
                 "-NoProfile",
                 "-NonInteractive",

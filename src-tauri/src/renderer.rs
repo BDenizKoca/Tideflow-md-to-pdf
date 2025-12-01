@@ -60,7 +60,7 @@ fn build_source_map(
     //
     // We detect this by running `typst --version` and checking for
     // "0.13." in the output.
-    let mut version_cmd = render_pipeline::typst_command(&typst_path);
+    let mut version_cmd = render_pipeline::typst_command(typst_path);
     if let Some(env) = package_env.as_ref() {
         version_cmd.env("TYPST_PACKAGE_PATH", env);
     }
@@ -82,7 +82,7 @@ fn build_source_map(
 
     // Try multiple selector variants to support different Typst versions.
     // Some Typst releases expect element-style selectors (e.g. element(label)).
-    let selector_variants = vec!["label", "element(label)", "element('label')", "element(\"label\")", "element.label"];
+    let selector_variants = ["label", "element(label)", "element('label')", "element(\"label\")", "element.label"];
     let mut tried_any = false;
     for selector in selector_variants.iter() {
         let args = [
@@ -95,13 +95,13 @@ fn build_source_map(
             selector,
         ];
         println!("[renderer] running typst query args: {:?}", args);
-        let mut query_cmd = render_pipeline::typst_command(&typst_path);
+        let mut query_cmd = render_pipeline::typst_command(typst_path);
         if let Some(env) = package_env.as_ref() {
             query_cmd.env("TYPST_PACKAGE_PATH", env);
         }
         let query_result = query_cmd
             .current_dir(build_dir)
-            .args(&args)
+            .args(args)
             .output();
 
         tried_any = true;

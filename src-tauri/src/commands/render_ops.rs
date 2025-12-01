@@ -77,7 +77,7 @@ pub async fn save_pdf_as(
         if let Err(e) = fs::create_dir_all(parent) { return Err(e.to_string()); }
     }
 
-    fs::copy(&pdf_source, &dest_path).map_err(|e| e.to_string())?;
+    fs::copy(&pdf_source, dest_path).map_err(|e| e.to_string())?;
     Ok(dest_path.to_string_lossy().to_string())
 }
 

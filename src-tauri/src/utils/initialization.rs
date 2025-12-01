@@ -66,8 +66,8 @@ pub fn ensure_tideflow_template_exists(app_handle: &AppHandle) -> Result<PathBuf
 /// Copy tideflow.typ template and themes from resources to user content directory
 fn copy_tideflow_template(
     _app_handle: &AppHandle,
-    resource_dir: &PathBuf,
-    content_dir: &PathBuf,
+    resource_dir: &std::path::Path,
+    content_dir: &std::path::Path,
 ) -> Result<()> {
     let user_typst_template = content_dir.join("tideflow.typ");
     
@@ -166,7 +166,7 @@ fn copy_tideflow_template(
 }
 
 /// Copy style files from resources to user styles directory
-fn copy_style_files(resource_dir: &PathBuf, styles_dir: &PathBuf) -> Result<()> {
+fn copy_style_files(resource_dir: &std::path::Path, styles_dir: &std::path::Path) -> Result<()> {
     let resource_styles_dir = resource_dir.join("styles");
     
     if resource_styles_dir.exists() {

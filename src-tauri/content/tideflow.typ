@@ -193,23 +193,46 @@
 #let image = (path, alt: none, ..n) => builtin-image(path, alt: alt, ..n)
 
 // Safe link function that doesn't fail on missing labels
-// Inspired by laurmaedje's maybe-image pattern
+// cmarker passes: label type for internal links, str for external URLs
 #let safe-link(target, body) = context {
-  let target-label = if type(target) == label {
-    target
+  // If cmarker passes a label directly (internal links like [text](#anchor))
+  if type(target) == label {
+    let results = query(target)
+    if results.len() > 0 {
+      link(target, body)
+    } else {
+      // Label doesn't exist - just show the text (no broken link)
+      body
+    }
+  } else if type(target) == str {
+    // String target - check if external URL or internal anchor
+    if target.starts-with("http://") or target.starts-with("https://") or target.starts-with("mailto:") or target.starts-with("tel:") {
+      // External link - pass through to native link
+      link(target, body)
+    } else if target.starts-with("#") {
+      // Internal anchor with # prefix - strip and convert to label
+      let label-name = target.slice(1)
+      let target-label = label(label-name)
+      let results = query(target-label)
+      if results.len() > 0 {
+        link(target-label, body)
+      } else {
+        body
+      }
+    } else {
+      // Other string - try as label name directly
+      let target-label = label(target)
+      let results = query(target-label)
+      if results.len() > 0 {
+        link(target-label, body)
+      } else {
+        // Fallback: try as regular link
+        link(target, body)
+      }
+    }
   } else {
-    label(target)
-  }
-  
-  // Check if the label exists in the document
-  let results = query(target-label)
-  
-  if results.len() > 0 {
-    // Label exists - create a proper link
-    link(target-label, body)
-  } else {
-    // Label doesn't exist - just show the body text
-    body
+    // Unknown type - try native link
+    link(target, body)
   }
 }
 

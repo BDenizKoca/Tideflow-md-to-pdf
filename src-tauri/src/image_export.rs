@@ -1,7 +1,7 @@
-/// Image export functionality (PNG/SVG) - Pro version exclusive
-///
-/// This module provides functions to export Typst documents to image formats.
-/// Separated from the main renderer to simplify merging with Free version.
+//! Image export functionality (PNG/SVG) - Pro version exclusive
+//!
+//! This module provides functions to export Typst documents to image formats.
+//! Separated from the main renderer to simplify merging with Free version.
 
 use crate::preprocessor::preprocess_markdown;
 use crate::render_pipeline::{self, RenderConfig};

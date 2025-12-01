@@ -1,8 +1,8 @@
-/// Shared rendering pipeline utilities to eliminate duplication across render functions.
-/// 
-/// This module extracts common setup logic for preferences, templates, assets, and Typst
-/// compilation that was previously duplicated 3x across render_markdown, export_markdown,
-/// and render_typst functions.
+//! Shared rendering pipeline utilities to eliminate duplication across render functions.
+//!
+//! This module extracts common setup logic for preferences, templates, assets, and Typst
+//! compilation that was previously duplicated 3x across render_markdown, export_markdown,
+//! and render_typst functions.
 
 use crate::utils;
 use anyhow::{anyhow, Result};

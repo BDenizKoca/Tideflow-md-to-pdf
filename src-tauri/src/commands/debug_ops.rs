@@ -66,8 +66,7 @@ pub async fn debug_paths(app_handle: AppHandle) -> Result<DebugPathsResponse, St
     let build_prefs_path = build_dir.join("prefs.json");
 
     // Load current logical preferences via API (source of truth at time of call)
-    let prefs_struct = preferences::get_preferences(app_handle.clone()).await
-        .map_err(|e| e)?;
+    let prefs_struct = preferences::get_preferences(app_handle.clone()).await?;
     let prefs_json = serde_json::to_value(&prefs_struct)
         .map_err(|e| e.to_string())?;
 
