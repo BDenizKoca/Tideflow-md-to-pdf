@@ -193,8 +193,8 @@ impl<'a> InjectionContext<'a> {
             return;
         }
 
-        // Skip list items and blockquotes
-        if matches!(tag, Tag::Item | Tag::BlockQuote) {
+        // Skip lists, list items, and blockquotes - injecting anchors breaks nesting
+        if matches!(tag, Tag::List(_) | Tag::Item | Tag::BlockQuote) {
             return;
         }
 
@@ -412,5 +412,15 @@ mod tests {
         let result = inject_anchors(md).unwrap();
         assert!(result.markdown.contains("tf-doc-start"));
         assert!(result.markdown.contains("#label(\"hello\")"));
+    }
+
+    #[test]
+    fn test_nested_lists() {
+        let md = "- Item 1\n  - Nested 1\n  - Nested 2\n- Item 2";
+        let result = inject_anchors(md).unwrap();
+        println!("OUTPUT:\n{}", result.markdown);
+        // Nested list structure should be preserved
+        assert!(result.markdown.contains("  - Nested 1"));
+        assert!(result.markdown.contains("  - Nested 2"));
     }
 }
