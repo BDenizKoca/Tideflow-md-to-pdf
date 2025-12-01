@@ -104,91 +104,79 @@
   }
 } else { it };
 
+// Parse preference values
 #let margin_x = parse-length(prefs.margin.x)
 #let margin_y = parse-length(prefs.margin.y)
-
-// Basic page setup without numbering/header (will be set conditionally later)
-// Don't set columns here - let the theme handle it initially
-#set page(
-  paper: prefs.papersize, 
-  margin: (x: margin_x, y: margin_y)
-)
-
-// Apply line height
-#let line_height_val = if "line_height" in prefs { prefs.line_height } else { 1.5 }
-#set par(leading: (line_height_val - 1.0) * 1em)
-
-// Apply paragraph spacing
-#let para_spacing = if "paragraph_spacing" in prefs { 
-  eval(prefs.paragraph_spacing)
-} else { 
-  0.65em 
-}
-#set block(spacing: para_spacing)
-
-// Store section numbering preference for later
-#let number_sections = if "numberSections" in prefs { prefs.numberSections } else { true }
-
-// CRITICAL: Disable any automatic outline generation by Typst or cmarker
-#set outline(title: none)
-
-// Read markdown content
-#let md_content = read("content.md")
-
-// Determine if we need two-column layout for main content
+#let is_landscape = if "page_orientation" in prefs { prefs.page_orientation == "landscape" } else { false }
 #let two_column_layout = if "two_column_layout" in prefs { prefs.two_column_layout } else { false }
 #let toc_two_column = if "toc_two_column" in prefs { prefs.toc_two_column } else { false }
 #let show_page_numbers = if "page_numbers" in prefs { prefs.page_numbers } else { false }
 #let show_header = if "header_title" in prefs { prefs.header_title } else { false }
 #let header_text = if "header_text" in prefs { prefs.header_text } else { "" }
+#let number_sections = if "numberSections" in prefs { prefs.numberSections } else { true }
+#let line_height_val = if "line_height" in prefs { prefs.line_height } else { 1.5 }
+#let para_spacing = if "paragraph_spacing" in prefs { eval(prefs.paragraph_spacing) } else { 0.65em }
 
-// Render cover in single-column mode
-#if cover_enabled [
-  #set page(columns: 1, numbering: none)
-  #render_cover_page
-  #pagebreak()
-]
+// Read markdown content
+#let md_content = read("content.md")
 
-// Render TOC with optional two-column layout
-#if prefs.toc [
-  #set page(columns: if toc_two_column { 2 } else { 1 }, numbering: none)
-  
-  #let has_custom_title = "toc_title" in prefs and prefs.toc_title.trim() != ""
-  #if has_custom_title [
-    #text(size: 16pt, weight: 600)[#prefs.toc_title]
-    #v(6pt)
-  ]
-  
-  // Generate outline explicitly here without numbering
-  #set heading(numbering: none)
-  #outline(title: none, depth: 3)
-  #pagebreak()
-]
-
-// Set up page format for main content with proper column layout
+// ============================================================================
+// BASE PAGE SETUP - Set all page properties once, applied to entire document
+// ============================================================================
 #set page(
+  paper: prefs.papersize,
+  margin: (x: margin_x, y: margin_y),
+  flipped: is_landscape,
+  columns: if two_column_layout { 2 } else { 1 },
   numbering: if show_page_numbers { "1" } else { none },
   header: if show_header and header_text != "" {
     align(right, text(size: 9pt, fill: gray)[_#header_text _])
   } else { none },
-  columns: if two_column_layout { 2 } else { 1 }
 )
 
-// Reset page counter to start at 1 for main content
-#if show_page_numbers [
-  #counter(page).update(1)
-]
+// Base text settings
+#set par(leading: (line_height_val - 1.0) * 1em)
+#set block(spacing: para_spacing)
+#set outline(title: none)
 
-// Apply section numbering for main content only
+// ============================================================================
+// COVER PAGE (if enabled) - uses scoped overrides
+// ============================================================================
+#if cover_enabled {
+  // Scoped page function for cover: no numbering, single column
+  page(numbering: none, columns: 1)[
+    #render_cover_page
+  ]
+}
+
+// ============================================================================
+// TABLE OF CONTENTS (if enabled) - uses scoped overrides  
+// ============================================================================
+#if prefs.toc {
+  page(numbering: none, columns: if toc_two_column { 2 } else { 1 })[
+    #let has_custom_title = "toc_title" in prefs and prefs.toc_title.trim() != ""
+    #if has_custom_title [
+      #text(size: 16pt, weight: 600)[#prefs.toc_title]
+      #v(6pt)
+    ]
+    #set heading(numbering: none)
+    #outline(title: none, depth: 3)
+  ]
+}
+
+// ============================================================================
+// MAIN CONTENT
+// ============================================================================
+// Reset page counter for main content
+#if show_page_numbers { counter(page).update(1) }
+
+// Apply section numbering
 #set heading(numbering: if number_sections { "1.1" } else { none })
 
-// Render markdown content with explicit outline suppression
+// Suppress any stray outlines in rendered content
 #show outline: none
 
-// Define fallback helpers at top-level so we don't need to pass them as
-// keyword arguments into #render (some cmarker versions reject unexpected
-// keyword arguments). These are safe defaults; the Rust preprocessor may
-// still inject label/anchor markup directly into the markdown.
+// Fallback helpers for render scope
 #let anchor = (id => none)
 #let image = (path, alt: none, ..n) => builtin-image(path, alt: alt, ..n)
 

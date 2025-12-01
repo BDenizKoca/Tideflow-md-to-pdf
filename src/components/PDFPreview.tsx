@@ -111,7 +111,7 @@ const PDFPreview: React.FC = () => {
     if (!el || !el.parentNode || !el.isConnected) return;
 
     if (process.env.NODE_ENV !== 'production') {
-      console.log(`[PDFPreview] scrollToAnchor: anchor=${anchorId}, force=${force}, center=${center}`);
+      console.debug(`[PDFPreview] scrollToAnchor: anchor=${anchorId}, force=${force}, center=${center}`);
     }
 
     const offset = anchorOffsetsRef.current.get(anchorId);

@@ -23,6 +23,7 @@ export interface Preferences {
   toc_title: string; // empty string => no heading
   toc_two_column?: boolean; // Enable two-column TOC layout
   two_column_layout?: boolean; // Enable two-column layout for main content
+  page_orientation?: 'portrait' | 'landscape'; // Page orientation
   cover_page: boolean;
   cover_title: string;
   cover_writer: string;

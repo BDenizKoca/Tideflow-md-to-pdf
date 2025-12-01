@@ -1,4 +1,5 @@
 /// Cache operation commands: manage render cache and temporary files
+use crate::log_debug;
 use crate::utils;
 use serde::Serialize;
 use std::fs;
@@ -75,7 +76,7 @@ pub async fn clear_render_cache(app_handle: AppHandle) -> Result<(), String> {
         }
     }
     
-    println!("🧹 Render cache cleared");
+    log_debug!("cache", "Render cache cleared");
     Ok(())
 }
 

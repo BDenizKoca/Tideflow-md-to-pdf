@@ -203,6 +203,7 @@ export async function exportMarkdown(filePath: string): Promise<string> {
 interface BackendPreferences {
   theme_id?: string;
   papersize: string;
+  page_orientation?: string;
   margin: { x: string; y: string };
   toc: boolean;
   toc_title?: string;
@@ -241,6 +242,7 @@ export async function getPreferences(): Promise<Preferences> {
   return {
     theme_id: raw.theme_id ?? 'default',
     papersize: raw.papersize,
+    page_orientation: (raw.page_orientation as 'portrait' | 'landscape') ?? 'portrait',
     margin: raw.margin,
     toc: raw.toc,
     toc_title: raw.toc_title ?? '',
@@ -276,6 +278,7 @@ export async function setPreferences(preferences: Preferences): Promise<void> {
   const outbound: BackendPreferences = {
     theme_id: preferences.theme_id,
     papersize: preferences.papersize,
+    page_orientation: preferences.page_orientation,
     margin: preferences.margin,
     toc: preferences.toc,
     toc_title: preferences.toc_title,

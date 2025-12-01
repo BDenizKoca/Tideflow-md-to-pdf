@@ -39,12 +39,16 @@ const TabBar: React.FC = () => {
 
   // Explicitly (re)open the instructions document
   const handleOpenInstructions = async () => {
-    console.log('[TabBar] Opening instructions...');
+    if (process.env.NODE_ENV !== 'production') {
+      console.debug('[TabBar] Opening instructions...');
+    }
     const instructionsName = 'instructions.md';
     addOpenFile(instructionsName);
     setCurrentFile(instructionsName);
     setContent(INSTRUCTIONS_DOC);
-    console.log('[TabBar] Instructions opened, content length:', INSTRUCTIONS_DOC.length);
+    if (process.env.NODE_ENV !== 'production') {
+      console.debug('[TabBar] Instructions opened, content length:', INSTRUCTIONS_DOC.length);
+    }
   };
 
   const handleCloseTab = (e: React.MouseEvent, filePath: string) => {

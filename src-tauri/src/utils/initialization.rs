@@ -1,5 +1,6 @@
 //! Application initialization utilities for setting up directories and default files.
 
+use crate::log_debug;
 use crate::utils::{filesystem, paths};
 use anyhow::{anyhow, Result};
 use std::fs;
@@ -71,7 +72,7 @@ fn copy_tideflow_template(
 ) -> Result<()> {
     let user_typst_template = content_dir.join("tideflow.typ");
     
-    println!("🔍 Looking for tideflow.typ template...");
+    log_debug!("init", "Looking for tideflow.typ template...");
     
     // Try different possible locations for the template
     let mut template_sources = Vec::new();
@@ -98,26 +99,26 @@ fn copy_tideflow_template(
     let mut copied = false;
 
     for src in &template_sources {
-        println!("🔎 Checking template source: {}", src.display());
+        log_debug!("init", "Checking template source: {}", src.display());
 
         if src.exists() {
             // Check if we need to copy/update the template
             let should_copy = if !user_typst_template.exists() {
-                println!("📝 Template doesn't exist, will copy");
+                log_debug!("init", "Template doesn't exist, will copy");
                 true
             } else {
                 match (fs::read_to_string(src), fs::read_to_string(&user_typst_template)) {
                     (Ok(src_content), Ok(dst_content)) => {
                         if src_content != dst_content {
-                            println!("🔄 Template content differs, will update");
+                            log_debug!("init", "Template content differs, will update");
                             true
                         } else {
-                            println!("✅ Template is up to date");
+                            log_debug!("init", "Template is up to date");
                             false
                         }
                     }
                     _ => {
-                        println!("⚠️ Could not compare templates, will copy");
+                        log_debug!("init", "Could not compare templates, will copy");
                         true
                     }
                 }
@@ -126,13 +127,13 @@ fn copy_tideflow_template(
             if should_copy {
                 match fs::copy(src, &user_typst_template) {
                     Ok(_) => {
-                        println!("✅ Copied tideflow.typ from {} to {}", src.display(), user_typst_template.display());
+                        log_debug!("init", "Copied tideflow.typ from {} to {}", src.display(), user_typst_template.display());
                         used_template_source = Some(src.clone());
                         copied = true;
                         break;
                     }
                     Err(e) => {
-                        println!("❌ Failed to copy template from {}: {}", src.display(), e);
+                        log_debug!("init", "Failed to copy template from {}: {}", src.display(), e);
                     }
                 }
             } else {
@@ -156,9 +157,9 @@ fn copy_tideflow_template(
     }
 
     if !copied {
-        println!("⚠️ Could not find tideflow.typ template in any location. Searched:");
+        log_debug!("init", "Could not find tideflow.typ template in any location. Searched:");
         for src in &template_sources {
-            println!("   - {}", src.display());
+            log_debug!("init", "   - {}", src.display());
         }
     }
     
@@ -181,7 +182,7 @@ fn copy_style_files(resource_dir: &std::path::Path, styles_dir: &std::path::Path
                 
                 if !dest.exists() {
                     fs::copy(&path, &dest)?;
-                    println!("📄 Copied style {} to {}", file_name.to_string_lossy(), dest.display());
+                    log_debug!("init", "Copied style {} to {}", file_name.to_string_lossy(), dest.display());
                 }
             }
         }
@@ -199,9 +200,9 @@ fn create_default_config_files(app_handle: &AppHandle) -> Result<()> {
     // Migrate legacy file if present and new one missing
     if legacy_path.exists() && !prefs_json_path.exists() {
         if let Err(e) = std::fs::copy(&legacy_path, &prefs_json_path) {
-            println!("⚠️ Failed to migrate legacy _prefs.json: {}", e);
+            log_debug!("init", "Failed to migrate legacy _prefs.json: {}", e);
         } else {
-            println!("✅ Migrated legacy _prefs.json to prefs.json");
+            log_debug!("init", "Migrated legacy _prefs.json to prefs.json");
         }
     }
     

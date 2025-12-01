@@ -114,5 +114,5 @@ Click the **🎨 Design** button to open the styling panel.
 
 ---
 
-**Tideflow** v1.4.0
+**Tideflow** v1.4.1
 `;

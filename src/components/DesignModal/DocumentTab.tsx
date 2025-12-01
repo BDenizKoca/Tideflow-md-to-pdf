@@ -21,6 +21,15 @@ const DocumentTab: React.FC<TabProps> = ({ local, mutate }) => {
             <option value="us-legal">US Legal (8.5 × 14 in)</option>
           </select>
         </label>
+        <label>Page Orientation
+          <select 
+            value={local.page_orientation || 'portrait'} 
+            onChange={e => mutate({ page_orientation: e.target.value as 'portrait' | 'landscape' })}
+          >
+            <option value="portrait">Portrait</option>
+            <option value="landscape">Landscape</option>
+          </select>
+        </label>
         <label>Horizontal Margin
           <div className="slider-group">
             <input

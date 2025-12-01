@@ -205,11 +205,15 @@ const Editor: React.FC = () => {
                    position.x <= editorRect.right && 
                    position.y >= editorRect.top && 
                    position.y <= editorRect.bottom;
-            console.log('[Editor] Drop position check:', { position, editorRect, isInBounds });
+            if (process.env.NODE_ENV !== 'production') {
+              console.debug('[Editor] Drop position check:', { position, editorRect, isInBounds });
+            }
             return isInBounds;
           })();
 
-          console.log('[Editor] Dropped on editor:', droppedOnEditor);
+          if (process.env.NODE_ENV !== 'production') {
+            console.debug('[Editor] Dropped on editor:', droppedOnEditor);
+          }
 
           // Check if it's a markdown file
           if (filePath.endsWith('.md') || filePath.endsWith('.markdown')) {

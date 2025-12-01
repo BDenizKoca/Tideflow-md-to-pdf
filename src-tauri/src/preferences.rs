@@ -46,6 +46,10 @@ pub struct Preferences {
     #[serde(default)]
     pub two_column_layout: bool,
     
+    /// Page orientation (portrait or landscape)
+    #[serde(default = "default_page_orientation")]
+    pub page_orientation: String,
+    
     /// Enable cover page
     #[serde(default)]
     pub cover_page: bool,
@@ -192,6 +196,10 @@ fn default_confirm_exit() -> bool {
     true
 }
 
+fn default_page_orientation() -> String {
+    "portrait".to_string()
+}
+
 impl Default for Preferences {
     fn default() -> Self {
         Self {
@@ -206,6 +214,7 @@ impl Default for Preferences {
             toc_title: String::new(),
             toc_two_column: false,
             two_column_layout: false,
+            page_orientation: "portrait".to_string(),
             cover_page: false,
             cover_title: String::new(),
             cover_writer: String::new(),
