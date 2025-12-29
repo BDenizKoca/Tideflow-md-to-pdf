@@ -20,7 +20,7 @@ I wanted a dead-simple, elegant writing tool that outputs print‑ready PDFs **w
 * Clean, distraction‑lite editor (CodeMirror 6)
 * 12 beautiful themes; Default, Minimal, Compact, Elegant, Technical, Magazine, Academic, Creative, Modern, Serif, Notebook, Dark
 * Academic writing support with bibliography management (BibTeX/.bib & Hayagriva/.yml) with Pandoc-style citations
-* Multiple citation styless to choose; IEEE, APA, Chicago, MLA, Vancouver, and Harvard
+* Multiple citation styles to choose; IEEE, APA, Chicago, MLA, Vancouver, and Harvard
 * Full LaTeX math rendering support via mitex (inline `$...$` and display `$$...$$`)
 * Automatic Table of Contents, optional section numbering, and configurable cover page
 * Image paste, drag‑drop, and import dialogs
