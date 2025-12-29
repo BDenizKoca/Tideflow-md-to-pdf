@@ -29,6 +29,12 @@ const AboutTab: React.FC = () => {
           <strong>Advanced Theming Engine:</strong> Take full control of your document's appearance with customizable themes, fonts, cover pages, and a table of contents.
         </li>
         <li>
+          <strong>Academic Writing Support:</strong> Add bibliography files (BibTeX/.bib or Hayagriva/.yml) and use Pandoc-style citations with multiple citation styles (IEEE, APA, Chicago, MLA, Vancouver, Harvard).
+        </li>
+        <li>
+          <strong>Advanced Math Support:</strong> Full LaTeX math rendering with support for complex equations, matrices, and mathematical notation.
+        </li>
+        <li>
           <strong>Multiple Export Formats:</strong> Export your documents as PDF, high-quality PNG images, or scalable SVG vectors.
         </li>
         <li>
@@ -79,6 +85,37 @@ const AboutTab: React.FC = () => {
             Support via GitHub Sponsors
           </button>
         </div>
+      </div>
+
+      <div className="about-section">
+        <h4>Open Source Licenses</h4>
+        <p>
+          Tideflow uses the following open source software:
+        </p>
+        <ul className="licenses-list">
+          <li>
+            <strong>Typst</strong> - Modern markup-based typesetting system
+            <br />
+            <span className="license-info">Apache License 2.0</span>
+            <br />
+            <a href="#" onClick={handleExternalLink('https://typst.app')}>
+              https://typst.app
+            </a>
+          </li>
+          <li>
+            <strong>mitex</strong> - LaTeX to Typst converter for mathematical formulas
+            <br />
+            <span className="license-info">Apache License 2.0</span>
+            <br />
+            <a href="#" onClick={handleExternalLink('https://github.com/mitex-rs/mitex')}>
+              https://github.com/mitex-rs/mitex
+            </a>
+          </li>
+        </ul>
+        <p className="license-note">
+          All dependencies are licensed under permissive open source licenses that allow commercial use.
+          Full license texts are available in the links above.
+        </p>
       </div>
 
       <div className="about-footer">

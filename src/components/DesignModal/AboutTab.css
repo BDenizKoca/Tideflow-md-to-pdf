@@ -156,6 +156,59 @@
   color: var(--link-hover-color);
 }
 
+.licenses-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0.5rem 0;
+}
+
+.licenses-list li {
+  padding: 0.5rem 0;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  border-bottom: var(--border-width) solid var(--border-color-light);
+}
+
+.licenses-list li:last-child {
+  border-bottom: none;
+}
+
+.licenses-list li strong {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.licenses-list li a {
+  color: var(--link-color);
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.licenses-list li a:hover {
+  text-decoration: underline;
+  color: var(--link-hover-color);
+}
+
+.license-info {
+  display: inline-block;
+  padding: 0.15rem 0.4rem;
+  background: var(--muted-surface);
+  color: var(--text-muted);
+  border-radius: 3px;
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  margin: 0.2rem 0;
+}
+
+.license-note {
+  font-size: 0.82rem !important;
+  color: var(--text-muted) !important;
+  margin-top: 0.6rem !important;
+  font-style: italic;
+}
+
 @media (max-width: 640px) {
   .about-tab {
     padding: 0.5rem;

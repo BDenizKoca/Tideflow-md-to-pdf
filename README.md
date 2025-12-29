@@ -18,6 +18,9 @@ I wanted a dead-simple, elegant writing tool that outputs print‑ready PDFs **w
 ## Features
 * Real‑time two-way scroll sync between editor & PDF preview (Has around %70 accuracy)
 * Clean, distraction‑lite editor (CodeMirror 6)
+* **Academic writing support**: Bibliography management (BibTeX/.bib & Hayagriva/.yml) with Pandoc-style citations
+* **Advanced math rendering**: Full LaTeX math support via mitex (inline `$...$` and display `$$...$$`)
+* **Multiple citation styles**: IEEE, APA, Chicago, MLA, Vancouver, and Harvard
 * Automatic Table of Contents, optional section numbering, and configurable cover page
 * Image paste, drag‑drop, and import dialogs
 * **12 beautiful themes**: Default, Minimal, Compact, Elegant, Technical, Magazine, Academic, Creative, Modern, Serif, Notebook, Dark
@@ -99,7 +102,8 @@ npm run tauri:build
 ## Supported Markdown / Extras
 * Headings (H1-H6), emphasis (bold, italic, strikethrough)
 * Code (inline and fenced blocks with syntax highlighting via Typst)
-* Math (inline `$...$` and block `$$...$$` via LaTeX-style syntax)
+* **Math** (inline `$...$` and block `$$...$$` via LaTeX-style syntax with mitex)
+* **Citations** (Pandoc-style `[@key]`, `[@key, p. 42]`, `[@key1; @key2]` with automatic bibliography generation)
 * Lists (ordered, unordered, task lists with `- [ ]` / `- [x]`)
 * Blockquotes (single and multi-line with `>`)
 * Tables (with alignment support)

@@ -67,6 +67,11 @@ export const defaultPreferences: Preferences = {
   focused_preview_enabled: false,
   preserve_scroll_position: true,
   confirm_exit_on_unsaved: true,
+  // Bibliography settings
+  bibliography_path: '',
+  bibliography_style: 'ieee',
+  bibliography_title: '',
+  bibliography_show_all: false,
 };
 
 // Preferences-specific store state

@@ -3,14 +3,24 @@
  * Manages the render queue and auto-save logic.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { renderTypst, cleanupTempPdfs } from '../api';
 import type { SourceMap, SyncMode } from '../types';
 import type { EditorStateRefs } from './useEditorState';
 import { logger } from '../utils/logger';
+import { useUIStore } from '../stores/uiStore';
 
 // Create scoped logger
 const useContentManagementLogger = logger.createScoped('useContentManagement');
+
+/**
+ * Check if error is a missing citation key error and extract the key
+ */
+function parseCitationError(errorMsg: string): string | null {
+  // Match pattern: "error: key `something` does not exist in the bibliography"
+  const match = errorMsg.match(/key `([^`]+)` does not exist in the bibliography/i);
+  return match ? match[1] : null;
+}
 
 interface CompileStatus {
   status: 'running' | 'ok' | 'error';
@@ -43,6 +53,11 @@ export function useContentManagement(params: UseContentManagementParams) {
     autoRenderInFlightRef,
     pendingRenderRef,
   } = editorStateRefs;
+
+  const addToast = useUIStore((state) => state.addToast);
+
+  // Debounce citation warnings to prevent spam while typing
+  const lastCitationWarningRef = useRef<{ key: string; timestamp: number } | null>(null);
 
   // Auto-render function (always full content)
   const handleAutoRender = useCallback(async (content: string, signal?: AbortSignal) => {
@@ -91,12 +106,41 @@ export function useContentManagement(params: UseContentManagementParams) {
       if (signal?.aborted) {
         return;
       }
-      setCompileStatus({
-        status: 'error',
-        message: 'Auto-render failed',
-        details: String(err)
-      });
-      setSourceMap(null);
+
+      const errorMsg = String(err);
+      const missingCitationKey = parseCitationError(errorMsg);
+
+      // If it's a missing citation error, show a non-intrusive warning
+      if (missingCitationKey) {
+        // Debounce warnings: only show if different key or enough time passed (3 seconds)
+        const now = Date.now();
+        const lastWarning = lastCitationWarningRef.current;
+        const shouldShowWarning =
+          !lastWarning ||
+          lastWarning.key !== missingCitationKey ||
+          now - lastWarning.timestamp > 3000;
+
+        if (shouldShowWarning) {
+          lastCitationWarningRef.current = { key: missingCitationKey, timestamp: now };
+          addToast({
+            type: 'warning',
+            message: `Citation key '${missingCitationKey}' not found in bibliography`,
+            duration: 4000,
+          });
+        }
+
+        // Don't block the preview - keep showing the last successful render
+        // Just log the warning
+        useContentManagementLogger.warn(`Missing citation key: ${missingCitationKey}`);
+      } else {
+        // For other errors, show full error state
+        setCompileStatus({
+          status: 'error',
+          message: 'Auto-render failed',
+          details: errorMsg
+        });
+        setSourceMap(null);
+      }
     } finally {
       autoRenderInFlightRef.current = false;
       // If there is a pending update queued during render, render once more with latest snapshot
@@ -115,6 +159,7 @@ export function useContentManagement(params: UseContentManagementParams) {
     setSyncMode,
     autoRenderInFlightRef,
     pendingRenderRef,
+    addToast,
   ]);
 
   return {

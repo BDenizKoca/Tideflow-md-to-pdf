@@ -76,6 +76,12 @@ export async function importImageFromPath(sourcePath: string): Promise<string> {
   return invoke('import_image_from_path', { sourcePath, source_path: sourcePath });
 }
 
+// Import a bibliography file from a filesystem path by copying it into the app's content directory.
+export async function importBibliographyFromPath(sourcePath: string): Promise<string> {
+  // Send both camelCase and snake_case to be safe across bindings
+  return invoke('import_bibliography_from_path', { sourcePath, source_path: sourcePath });
+}
+
 // Rendering operations
 export async function renderMarkdown(filePath: string): Promise<RenderedDocument> {
   const raw = await invoke<BackendRenderedDocument>('render_markdown', { filePath });
@@ -235,6 +241,11 @@ interface BackendPreferences {
   confirm_exit_on_unsaved?: boolean;
   // Optional typst_path forwarded from backend
   typst_path?: string;
+  // Bibliography settings
+  bibliography_path?: string;
+  bibliography_style?: string;
+  bibliography_title?: string;
+  bibliography_show_all?: boolean;
 }
 
 export async function getPreferences(): Promise<Preferences> {
@@ -271,6 +282,11 @@ export async function getPreferences(): Promise<Preferences> {
     confirm_exit_on_unsaved: raw.confirm_exit_on_unsaved ?? true,
     // Optional typst_path is forwarded from the backend
     typst_path: raw.typst_path ?? undefined,
+    // Bibliography settings
+    bibliography_path: raw.bibliography_path ?? '',
+    bibliography_style: raw.bibliography_style ?? 'ieee',
+    bibliography_title: raw.bibliography_title ?? '',
+    bibliography_show_all: raw.bibliography_show_all ?? false,
   };
 }
 
@@ -309,6 +325,11 @@ export async function setPreferences(preferences: Preferences): Promise<void> {
     confirm_exit_on_unsaved: preferences.confirm_exit_on_unsaved,
     // Forward typst_path to backend if present
     typst_path: preferences.typst_path,
+    // Bibliography settings
+    bibliography_path: preferences.bibliography_path,
+    bibliography_style: preferences.bibliography_style,
+    bibliography_title: preferences.bibliography_title,
+    bibliography_show_all: preferences.bibliography_show_all,
   };
   await invoke('set_preferences', { preferences: outbound });
 }
@@ -329,6 +350,17 @@ export async function getCacheStats(): Promise<{
 
 export async function clearRenderCache(): Promise<void> {
   return invoke('clear_render_cache');
+}
+
+export async function cleanupUnusedAssets(): Promise<{
+  files_removed: number;
+  total_space_freed: number;
+}> {
+  return invoke('cleanup_unused_assets');
+}
+
+export async function clearBibliography(): Promise<void> {
+  return invoke('clear_bibliography');
 }
 
 // Debug operations

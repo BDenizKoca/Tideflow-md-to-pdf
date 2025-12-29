@@ -25,6 +25,33 @@ lazy_static::lazy_static! {
     static ref RENDER_MUTEX: Arc<Mutex<()>> = Arc::new(Mutex::new(()));
 }
 
+/// Check if bibliography is enabled by reading preferences
+fn has_bibliography_enabled(app_handle: &AppHandle) -> bool {
+    let content_dir = match utils::get_content_dir(app_handle) {
+        Ok(dir) => dir,
+        Err(_) => return false,
+    };
+
+    let prefs_path = content_dir.join("prefs.json");
+    if !prefs_path.exists() {
+        return false;
+    }
+
+    // Read and parse preferences
+    if let Ok(prefs_text) = fs::read_to_string(&prefs_path) {
+        if let Ok(prefs_json) = serde_json::from_str::<serde_json::Value>(&prefs_text) {
+            // Check if bibliography_path exists and is not empty
+            if let Some(bib_path) = prefs_json.get("bibliography_path") {
+                if let Some(path_str) = bib_path.as_str() {
+                    return !path_str.trim().is_empty();
+                }
+            }
+        }
+    }
+
+    false
+}
+
 fn build_source_map(
     app_handle: &AppHandle,
     typst_path: &Path,
@@ -221,8 +248,11 @@ pub async fn render_markdown(app_handle: &AppHandle, file_path: &str) -> Result<
     let assets_root = utils::get_assets_dir(app_handle).ok();
     let assets_root_ref = assets_root.as_deref();
 
+    // Check if bibliography is enabled to determine whether to convert citations
+    let has_bib = has_bibliography_enabled(app_handle);
+
     // Clean (export) version: do NOT inject visible tokens
-    let preprocess_clean = preprocess_markdown(&md_content_raw)?;
+    let preprocess_clean = preprocess_markdown(&md_content_raw, has_bib)?;
     let md_content_clean = utils::rewrite_image_paths_in_markdown(
         &preprocess_clean.markdown,
         base_dir,
@@ -231,7 +261,7 @@ pub async fn render_markdown(app_handle: &AppHandle, file_path: &str) -> Result<
     fs::write(build_dir.join("content.md"), &md_content_clean)?;
 
     // Preview version: inject preview-only tokens (these will NOT be used for exports)
-    let preprocess_preview = preprocess_markdown(&md_content_raw)?;
+    let preprocess_preview = preprocess_markdown(&md_content_raw, has_bib)?;
     let md_content_preview = utils::rewrite_image_paths_in_markdown(
         &preprocess_preview.markdown,
         base_dir,
@@ -325,8 +355,12 @@ pub async fn export_markdown(app_handle: &AppHandle, file_path: &str) -> Result<
     let base_dir = path.parent().unwrap_or(Path::new("."));
     let assets_root = utils::get_assets_dir(app_handle).ok();
     let assets_root_ref = assets_root.as_deref();
+
+    // Check if bibliography is enabled to determine whether to convert citations
+    let has_bib = has_bibliography_enabled(app_handle);
+
     // For export, do NOT inject visible tokens — output must be clean for users
-    let preprocess = preprocess_markdown(&md_content_raw)?;
+    let preprocess = preprocess_markdown(&md_content_raw, has_bib)?;
     let md_content =
         utils::rewrite_image_paths_in_markdown(&preprocess.markdown, base_dir, assets_root_ref);
     fs::write(build_dir.join("content.md"), md_content)?;
@@ -380,9 +414,12 @@ pub async fn render_typst(
     let temp_content_name = format!("temp_{}.md", uuid);
     let temp_content_path = build_dir.join(&temp_content_name);
 
+    // Check if bibliography is enabled to determine whether to convert citations
+    let has_bib = has_bibliography_enabled(app_handle);
+
     // Preprocess content to rewrite image paths so Typst/cmarker can resolve them properly
     // For ad-hoc typst renders, include visible tokens to aid preview extraction
-    let preprocess = preprocess_markdown(content)?;
+    let preprocess = preprocess_markdown(content, has_bib)?;
     
     // Determine base directory for image path resolution
     // Use the current file's parent directory if available, otherwise fall back to content_dir

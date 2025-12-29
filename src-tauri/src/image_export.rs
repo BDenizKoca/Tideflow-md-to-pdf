@@ -19,6 +19,33 @@ lazy_static::lazy_static! {
     static ref IMAGE_EXPORT_MUTEX: Arc<Mutex<()>> = Arc::new(Mutex::new(()));
 }
 
+/// Check if bibliography is enabled by reading preferences
+fn has_bibliography_enabled(app_handle: &AppHandle) -> bool {
+    let content_dir = match utils::get_content_dir(app_handle) {
+        Ok(dir) => dir,
+        Err(_) => return false,
+    };
+
+    let prefs_path = content_dir.join("prefs.json");
+    if !prefs_path.exists() {
+        return false;
+    }
+
+    // Read and parse preferences
+    if let Ok(prefs_text) = fs::read_to_string(&prefs_path) {
+        if let Ok(prefs_json) = serde_json::from_str::<serde_json::Value>(&prefs_text) {
+            // Check if bibliography_path exists and is not empty
+            if let Some(bib_path) = prefs_json.get("bibliography_path") {
+                if let Some(path_str) = bib_path.as_str() {
+                    return !path_str.trim().is_empty();
+                }
+            }
+        }
+    }
+
+    false
+}
+
 /// Export markdown to PNG or SVG using Typst
 ///
 /// This function compiles the markdown to the specified image format.
@@ -67,7 +94,11 @@ pub async fn export_as_image(
 
     let assets_root = utils::get_assets_dir(app_handle).ok();
     let assets_root_ref = assets_root.as_deref();
-    let preprocess = preprocess_markdown(content)?;
+
+    // Check if bibliography is enabled to determine whether to convert citations
+    let has_bib = has_bibliography_enabled(app_handle);
+
+    let preprocess = preprocess_markdown(content, has_bib)?;
     let md_content =
         utils::rewrite_image_paths_in_markdown(&preprocess.markdown, base_dir, assets_root_ref);
     fs::write(build_dir.join("content.md"), md_content)?;

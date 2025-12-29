@@ -158,12 +158,24 @@ export function useAppInitialization() {
 
         // Register compile error listener
         const unlistenCompileError = await listen<string>('compile-error', (evt) => {
-          initLogger.error('Compile error', evt.payload);
-          const editorState = useEditorStore.getState();
-          const uiState = useUIStore.getState();
-          editorState.setCompileStatus({ status: 'error', message: 'Compile failed', details: evt.payload });
-          editorState.setSourceMap(null);
-          uiState.addToast({ type: 'error', message: 'Failed to compile document' });
+          const errorMsg = evt.payload;
+
+          // Check if it's a missing citation error
+          const isCitationError = /key `([^`]+)` does not exist in the bibliography/i.test(errorMsg);
+
+          if (isCitationError) {
+            // For citation errors, only log - don't show blocking error
+            // The useContentManagement hook will show a gentle warning toast
+            initLogger.warn('Missing citation key in document');
+          } else {
+            // For other errors, show full error state
+            initLogger.error('Compile error', errorMsg);
+            const editorState = useEditorStore.getState();
+            const uiState = useUIStore.getState();
+            editorState.setCompileStatus({ status: 'error', message: 'Compile failed', details: errorMsg });
+            editorState.setSourceMap(null);
+            uiState.addToast({ type: 'error', message: 'Failed to compile document' });
+          }
         });
         register(unlistenCompileError);
 

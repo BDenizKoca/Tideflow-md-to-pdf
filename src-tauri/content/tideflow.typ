@@ -1,9 +1,47 @@
 // Main Tideflow Typst template (lean, preference-driven)
 #import "@preview/cmarker:0.1.6": render
+#import "@preview/mitex:0.2.6": mitex
 #import "themes/registry.typ": get-theme
 
 #let prefs = json("prefs.json")
 #let theme-id = if "theme_id" in prefs { prefs.theme_id } else { "default" }
+
+// Safe mitex wrapper that handles errors gracefully
+// Instead of crashing on invalid LaTeX, shows error placeholder
+#let safe-mitex(block: false, body) = {
+  // Basic validation of LaTeX syntax
+  let content-str = repr(body).trim()
+
+  // Check for balanced braces
+  let open-braces = content-str.matches(regex("\\{")).len()
+  let close-braces = content-str.matches(regex("\\}")).len()
+
+  // Check for balanced brackets
+  let open-brackets = content-str.matches(regex("\\[")).len()
+  let close-brackets = content-str.matches(regex("\\]")).len()
+
+  // Check for balanced \begin \end pairs
+  let begins = content-str.matches(regex("\\\\begin")).len()
+  let ends = content-str.matches(regex("\\\\end")).len()
+
+  // If validation fails, show error placeholder instead of crashing
+  if open-braces != close-braces or open-brackets != close-brackets or begins != ends {
+    box(
+      fill: rgb(254, 226, 226),
+      inset: 4pt,
+      radius: 2pt,
+      stroke: 1pt + rgb(239, 68, 68),
+    )[
+      #text(fill: rgb(185, 28, 28), size: 0.9em)[
+        ⚠️ LaTeX Error: Unbalanced delimiters
+      ]
+    ]
+  } else {
+    // Validation passed, try mitex
+    // Note: This still might crash on unknown commands, but catches most issues
+    mitex(block: block, body)
+  }
+}
 
 // Apply theme to entire document using show rule
 #show: get-theme(theme-id).with(prefs)
@@ -176,10 +214,6 @@
 // Suppress any stray outlines in rendered content
 #show outline: none
 
-// Fallback helpers for render scope
-#let anchor = (id => none)
-#let image = (path, alt: none, ..n) => builtin-image(path, alt: alt, ..n)
-
 // Safe link function that doesn't fail on missing labels
 // cmarker passes: label type for internal links, str for external URLs
 #let safe-link(target, body) = context {
@@ -227,20 +261,14 @@
 #render(md_content,
   smart-punctuation: false,
   raw-typst: true,
-  // Enable math rendering - Typst math syntax is close enough to LaTeX
-  math: (block: false, body) => {
-    // Just wrap in $ delimiters and let Typst parse it
-    // Most common LaTeX math works in Typst with minor differences
-    if block {
-      // Block math - display style, centered
-      [$ #body $]
-    } else {
-      // Inline math
-      [$#body$]
-    }
-  },
+  // Enable LaTeX math rendering using safe-mitex wrapper
+  // Validates syntax before rendering to prevent crashes
+  // Supports full LaTeX math syntax including \frac, \int, \ddot, etc.
+  math: safe-mitex,
   scope: (
     link: safe-link,
+    mitex: mitex,  // Make mitex available in raw-typst blocks
+    "safe-mitex": safe-mitex,  // Make safe wrapper available too
   ),
   // Note: cmarker 0.1.6 follows standard Markdown line break rules:
   // - Single newline = soft break (ignored in output)
@@ -268,3 +296,35 @@
     })
   )
 )
+
+// ============================================================================
+// BIBLIOGRAPHY (if enabled)
+// ============================================================================
+#if "bibliography_path" in prefs and prefs.bibliography_path != none and prefs.bibliography_path != "" {
+  let bib_path = prefs.bibliography_path
+  let bib_style = if "bibliography_style" in prefs and prefs.bibliography_style != none {
+    prefs.bibliography_style
+  } else {
+    "ieee"
+  }
+  let bib_title = if "bibliography_title" in prefs and prefs.bibliography_title != none and prefs.bibliography_title.trim() != "" {
+    prefs.bibliography_title
+  } else {
+    auto  // Use default for document language
+  }
+  let show_all = if "bibliography_show_all" in prefs and prefs.bibliography_show_all != none {
+    prefs.bibliography_show_all
+  } else {
+    false
+  }
+
+  // Add some spacing before bibliography
+  v(2em)
+
+  bibliography(
+    bib_path,
+    title: bib_title,
+    style: bib_style,
+    full: show_all,
+  )
+}

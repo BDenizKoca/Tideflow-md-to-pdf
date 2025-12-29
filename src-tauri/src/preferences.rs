@@ -140,6 +140,24 @@ pub struct Preferences {
     /// Optional explicit path to Typst binary (used as a final fallback)
     #[serde(default)]
     pub typst_path: Option<String>,
+
+    // Bibliography settings
+
+    /// Path to bibliography file (.bib or .yml)
+    #[serde(default)]
+    pub bibliography_path: Option<String>,
+
+    /// Citation style (e.g., "ieee", "apa", "chicago-author-date")
+    #[serde(default)]
+    pub bibliography_style: Option<String>,
+
+    /// Custom heading for bibliography section (empty = use default)
+    #[serde(default)]
+    pub bibliography_title: Option<String>,
+
+    /// Show all bibliography entries (true) or only cited works (false)
+    #[serde(default)]
+    pub bibliography_show_all: Option<bool>,
 }
 
 /// Page margin configuration
@@ -243,6 +261,11 @@ impl Default for Preferences {
             preserve_scroll_position: true,
             confirm_exit_on_unsaved: true,
             typst_path: None,
+            // Bibliography defaults
+            bibliography_path: None,
+            bibliography_style: Some("ieee".to_string()),
+            bibliography_title: None,
+            bibliography_show_all: Some(false),
         }
     }
 }

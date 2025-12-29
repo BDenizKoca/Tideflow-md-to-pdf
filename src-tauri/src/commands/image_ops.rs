@@ -100,3 +100,54 @@ pub async fn import_image_from_path(
 
     Ok(format!("assets/{}", base))
 }
+
+/// Import a bibliography file by copying it to the .build directory.
+/// Returns the filename (e.g., "references.bib") for use in Typst bibliography().
+/// Automatically cleans up old bibliography files to prevent AppData bloat.
+#[tauri::command]
+pub async fn import_bibliography_from_path(
+    app_handle: AppHandle,
+    source_path: &str,
+) -> Result<String, String> {
+    let src = Path::new(source_path);
+    if !src.exists() {
+        return Err(format!("Source bibliography file does not exist: {}", source_path));
+    }
+
+    // Read source file
+    let bib_bytes = fs::read(src).map_err(|e| format!("Failed to read bibliography: {}", e))?;
+
+    // Get build directory (.build is where the template runs from)
+    let content_dir = utils::get_content_dir(&app_handle).map_err(|e| e.to_string())?;
+    let build_dir = content_dir.join(".build");
+
+    // Ensure build directory exists
+    fs::create_dir_all(&build_dir).map_err(|e| e.to_string())?;
+
+    // Clean up ALL old bibliography files in .build to prevent bloat
+    // We only ever need one bibliography file at a time
+    if let Ok(entries) = fs::read_dir(&build_dir) {
+        for entry in entries.flatten() {
+            if let Some(ext) = entry.path().extension() {
+                if ext == "bib" || ext == "yml" || ext == "yaml" {
+                    let _ = fs::remove_file(entry.path()); // Best effort cleanup
+                }
+            }
+        }
+    }
+
+    // Use original filename
+    let orig_name = src
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("references.bib");
+    let filename = utils::sanitize_filename(orig_name);
+
+    let dest_path = build_dir.join(&filename);
+
+    // Write new bibliography file to .build directory
+    fs::write(&dest_path, bib_bytes).map_err(|e| e.to_string())?;
+
+    // Return just the filename (Typst will look in .build directory where template runs)
+    Ok(filename)
+}

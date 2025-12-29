@@ -14,6 +14,7 @@ import {
   TypographyTab,
   SpacingTab,
   StructureTab,
+  AcademicTab,
   ImagesTab,
   PresetsTab,
   type TabSection
@@ -28,6 +29,7 @@ const DESIGN_TABS: { id: TabSection; label: string; icon: string }[] = [
   { id: 'typography', label: 'Typography', icon: '🔤' },
   { id: 'spacing', label: 'Spacing & Layout', icon: '📐' },
   { id: 'structure', label: 'Structure', icon: '🧱' },
+  { id: 'academic', label: 'Academic', icon: '🎓' },
   { id: 'images', label: 'Images', icon: '🖼️' },
   { id: 'presets', label: 'Presets', icon: '💾' },
 ];
@@ -72,6 +74,39 @@ const DesignModal: React.FC = () => {
       }
     } catch (err) {
       designLogger.warn('Failed to browse for image', err);
+    }
+  };
+
+  const handleBrowseBibliography = async () => {
+    try {
+      const { open } = await import('@tauri-apps/plugin-dialog');
+      const result = await open({
+        multiple: false,
+        filters: [
+          { name: 'Bibliography Files', extensions: ['bib', 'yml', 'yaml'] },
+          { name: 'All Files', extensions: ['*'] }
+        ]
+      });
+      const filePath = Array.isArray(result) ? result?.[0] : result;
+      if (filePath) {
+        const { importBibliographyFromPath } = await import('../api');
+        const filename = await importBibliographyFromPath(filePath);
+        mutate({ bibliography_path: filename });
+      }
+    } catch (err) {
+      designLogger.warn('Failed to browse for bibliography', err);
+    }
+  };
+
+  const handleClearBibliography = async () => {
+    try {
+      // Clear the .bib file from .build directory
+      const { clearBibliography } = await import('../api');
+      await clearBibliography();
+      // Then clear the preference
+      mutate({ bibliography_path: '' });
+    } catch (err) {
+      designLogger.warn('Failed to clear bibliography', err);
     }
   };
 
@@ -370,6 +405,11 @@ const DesignModal: React.FC = () => {
             {/* Structure Tab */}
             {activeTab === 'structure' && (
               <StructureTab local={local} mutate={mutate} handleBrowseCoverImage={handleBrowseCoverImage} currentFile={currentFile} />
+            )}
+
+            {/* Academic Tab */}
+            {activeTab === 'academic' && (
+              <AcademicTab local={local} mutate={mutate} handleBrowseBibliography={handleBrowseBibliography} handleClearBibliography={handleClearBibliography} />
             )}
 
             {/* Images Tab */}

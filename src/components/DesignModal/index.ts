@@ -3,6 +3,7 @@ export { default as DocumentTab } from './DocumentTab';
 export { default as TypographyTab } from './TypographyTab';
 export { default as SpacingTab } from './SpacingTab';
 export { default as StructureTab } from './StructureTab';
+export { default as AcademicTab } from './AcademicTab';
 export { default as ImagesTab } from './ImagesTab';
 export { default as PresetsTab } from './PresetsTab';
 export { default as AdvancedTab } from './AdvancedTab';

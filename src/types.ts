@@ -50,6 +50,11 @@ export interface Preferences {
   confirm_exit_on_unsaved: boolean;
   // Optional explicit path to Typst binary (used as a final fallback)
   typst_path?: string;
+  // Bibliography settings
+  bibliography_path?: string;        // Path to .bib or .yml file
+  bibliography_style?: string;       // Citation style: "apa", "ieee", "chicago", etc.
+  bibliography_title?: string;       // Custom "References" heading (optional)
+  bibliography_show_all?: boolean;   // Show all entries or only cited (default: false)
 }
 
 export interface CompileStatus {

@@ -53,6 +53,16 @@ Use the toolbar or shortcuts for common actions:
 - **Tables (▦):** Insert a basic Markdown table template.
 - **Math:** Write LaTeX math expressions. Use `$x$` for inline math ($E=mc^2$) and `$$` for block math, which is centered on its own line.
 
+#### **Academic Writing & Citations**
+
+- **Bibliography:** Add a `.bib` (BibTeX) or `.yml` (Hayagriva) file in the **🎓 Academic** tab of the Design panel to enable citations.
+- **Citations:** Use Pandoc-style syntax to cite sources:
+  - Simple citation: `[@einstein1905]` → (Einstein, 1905)
+  - With page number: `[@darwin1859, p. 42]` → (Darwin, 1859, p. 42)
+  - Multiple citations: `[@key1; @key2]` → (Author1, 2020; Author2, 2021)
+- **Citation Styles:** Choose from IEEE, APA, Chicago, MLA, Vancouver, or Harvard in the Academic tab.
+- **Bibliography Section:** Your references automatically appear at the end of the document.
+
 #### **Advanced Elements**
 
 The toolbar also gives you quick access to:
@@ -78,6 +88,7 @@ Click the **🎨 Design** button to control your document's entire look and feel
 - **Typography:** Change the main font, font size, and line height.
 - **Spacing:** Adjust page margins and paragraph spacing.
 - **Structure:** Automatically add a **Cover Page** or a **Table of Contents (TOC)**.
+- **Academic:** Add bibliography files and configure citation styles for academic papers and research documents.
 - **Presets:** Save your custom style settings to reuse in other documents.
 
 Changes are applied live. You can drag-to-scroll through the theme gallery and other options for quick navigation.
@@ -153,9 +164,9 @@ This guide itself was created in Tideflow. It showcases:
 
 ---
 
-**Version:** 2.0
-**Last Updated:** December 2024
-**App Version:** Tideflow 1.0
+**Version:** 2.1
+**Last Updated:** December 2025
+**App Version:** Tideflow 1.4
 
 **Questions? Issues? Feedback?**
 - Report issues or request features

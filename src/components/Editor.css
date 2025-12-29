@@ -610,8 +610,15 @@
   color: var(--cm-punctuation-color) !important;
 }
 
-.cm-cursor {
+.cm-cursor,
+.cm-dropCursor {
   border-left: 2px solid var(--cm-cursor) !important;
+  border-left-color: var(--cm-cursor) !important;
+}
+
+/* Ensure caret (text input cursor) is always visible */
+.cm-editor .cm-content {
+  caret-color: var(--cm-cursor) !important;
 }
 
 .cm-selectionBackground {

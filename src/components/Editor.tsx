@@ -481,8 +481,8 @@ const Editor: React.FC = () => {
         extensions: ['md', 'markdown']
       }]);
 
-      if (result && result.length > 0) {
-        const filePath = result[0];
+      if (result) {
+        const filePath = result;
         const fileContent = await readMarkdownFile(filePath);
         addOpenFile(filePath);
         setCurrentFile(filePath);
