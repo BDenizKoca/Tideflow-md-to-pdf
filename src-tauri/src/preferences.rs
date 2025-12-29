@@ -172,7 +172,7 @@ pub struct Margins {
 /// Font configuration
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Fonts {
-    /// Main body text font (e.g., "New Computer Modern", "Inter")
+    /// Main body text font (e.g., "Linux Libertine", "Inter")
     pub main: String,
     /// Monospace font for code blocks (e.g., "JetBrains Mono", "Fira Code")
     pub mono: String,
@@ -242,7 +242,7 @@ impl Default for Preferences {
             default_image_width: "80%".to_string(),
             default_image_alignment: "center".to_string(),
             fonts: Fonts {
-                main: "New Computer Modern".to_string(),
+                main: "Linux Libertine".to_string(),
                 mono: "Liberation Mono".to_string(),
             },
             font_size: 11.0,

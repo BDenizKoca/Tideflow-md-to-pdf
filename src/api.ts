@@ -363,6 +363,24 @@ export async function clearBibliography(): Promise<void> {
   return invoke('clear_bibliography');
 }
 
+export async function clearAllCache(): Promise<{
+  files_removed: number;
+  space_freed_mb: number;
+}> {
+  // Clear all cache types: render cache, temp PDFs, unused assets, and bibliography files
+  const [tempResult, assetsResult] = await Promise.all([
+    cleanupTempPdfs(5), // Keep only last 5 temp PDFs
+    cleanupUnusedAssets(),
+    clearRenderCache(),
+    clearBibliography(),
+  ]);
+
+  return {
+    files_removed: tempResult.files_removed + assetsResult.files_removed,
+    space_freed_mb: (tempResult.total_space_freed + assetsResult.total_space_freed) / (1024 * 1024),
+  };
+}
+
 // Debug operations
 export interface DebugPathsInfo {
   content_dir: string;

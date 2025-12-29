@@ -21,6 +21,8 @@ const AdvancedTab: React.FC<AdvancedTabProps> = ({ local, mutate, setDirty, pend
   const globalUITheme = usePreferencesStore((state) => state.uiTheme);
   const setUITheme = usePreferencesStore((state) => state.setUITheme);
   const [localTheme, setLocalTheme] = useState<UIThemeId>(globalUITheme);
+  const [clearing, setClearing] = useState(false);
+  const [cacheResult, setCacheResult] = useState<string>('');
 
   useEffect(() => {
     if (autoApply) {
@@ -88,6 +90,19 @@ const AdvancedTab: React.FC<AdvancedTabProps> = ({ local, mutate, setDirty, pend
       setStatus('error');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const clearCache = async () => {
+    setClearing(true);
+    setCacheResult('');
+    try {
+      const result = await api.clearAllCache();
+      setCacheResult(`Cleared ${result.files_removed} files (${result.space_freed_mb.toFixed(2)} MB freed)`);
+    } catch (err) {
+      setCacheResult(`Error: ${String(err)}`);
+    } finally {
+      setClearing(false);
     }
   };
 
@@ -196,6 +211,17 @@ const AdvancedTab: React.FC<AdvancedTabProps> = ({ local, mutate, setDirty, pend
             </div>
             <div className="helper-text">Milliseconds to wait before re-rendering PDF while typing</div>
           </label>
+        </div>
+
+        <div className="design-section">
+          <h4>Cache & Storage</h4>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <button type="button" onClick={clearCache} disabled={clearing}>
+              {clearing ? 'Clearing...' : 'Clear All Cache'}
+            </button>
+            {cacheResult && <span className="helper-text" style={{ margin: 0 }}>{cacheResult}</span>}
+          </div>
+          <div className="helper-text">Clears temporary PDFs, unused images, bibliography files, and render cache</div>
         </div>
 
         <div className="design-section">

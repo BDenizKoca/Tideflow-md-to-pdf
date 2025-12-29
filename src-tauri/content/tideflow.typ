@@ -177,6 +177,10 @@
 #set block(spacing: para_spacing)
 #set outline(title: none)
 
+// Fix inline math equation spacing - remove extra vertical space
+// This prevents oversized selection/focus boxes around inline formulas
+#show math.equation.where(block: false): set block(above: 0pt, below: 0pt)
+
 // ============================================================================
 // COVER PAGE (if enabled) - uses scoped overrides
 // ============================================================================

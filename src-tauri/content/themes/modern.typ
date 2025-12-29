@@ -14,7 +14,7 @@
   set text(
     font: main-font,
     size: font-size,
-    lang: "tr",
+    lang: "en",
     fill: font-color,
     fallback: true,
   )

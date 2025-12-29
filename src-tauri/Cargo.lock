@@ -4427,7 +4427,7 @@ dependencies = [
 
 [[package]]
 name = "tideflow"
-version = "1.4.1"
+version = "1.5.2"
 dependencies = [
  "anyhow",
  "base64 0.21.7",

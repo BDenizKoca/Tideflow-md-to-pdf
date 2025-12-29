@@ -2,7 +2,7 @@
 
 #let default_theme(prefs, doc) = {
   // Extract preferences with defaults
-  let main-font = prefs.fonts.at("main", default: "New Computer Modern")
+  let main-font = prefs.fonts.at("main", default: "Linux Libertine")
   let mono-font = prefs.fonts.at("mono", default: "Latin Modern Mono")
   let font-size = prefs.at("font_size", default: 11) * 1pt
   let page-bg = rgb(prefs.at("page_bg_color", default: "#ffffff"))
@@ -11,7 +11,7 @@
   let heading-scale = prefs.at("heading_scale", default: 1.0)
   
   set page(paper: prefs.papersize, fill: page-bg, margin: (x: 2.5cm, y: 3cm))
-  set text(font: main-font, size: font-size, lang: "tr", fill: font-color, fallback: true)
+  set text(font: main-font, size: font-size, lang: "en", fill: font-color, fallback: true)
   set par(leading: 0.75em, spacing: 1em, justify: false)
   show raw: set text(font: mono-font, size: font-size * 0.9, fallback: true)
   

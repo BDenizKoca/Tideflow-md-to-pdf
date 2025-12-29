@@ -21,7 +21,7 @@ I wanted a dead-simple, elegant writing tool that outputs print‑ready PDFs **w
 * 12 beautiful themes; Default, Minimal, Compact, Elegant, Technical, Magazine, Academic, Creative, Modern, Serif, Notebook, Dark
 * Academic writing support with bibliography management (BibTeX/.bib & Hayagriva/.yml) with Pandoc-style citations
 * Multiple citation styless to choose; IEEE, APA, Chicago, MLA, Vancouver, and Harvard
-* Full LaTeX math rendering support via mitex (inline `$...$` and display `$$...$$`)
+* Full LaTeX math rendering support via MiTeX (inline `$...$` and display `$$...$$`)
 * Automatic Table of Contents, optional section numbering, and configurable cover page
 * Image paste, drag‑drop, and import dialogs
 * Full blockquote support with theme-appropriate backgrounds
@@ -102,7 +102,7 @@ npm run tauri:build
 ## Supported Markdown / Extras
 * Headings (H1-H6), emphasis (bold, italic, strikethrough)
 * Code (inline and fenced blocks with syntax highlighting via Typst)
-* Math (inline `$...$` and block `$$...$$` via LaTeX-style syntax with mitex)
+* Math (inline `$...$` and block `$$...$$` via LaTeX-style syntax with MiTeX)
 * Citations (Pandoc-style `[@key]`, `[@key, p. 42]`, `[@key1; @key2]` with automatic bibliography generation)
 * Lists (ordered, unordered, task lists with `- [ ]` / `- [x]`)
 * Blockquotes (single and multi-line with `>`)
@@ -144,6 +144,8 @@ PRs welcome. Please:
 
 ## Third-Party Notices
 Tideflow bundles the official Typst CLI (currently v0.13.1) for macOS, Windows, and Linux so the app works offline out of the box. Typst is available under the MIT OR Apache-2.0 licenses; see the [Typst project](https://github.com/typst/typst) for details. Our release pipeline downloads the upstream archives, verifies their SHA256 digests, and repackages the binaries into the platform bundles.
+
+LaTeX math rendering is powered by [MiTeX](https://github.com/mitex-rs/mitex), a LaTeX math parser and renderer for Typst. MiTeX is available under the Apache-2.0 license; see the MiTeX project for details.
 
 ## License
 MIT – use, modify, distribute with attribution.

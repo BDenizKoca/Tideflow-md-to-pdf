@@ -15,7 +15,7 @@
     margin: (x: 2cm, y: 2.5cm),
     fill: page-bg,
   )
-  set text(font: main-font, size: font-size, lang: "tr", fill: font-color, fallback: true)
+  set text(font: main-font, size: font-size, lang: "en", fill: font-color, fallback: true)
   set par(leading: 0.65em, spacing: 0.85em, justify: false)
   show raw: set text(font: mono-font, size: font-size * 0.95, fallback: true)
   show raw.where(block: true): block.with(inset: 10pt, fill: page-bg.darken(3%), stroke: 1.5pt + accent, radius: 3pt)
