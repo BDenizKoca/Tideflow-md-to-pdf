@@ -14,7 +14,20 @@ Write on the left, get a beautifully typeset PDF on the right – instantly.
 
 ## Why I Built It
 I wanted a dead-simple, elegant writing tool that outputs print‑ready PDFs **without relying on a web service**, LaTeX toolchains, or heavy exports. That's that TideFlow is, a simple use editor for quickly editing and formatting markdowns as pdfs.
+## Who Is This For?
 
+Tideflow is designed for people who prefer writing in Markdown and want a reliable way to generate well-formatted PDF documents.
+
+It may be useful for:
+
+- Writers who draft long-form content in Markdown and need a clean export workflow  
+- Researchers who want structured documents without maintaining complex LaTeX environments  
+- Developers who are already comfortable with Markdown-based tooling  
+- Professionals preparing reports or technical documentation in PDF format  
+
+Tideflow does not aim to replace advanced publishing systems. Instead, it focuses on providing a practical, lightweight path from Markdown text to a print-ready PDF.
+
+If you regularly write in Markdown and distribute your work as PDFs, Tideflow keeps that process simple and predictable.
 ## Features
 * Real‑time two-way scroll sync between editor & PDF preview (Has around %85 accuracy)
 * Clean, distraction‑lite editor (CodeMirror 6)
