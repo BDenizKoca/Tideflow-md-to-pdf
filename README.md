@@ -24,6 +24,19 @@ Tideflow is designed for:
 - Developers...
 
 If you think best in Markdown but publish in PDF — Tideflow bridges that gap.
+## Contributing
+
+Contributions are welcome — especially documentation improvements, bug fixes, feature ideas, and UX polish.
+
+If you'd like to contribute:
+
+- Open an Issue to discuss bugs, ideas, or feature requests  
+- Fork the repository and create a focused branch  
+- Submit a Pull Request with a clear description of the changes  
+
+Please keep contributions focused and well-described.
+
+Thanks for helping make Tideflow better 🚀
 
 ## Features
 * Real‑time two-way scroll sync between editor & PDF preview (Has around %85 accuracy)
