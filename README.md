@@ -14,20 +14,23 @@ Write on the left, get a beautifully typeset PDF on the right – instantly.
 
 ## Why I Built It
 I wanted a dead-simple, elegant writing tool that outputs print‑ready PDFs **without relying on a web service**, LaTeX toolchains, or heavy exports. That's that TideFlow is, a simple use editor for quickly editing and formatting markdowns as pdfs.
-## Who Is This For?
+Who Is This For?
 
-Tideflow is designed for people who prefer writing in Markdown and want a reliable way to generate well-formatted PDF documents.
+Tideflow is built for people who write in Markdown and need a reliable way to generate clean, well-formatted PDF documents. It provides a lightweight and predictable Markdown-to-PDF workflow without requiring complex publishing tools.
 
-It may be useful for:
+It’s especially useful for:
 
-- Writers who draft long-form content in Markdown and need a clean export workflow  
-- Researchers who want structured documents without maintaining complex LaTeX environments  
-- Developers who are already comfortable with Markdown-based tooling  
-- Professionals preparing reports or technical documentation in PDF format  
+Writers creating long-form content in Markdown who need professional PDF exports
 
-Tideflow does not aim to replace advanced publishing systems. Instead, it focuses on providing a practical, lightweight path from Markdown text to a print-ready PDF.
+Researchers generating structured reports from Markdown files
 
-If you regularly write in Markdown and distribute your work as PDFs, Tideflow keeps that process simple and predictable.
+Developers maintaining Markdown-based documentation and requiring consistent PDF output
+
+Professionals preparing technical documentation or reports in PDF format
+
+Tideflow doesn’t aim to replace advanced publishing systems. Instead, it focuses on delivering a practical, streamlined Markdown-to-PDF conversion process that keeps formatting reliable and output consistent.
+
+If you regularly write in Markdown and distribute your work as PDFs, Tideflow keeps the process simple, consistent, and predictable.
 ## Features
 * Real‑time two-way scroll sync between editor & PDF preview (Has around %85 accuracy)
 * Clean, distraction‑lite editor (CodeMirror 6)
