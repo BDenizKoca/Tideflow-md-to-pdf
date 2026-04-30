@@ -4,6 +4,7 @@
  */
 
 import { useEffect } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { useEditorStore } from '../stores/editorStore';
 import { useUIStore } from '../stores/uiStore';
@@ -52,6 +53,22 @@ export function useAppInitialization() {
         preferencesStore.setPreferences(prefs);
         preferencesStore.setThemeSelection(prefs.theme_id ?? 'default');
         initLogger.debug('preferences loaded', prefs);
+
+        // Check if a file was passed via Windows file-association (double-click or "Open with")
+        const launchFilePath = await invoke<string | null>('get_launch_file_path').catch(() => null);
+        if (launchFilePath) {
+          initLogger.info('opening launch file', launchFilePath);
+          try {
+            const content = await readMarkdownFile(launchFilePath);
+            editorStore.addOpenFile(launchFilePath);
+            editorStore.setCurrentFile(launchFilePath);
+            editorStore.setContent(content);
+            uiStore.setInitialSampleInjected(true);
+            sampleInjected = true;
+          } catch (e) {
+            initLogger.error('Failed to open launch file', e);
+          }
+        }
 
         // Check if this is first time running (no previous session with files)
         const isFirstTime = !session || !session.openFiles || session.openFiles.length === 0;
@@ -215,6 +232,25 @@ export function useAppInitialization() {
           initLogger.warn('TypstQuery: no positions found, falling back to PDF-text extraction');
         });
         register(unlistenTypstFailed);
+
+        // Handle files forwarded from a second instance (single-instance plugin)
+        // Fires when the user double-clicks a .md file while Tideflow is already open.
+        const unlistenOpenFile = await listen<string>('open-file', async (evt) => {
+          const path = evt.payload;
+          if (!path) return;
+          initLogger.info('open-file event received', path);
+          try {
+            const content = await readMarkdownFile(path);
+            const store = useEditorStore.getState();
+            store.addOpenFile(path);
+            store.setCurrentFile(path);
+            store.setContent(content);
+          } catch (e) {
+            initLogger.error('Failed to open forwarded file', e);
+            useUIStore.getState().addToast({ type: 'error', message: `Could not open file: ${path}` });
+          }
+        });
+        register(unlistenOpenFile);
 
         initLogger.info('init complete');
       } catch (error) {

@@ -21,7 +21,7 @@ export default defineConfig({
 
   // Optimize build for production
   build: {
-    target: ["es2021", "chrome100", "safari14"],
+    target: ["es2022", "chrome120"],
     minify: !process.env.TAURI_DEBUG ? "esbuild" : false,
     sourcemap: !!process.env.TAURI_DEBUG,
     rollupOptions: {
