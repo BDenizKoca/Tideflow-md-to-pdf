@@ -259,6 +259,19 @@ export function usePdfToEditorSync(params: UsePdfToEditorSyncParams): void {
     // Dependencies: rendering state and sync functions
     // Re-attach listener when PDF is ready (rendering completes)
   }, [
+    containerRef,
+    anchorOffsetsRef,
+    sourceMapRef,
+    programmaticScrollRef,
+    lastProgrammaticScrollAt,
+    mountedAt,
+    userInteractedRef,
+    userManuallyPositionedPdfRef,
+    activeAnchorRef,
+    syncModeRef,
+    renderingRef,
+    isTypingRef,
+    savedScrollPositionRef,
     // Key dependency: rendering state triggers re-attachment when PDF ready
     rendering,
     // Other dependencies

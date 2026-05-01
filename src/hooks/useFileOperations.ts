@@ -1,41 +1,32 @@
 /**
- * Hook to handle file operations: saving, rendering, file switching, content loading.
- * Manages scroll position restoration and document lifecycle.
+ * Hook for file-level operations: saving, rendering, and reacting to tab
+ * switches. The active file's data lives in the store; this hook owns the
+ * imperative side — writing to disk, swapping CodeMirror state on tab
+ * change, scheduling renders.
  */
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback } from 'react';
 import { writeMarkdownFile, renderTypst } from '../api';
 import { scrubRawTypstAnchors } from '../utils/scrubAnchors';
 import { handleError } from '../utils/errorHandler';
 import { getScrollElement } from '../types/codemirror';
-import { programmaticUpdateAnnotation } from './useCodeMirrorSetup';
-import type { SourceMap } from '../types';
+import { useEditorStore } from '../stores/editorStore';
 import type { EditorStateRefs } from './useEditorState';
 import { logger } from '../utils/logger';
 
-// Create scoped logger
 const fileOpsLogger = logger.createScoped('FileOps');
-
-interface CompileStatus {
-  status: 'running' | 'ok' | 'error';
-  pdf_path?: string;
-  source_map?: SourceMap;
-  message?: string;
-  details?: string;
-}
 
 interface UseFileOperationsParams {
   editorStateRefs: EditorStateRefs;
-  currentFile: string | null;
+  /** Path of the active file, or null. */
+  activeFile: string | null;
+  /** Active file's text content (driven by the store, mirrored here for
+   *  effect dependency tracking). */
   content: string;
+  /** Active file's modified flag. */
   modified: boolean;
-  sourceMap: SourceMap | null;
+  /** True once CodeMirror has finished mounting. */
   editorReady: boolean;
-  setModified: (modified: boolean) => void;
-  setCompileStatus: (status: CompileStatus) => void;
-  setSourceMap: (map: SourceMap | null) => void;
-  setEditorScrollPosition: (file: string, position: number) => void;
-  getEditorScrollPosition: (file: string) => number | null;
   handleAutoRender: (content: string, signal?: AbortSignal) => Promise<void>;
   computeAnchorFromViewport: (userInitiated: boolean) => void;
 }
@@ -43,16 +34,10 @@ interface UseFileOperationsParams {
 export function useFileOperations(params: UseFileOperationsParams) {
   const {
     editorStateRefs,
-    currentFile,
+    activeFile,
     content,
     modified,
-    sourceMap,
     editorReady,
-    setModified,
-    setCompileStatus,
-    setSourceMap,
-    setEditorScrollPosition,
-    getEditorScrollPosition,
     handleAutoRender,
     computeAnchorFromViewport,
   } = params;
@@ -60,58 +45,61 @@ export function useFileOperations(params: UseFileOperationsParams) {
   const {
     editorViewRef,
     prevFileRef,
-    lastLoadedContentRef,
     programmaticScrollRef,
-    programmaticUpdateRef,
+    swapDocumentRef,
   } = editorStateRefs;
 
-  // Handle render
+  // Manual render — invoked from the toolbar / keyboard shortcut. Renders
+  // whatever the active file currently has.
   const handleRender = useCallback(async (setPreviewVisible?: (visible: boolean) => void) => {
+    const s = useEditorStore.getState();
+    const path = s.activeFile;
+    if (!path) return;
+    const doc = s.documents[path];
+    if (!doc) return;
+
     try {
-      setCompileStatus({ status: 'running' });
-      const document = await renderTypst(content, 'pdf', currentFile);
-      setSourceMap(document.sourceMap);
-      setCompileStatus({
+      s.setCompileStatus(path, { status: 'running' });
+      const document = await renderTypst(doc.content, 'pdf', path);
+      s.setSourceMap(path, document.sourceMap);
+      s.setCompileStatus(path, {
         status: 'ok',
         pdf_path: document.pdfPath,
         source_map: document.sourceMap,
       });
-      // Show preview if it's hidden
-      if (setPreviewVisible) {
-        setPreviewVisible(true);
-      }
+      if (setPreviewVisible) setPreviewVisible(true);
     } catch (err) {
-      setCompileStatus({
+      s.setCompileStatus(path, {
         status: 'error',
         message: 'Rendering failed',
-        details: String(err)
+        details: String(err),
       });
-      setSourceMap(null);
+      s.setSourceMap(path, null);
     }
-  }, [content, currentFile, setCompileStatus, setSourceMap]);
+  }, []);
 
-  // Save the file
-  const handleSave = useCallback(async (setIsSaving: (saving: boolean) => void, addToast?: (toast: { type: 'success' | 'error' | 'warning' | 'info'; message: string }) => void) => {
-    if (!currentFile || !modified) return;
+  // Save the active file to disk. Triggered by the Ctrl+S keymap.
+  const handleSave = useCallback(async (
+    setIsSaving: (saving: boolean) => void,
+    addToast?: (toast: { type: 'success' | 'error' | 'warning' | 'info'; message: string }) => void,
+  ) => {
+    if (!activeFile || !modified) return;
 
     try {
       setIsSaving(true);
-      // Strip invisible raw-typst anchors before saving so the persisted
-      // markdown doesn't contain those injected tokens which can interfere
-      // with copy/paste and other tooling.
+      // Strip invisible raw-typst anchors before persisting so the on-disk
+      // file is plain Markdown.
       const cleaned = scrubRawTypstAnchors(content);
-      await writeMarkdownFile(currentFile, cleaned);
-      setModified(false);
+      await writeMarkdownFile(activeFile, cleaned);
+      useEditorStore.getState().markDocumentModified(activeFile, false);
 
-      // Show success toast
       if (addToast) {
         addToast({ type: 'success', message: 'File saved successfully' });
       }
 
-      // After saving, render the file
+      // Re-render after save
       await handleRender();
     } catch (err) {
-      // Show error toast
       if (addToast) {
         addToast({ type: 'error', message: 'Failed to save file' });
       }
@@ -119,187 +107,106 @@ export function useFileOperations(params: UseFileOperationsParams) {
     } finally {
       setIsSaving(false);
     }
-  }, [currentFile, modified, content, setModified, handleRender]);
+  }, [activeFile, modified, content, handleRender]);
 
-  // Load file content ONLY when switching to a different file, not on every keystroke.
-  // Use generation tracking to prevent race conditions on rapid file switches.
+  // ============================================================================
+  // File-switch effect: react to activeFile changes
+  // ============================================================================
+  // When the user switches tabs, save the outgoing file's editor state and
+  // scroll position into its FileState, then load the incoming file's
+  // EditorView state via swapDocument. Per-file undo history, cursor, and
+  // selection survive the switch — that's the point of storing editorState
+  // on each FileState rather than dispatching a doc-replace transaction.
   useEffect(() => {
-    // Wait until CodeMirror/editor is initialized before attempting content sync.
     if (!editorReady) {
-      fileOpsLogger.debug('Editor not ready, skipping content sync');
+      fileOpsLogger.debug('editor not ready, skipping file-switch sync');
       return;
     }
-    if (!editorViewRef.current) {
-      fileOpsLogger.debug('No editorView, skipping content sync');
+    const view = editorViewRef.current;
+    if (!view) {
+      fileOpsLogger.debug('no editorView, skipping file-switch sync');
       return;
     }
-    if (!currentFile) {
-      fileOpsLogger.debug('No currentFile, skipping content sync');
-      return; // No file selected
+
+    const prev = prevFileRef.current;
+    if (prev === activeFile) return; // no transition
+
+    fileOpsLogger.debug('file switch', { prev, next: activeFile });
+
+    // Save outgoing scroll position into the previous file's FileState.
+    if (prev) {
+      const sc = getScrollElement(view);
+      if (sc) {
+        useEditorStore.getState().setDocumentEditorScroll(prev, sc.scrollTop);
+      }
     }
 
-    // When a new file is selected (including when going from no files to first file)
-    if (currentFile !== prevFileRef.current) {
-      fileOpsLogger.debug('File changed, syncing content', { currentFile, prevFile: prevFileRef.current, contentLength: content.length });
-      // Track the target file to detect if user switches away during loading
-      const targetFile = currentFile;
+    // Update tracker BEFORE the swap so a re-render mid-swap doesn't double up.
+    prevFileRef.current = activeFile;
 
-      // Save current scroll position for the previous file before switching
-      if (prevFileRef.current) {
-        const sc = getScrollElement(editorViewRef.current);
-        if (sc) {
-          const pos = sc.scrollTop;
-          setEditorScrollPosition(prevFileRef.current, pos);
-          fileOpsLogger.debug('saved scroll pos on file switch', { file: prevFileRef.current, pos });
+    // Swap the EditorView state. swapDocument persists the previous file's
+    // full state (cursor, selection, history) into its FileState as a side
+    // effect, then loads the next file's stored state — or a fresh state
+    // built from its content if the file has never been activated yet.
+    if (swapDocumentRef.current) {
+      swapDocumentRef.current(prev, activeFile);
+    }
+
+    if (!activeFile) return; // closed all — nothing more to do
+
+    const targetFile = activeFile;
+
+    // Restore the new file's editor scroll position (after layout has
+    // settled from the setState swap).
+    requestAnimationFrame(() => {
+      // Bail if the user switched again before the rAF callback ran.
+      if (useEditorStore.getState().activeFile !== targetFile) return;
+
+      const sc = editorViewRef.current ? getScrollElement(editorViewRef.current) : null;
+      if (sc) {
+        const stored = useEditorStore.getState().documents[targetFile]?.editorScrollPos ?? null;
+        if (stored != null) {
+          programmaticScrollRef.current = true;
+          sc.scrollTop = stored;
+          requestAnimationFrame(() => { programmaticScrollRef.current = false; });
         }
       }
 
-      // Update tracking refs immediately to prevent double-processing
-      prevFileRef.current = currentFile;
-      lastLoadedContentRef.current = content;
+      computeAnchorFromViewport(false);
 
-      // Replace document content with the file's content
-      // Mark as programmatic update using annotation
-      editorViewRef.current.dispatch({
-        changes: {
-          from: 0,
-          to: editorViewRef.current.state.doc.length,
-          insert: content
-        },
-        selection: { anchor: 0, head: 0 }, // Set cursor to top to prevent auto-scroll
-        annotations: programmaticUpdateAnnotation.of(true)
-      });
-
-      // Restore scroll position after content is loaded (async to avoid race)
-      requestAnimationFrame(() => {
-        // Verify we're still on the same file (user might have switched again)
-        if (currentFile !== targetFile) {
-          fileOpsLogger.debug('skipped scroll restore - file changed', { targetFile, currentFile });
-          return;
-        }
-
-        try {
-          const stored = getEditorScrollPosition(targetFile);
-          if (stored !== null && editorViewRef.current) {
-            const sc = getScrollElement(editorViewRef.current);
-            if (sc) {
-              programmaticScrollRef.current = true;
-              sc.scrollTop = stored;
-              requestAnimationFrame(() => { programmaticScrollRef.current = false; });
-              fileOpsLogger.debug('restored scroll pos', { file: targetFile, pos: stored });
-            }
+      // Always re-render on tab switch.
+      //
+      // We can't trust a cached "ok" compileStatus across tab switches: the
+      // backend writes every PDF to a shared `build_dir/preview.pdf`, so a
+      // file that compiled cleanly an hour ago has a stale on-disk PDF if
+      // any other file has rendered since. Reading those bytes back into
+      // the canvas would show the wrong file's content.
+      //
+      // We immediately flip compileStatus to 'running' so PDFViewer drops
+      // the (potentially stale) cached canvas and shows the skeleton until
+      // the fresh render lands. The 100ms timer debounces against an
+      // in-flight typing-induced render that may still be settling.
+      const after = useEditorStore.getState().documents[targetFile];
+      if (after && after.content) {
+        useEditorStore.getState().setCompileStatus(targetFile, { status: 'running' });
+        const abortController = new AbortController();
+        setTimeout(() => {
+          if (useEditorStore.getState().activeFile === targetFile) {
+            handleAutoRender(after.content, abortController.signal);
           }
-        } catch { /* ignore */ }
-
-        // Compute anchor and auto-render (only if still on same file)
-        if (currentFile === targetFile) {
-          computeAnchorFromViewport(false);
-          // Debounce auto-render on file switch to avoid race with content loading
-          const abortController = new AbortController();
-          const timerId = setTimeout(() => {
-            if (currentFile === targetFile) {
-              handleAutoRender(content, abortController.signal);
-            }
-          }, 100);
-
-          // Cleanup: cancel render if component unmounts or file changes
-          return () => {
-            clearTimeout(timerId);
-            abortController.abort();
-          };
-        }
-      });
-    }
+        }, 100);
+      }
+    });
   }, [
     editorReady,
-    currentFile,
-    content,
+    activeFile,
     handleAutoRender,
-    setEditorScrollPosition,
-    getEditorScrollPosition,
     computeAnchorFromViewport,
+    editorViewRef,
+    prevFileRef,
+    programmaticScrollRef,
+    swapDocumentRef,
   ]);
 
-  // If content in store changes for current file (e.g., loaded asynchronously) and differs from editor doc, update it.
-  // This effect is now safer as it only runs when content genuinely changes for the CURRENT file.
-  useEffect(() => {
-    if (!editorViewRef.current) return;
-    if (!currentFile) return;
-
-    // Only update if this content is for the currently displayed file
-    if (currentFile !== prevFileRef.current) return;
-
-    const currentDoc = editorViewRef.current.state.doc.toString();
-    if (content !== currentDoc && content !== lastLoadedContentRef.current) {
-      // Mark as programmatic update using annotation
-      editorViewRef.current.dispatch({
-        changes: {
-          from: 0,
-          to: editorViewRef.current.state.doc.length,
-          insert: content
-        },
-        annotations: programmaticUpdateAnnotation.of(true)
-      });
-      lastLoadedContentRef.current = content;
-    }
-  }, [content, currentFile, editorViewRef, prevFileRef, lastLoadedContentRef, programmaticUpdateRef]);
-
-  // Initial render on startup: trigger auto-render when editor is ready with content but no PDF yet
-  // This handles the case where the app starts with a file already loaded from session
-  const initialRenderAttemptedRef = useRef(false);
-
-  useEffect(() => {
-    fileOpsLogger.debug('startup render effect fired', {
-      attempted: initialRenderAttemptedRef.current,
-      editorReady,
-      hasFile: !!currentFile,
-      hasContent: !!content,
-      hasSourceMap: !!sourceMap,
-    });
-
-    // Only attempt initial render once per mount
-    if (initialRenderAttemptedRef.current) {
-      fileOpsLogger.debug('startup render already attempted, skipping');
-      return;
-    }
-
-    // Wait for editor to be ready
-    if (!editorReady) {
-      fileOpsLogger.debug('startup render waiting for editor ready');
-      return;
-    }
-    if (!currentFile) {
-      fileOpsLogger.debug('startup render waiting for file');
-      return;
-    }
-    if (!content) {
-      fileOpsLogger.debug('startup render waiting for content');
-      return;
-    }
-
-    // Don't render if we already have a PDF
-    if (sourceMap) {
-      fileOpsLogger.debug('startup render skipped - sourceMap already exists');
-      initialRenderAttemptedRef.current = true;
-      return;
-    }
-
-    // Mark that we've attempted
-    initialRenderAttemptedRef.current = true;
-
-    // At this point: editor is ready, file is open, has content, but no PDF rendered yet
-    fileOpsLogger.debug('startup render triggered', { file: currentFile, contentLength: content.length });
-
-    const timerId = setTimeout(() => {
-      fileOpsLogger.debug('executing startup render NOW');
-      handleAutoRender(content);
-    }, 500); // Longer delay to ensure everything is initialized
-
-    return () => clearTimeout(timerId);
-  }, [editorReady, currentFile, content, sourceMap, handleAutoRender]);
-
-  return {
-    handleSave,
-    handleRender,
-  };
+  return { handleSave, handleRender };
 }

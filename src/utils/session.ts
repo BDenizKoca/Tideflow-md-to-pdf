@@ -19,19 +19,21 @@ export interface TideflowSessionData {
 const KEY = 'tideflowSession';
 const VERSION = 1;
 
+/**
+ * Read raw session JSON from localStorage. Returns null if no data, version
+ * mismatch, or parse error. Intentionally silent on the happy path — the
+ * autosave effect calls this often (directly and via saveSession's merge),
+ * and a debug log per call drowns out anything useful.
+ */
 export function loadSession(): TideflowSessionData | null {
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) {
-      sessionLogger.debug('No session data found');
-      return null;
-    }
+    if (!raw) return null;
     const data = JSON.parse(raw) as TideflowSessionData;
     if (data.version !== VERSION) {
       sessionLogger.warn(`Incompatible session version: ${data.version}, expected: ${VERSION}`);
       return null; // ignore incompatible versions
     }
-    sessionLogger.debug('Session loaded successfully', { openFiles: data.openFiles.length });
     return data;
   } catch (error) {
     sessionLogger.error('Failed to load session', error);
@@ -39,6 +41,11 @@ export function loadSession(): TideflowSessionData | null {
   }
 }
 
+/**
+ * Merge `partial` into the existing session and persist. Existing fields not
+ * present in `partial` are preserved automatically — callers don't need to
+ * read the session first to roundtrip values like `fullscreen`.
+ */
 export function saveSession(partial: Partial<TideflowSessionData>) {
   try {
     const existing = loadSession();
@@ -55,7 +62,6 @@ export function saveSession(partial: Partial<TideflowSessionData>) {
       timestamp: Date.now()
     };
     localStorage.setItem(KEY, JSON.stringify(merged));
-    sessionLogger.debug('Session saved', { currentFile: merged.currentFile });
   } catch (error) {
     sessionLogger.warn('Failed to save session', error);
   }

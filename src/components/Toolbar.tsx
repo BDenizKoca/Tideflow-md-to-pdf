@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useEditorStore } from '../stores/editorStore';
+import { useActiveDocument } from '../hooks/useActiveDocument';
 import { useUIStore } from '../stores/uiStore';
 import DesignModal from './DesignModal';
 import SettingsModal from './SettingsModal';
@@ -13,14 +14,12 @@ import { scrubRawTypstAnchors } from '../utils/scrubAnchors';
 import './Toolbar.css';
 
 const Toolbar: React.FC = () => {
-  const {
-    editor,
-    setCurrentFile,
-    setContent,
-    setModified,
-    addOpenFile,
-    closeAllFiles,
-  } = useEditorStore();
+  const activeDocument = useActiveDocument();
+  const openDocument = useEditorStore((s) => s.openDocument);
+  const setActiveDocument = useEditorStore((s) => s.setActiveDocument);
+  const closeAllDocuments = useEditorStore((s) => s.closeAllDocuments);
+  const renameDocument = useEditorStore((s) => s.renameDocument);
+  const markDocumentModified = useEditorStore((s) => s.markDocumentModified);
   const {
   previewVisible,
   setPreviewVisible,
@@ -68,9 +67,8 @@ const Toolbar: React.FC = () => {
       const filePath = await createFile(fileName);
       await writeMarkdownFile(filePath, newContent);
 
-      addOpenFile(filePath);
-      setCurrentFile(filePath);
-      setContent(newContent);
+      openDocument(filePath, newContent);
+      setActiveDocument(filePath);
       addRecentFile(filePath);
       addToast({ type: 'success', message: 'File created successfully' });
     } catch (err) {
@@ -87,9 +85,8 @@ const Toolbar: React.FC = () => {
       if (filePath) {
         try {
           const content = await readMarkdownFile(filePath);
-          addOpenFile(filePath);
-          setCurrentFile(filePath);
-          setContent(content);
+          openDocument(filePath, content);
+          setActiveDocument(filePath);
           addRecentFile(filePath);
           addToast({ type: 'success', message: 'File opened successfully' });
           return;
@@ -105,13 +102,15 @@ const Toolbar: React.FC = () => {
   };
 
   const handleSaveFile = async () => {
-    const { currentFile, content, modified } = editor;
-    if (!currentFile || !modified) return;
+    const path = activeDocument?.path;
+    const content = activeDocument?.content;
+    const modified = activeDocument?.modified;
+    if (!path || !modified || content === undefined) return;
 
     try {
       const cleaned = scrubRawTypstAnchors(content);
-      await writeMarkdownFile(currentFile, cleaned);
-      setModified(false);
+      await writeMarkdownFile(path, cleaned);
+      markDocumentModified(path, false);
       addToast({ type: 'success', message: 'File saved successfully' });
     } catch (err) {
       addToast({ type: 'error', message: 'Failed to save file' });
@@ -120,9 +119,10 @@ const Toolbar: React.FC = () => {
   };
 
   const handleSaveAs = async () => {
-    const { currentFile, content } = editor;
+    const oldPath = activeDocument?.path ?? null;
+    const content = activeDocument?.content ?? '';
     try {
-      const suggestedName = currentFile ? currentFile.split(/[\\/]/).pop() : 'document.md';
+      const suggestedName = oldPath ? oldPath.split(/[\\/]/).pop() : 'document.md';
       const filePath = await save({
         defaultPath: suggestedName,
         filters: [{ name: 'Markdown Files', extensions: ['md'] }]
@@ -132,8 +132,15 @@ const Toolbar: React.FC = () => {
 
       const cleaned = scrubRawTypstAnchors(content);
       await writeMarkdownFile(filePath, cleaned);
-      setCurrentFile(filePath);
-      setModified(false);
+      // Re-key the document under the new path so all per-file state
+      // (editor history, scroll, last render) follows the new identity.
+      if (oldPath) {
+        renameDocument(oldPath, filePath);
+        markDocumentModified(filePath, false);
+      } else {
+        openDocument(filePath, cleaned);
+        setActiveDocument(filePath);
+      }
       addRecentFile(filePath);
       setSaveDropdownOpen(false);
       addToast({ type: 'success', message: 'File saved successfully' });
@@ -144,7 +151,8 @@ const Toolbar: React.FC = () => {
   };
 
   const handleExportClean = async () => {
-    const { currentFile, content } = editor;
+    const currentFile = activeDocument?.path ?? null;
+    const content = activeDocument?.content ?? '';
     try {
       const baseName = currentFile ? currentFile.split(/[\\/]/).pop()?.replace('.md', '') : 'document';
       const suggestedName = `${baseName}-clean.md`;
@@ -176,9 +184,8 @@ const Toolbar: React.FC = () => {
       const cleaned = scrubRawTypstAnchors(text);
       await writeMarkdownFile(newPath, cleaned);
 
-      addOpenFile(newPath);
-      setCurrentFile(newPath);
-      setContent(cleaned);
+      openDocument(newPath, cleaned);
+      setActiveDocument(newPath);
       addToast({ type: 'success', message: 'File imported successfully' });
     } catch (e2) {
       addToast({ type: 'error', message: 'Failed to import file' });
@@ -194,7 +201,7 @@ const Toolbar: React.FC = () => {
 
   const handleExportPDF = async () => {
     try {
-      const pdfSource = editor.compileStatus.pdf_path;
+      const pdfSource = activeDocument?.compileStatus.pdf_path;
       if (!pdfSource) {
         handleError(new Error('No PDF available to export'),
           { operation: 'export PDF', component: 'Toolbar' }, 'warning');
@@ -237,7 +244,7 @@ const Toolbar: React.FC = () => {
       if (!dest.toLowerCase().endsWith('.png')) dest = dest + '.png';
 
       // Export using current content (no file needed!)
-      await exportAsPng(editor.content, dest, 144, editor.currentFile);
+      await exportAsPng(activeDocument?.content ?? '', dest, 144, activeDocument?.path ?? null);
 
       // Extract base name for multi-page message
       const baseName = dest.replace(/\.png$/i, '');
@@ -262,7 +269,7 @@ const Toolbar: React.FC = () => {
       if (!dest.toLowerCase().endsWith('.svg')) dest = dest + '.svg';
 
       // Export using current content (no file needed!)
-      await exportAsSvg(editor.content, dest, editor.currentFile);
+      await exportAsSvg(activeDocument?.content ?? '', dest, activeDocument?.path ?? null);
 
       // Extract base name for multi-page message
       const baseName = dest.replace(/\.svg$/i, '');
@@ -316,9 +323,8 @@ const Toolbar: React.FC = () => {
                     onClick={async () => {
                       try {
                         const content = await readMarkdownFile(file);
-                        addOpenFile(file);
-                        setCurrentFile(file);
-                        setContent(content);
+                        openDocument(file, content);
+                        setActiveDocument(file);
                         addRecentFile(file);
                         setRecentDropdownOpen(false);
                         addToast({ type: 'success', message: 'File opened successfully' });
@@ -356,7 +362,7 @@ const Toolbar: React.FC = () => {
           </button>
           <button
             type="button"
-            onClick={closeAllFiles}
+            onClick={closeAllDocuments}
             title="Close all tabs and return to instructions"
           >
             ✖ Close All
@@ -402,7 +408,7 @@ const Toolbar: React.FC = () => {
             <button
               type="button"
               onClick={handleSaveFile}
-              disabled={!editor.modified}
+              disabled={!activeDocument?.modified}
               title="Save File (Ctrl+S)"
               className="file-open-btn btn-primary"
             >
@@ -450,7 +456,7 @@ const Toolbar: React.FC = () => {
           <div className="file-control-group">
             <button
               onClick={handleExportPDF}
-              disabled={!editor.compileStatus.pdf_path}
+              disabled={!activeDocument?.compileStatus.pdf_path}
               title="Export PDF (Ctrl+E)"
               className="btn-primary file-open-btn"
             >
@@ -462,7 +468,7 @@ const Toolbar: React.FC = () => {
                   type="button" 
                   className="dropdown-toggle btn-primary" 
                   title="Export options"
-                  disabled={!editor.compileStatus.pdf_path}
+                  disabled={!activeDocument?.compileStatus.pdf_path}
                 >
                   ▼
                 </button>

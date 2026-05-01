@@ -45,18 +45,22 @@ export function useWindowManagement(setLoading: (loading: boolean) => void) {
           // Always prevent default and handle close manually
           event.preventDefault();
 
-          const editor = useEditorStore.getState().editor;
+          const editorState = useEditorStore.getState();
           const preferences = usePreferencesStore.getState().preferences;
           const previewVisible = useUIStore.getState().previewVisible;
 
-          windowMgmtLogger.debug('Close handler', { modified: editor.modified, confirm_exit_on_unsaved: preferences.confirm_exit_on_unsaved });
+          // "Modified" at the app level means *any* open file has unsaved
+          // edits — exit confirmation should fire if any tab is dirty.
+          const anyModified = Object.values(editorState.documents).some((d) => d.modified);
+
+          windowMgmtLogger.debug('Close handler', { anyModified, confirm_exit_on_unsaved: preferences.confirm_exit_on_unsaved });
 
           // Save window state before potential exit
           const isMaximized = await appWindow.isMaximized();
           saveSession({ maximized: isMaximized });
 
           // Check if there are unsaved changes and confirmation is enabled
-          if (editor.modified && preferences.confirm_exit_on_unsaved) {
+          if (anyModified && preferences.confirm_exit_on_unsaved) {
             // Ask for confirmation using Tauri dialog
             const result = await confirm(
               'You have unsaved changes. Do you want to exit without saving?',
@@ -73,8 +77,8 @@ export function useWindowManagement(setLoading: (loading: boolean) => void) {
               // User confirmed exit, save session and close
               windowMgmtLogger.debug('Saving session and destroying window');
               saveSession({
-                currentFile: editor.currentFile,
-                openFiles: editor.openFiles,
+                currentFile: editorState.activeFile,
+                openFiles: editorState.openFiles,
                 previewVisible,
               });
               // Destroy the window
@@ -86,8 +90,8 @@ export function useWindowManagement(setLoading: (loading: boolean) => void) {
             windowMgmtLogger.debug('No unsaved changes or confirmation disabled - closing immediately');
             // No unsaved changes or confirmation disabled, save session and close
             saveSession({
-              currentFile: editor.currentFile,
-              openFiles: editor.openFiles,
+              currentFile: editorState.activeFile,
+              openFiles: editorState.openFiles,
               previewVisible,
             });
             // Close the window

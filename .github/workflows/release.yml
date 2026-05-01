@@ -11,7 +11,7 @@ jobs:
     permissions:
       contents: write
     env:
-      TYPST_VERSION: 0.13.1
+      TYPST_VERSION: 0.14.2
     strategy:
       fail-fast: false
       matrix:
@@ -20,17 +20,17 @@ jobs:
             args: '--target x86_64-apple-darwin'
             typst_dir: 'macos'
             typst_asset: 'typst-x86_64-apple-darwin.tar.xz'
-            typst_sha256: '4dabfe647f7f01ed9cc13ad8196a6c7f5e16f0732821b522d50740d3a9f5207b'
+            typst_sha256: '4e91d8e1e33ab164f949c5762e01ee3faa585c8615a2a6bd5e3677fa8506b249'
           - platform: 'macos-latest' # macOS (ARM)
             args: '--target aarch64-apple-darwin'
             typst_dir: 'macos'
             typst_asset: 'typst-aarch64-apple-darwin.tar.xz'
-            typst_sha256: '541e4f9eaca3f34ee865f81fc663e4839cb84d6253f71a372cd855b0a7283213'
+            typst_sha256: '470aa49a2298d20b65c119a10e4ff8808550453e0cb4d85625b89caf0cedf048'
           - platform: 'ubuntu-22.04' # Linux
             args: ''
             typst_dir: 'linux'
             typst_asset: 'typst-x86_64-unknown-linux-musl.tar.xz'
-            typst_sha256: '7d214bfeffc2e585dc422d1a09d2b144969421281e8c7f5d784b65fc69b5673f'
+            typst_sha256: 'a6044cbad2a954deb921167e257e120ac0a16b20339ec01121194ff9d394996d'
           - platform: 'windows-latest' # Windows
             args: ''
             typst_dir: ''

@@ -1,6 +1,7 @@
 import React from 'react';
 import { UI } from '../constants/timing';
 import { useEditorStore } from '../stores/editorStore';
+import { useActiveCompileStatus } from '../hooks/useActiveDocument';
 import { useUIStore } from '../stores/uiStore';
 import { usePreferencesStore } from '../stores/preferencesStore';
 import type { SyncMode, Preferences } from '../types';
@@ -21,7 +22,7 @@ const PDFPreviewHeader: React.FC<Props> = ({ pdfZoom, setPdfZoom }) => {
   const setSyncMode = useEditorStore((state) => state.setSyncMode);
   const syncEnabled = useEditorStore((state) => state.syncEnabled);
   const setSyncEnabled = useEditorStore((state) => state.setSyncEnabled);
-  const compileStatus = useEditorStore((state) => state.editor.compileStatus);
+  const compileStatus = useActiveCompileStatus();
   const setCompileStatus = useEditorStore((s) => s.setCompileStatus);
   const addToast = useUIStore((state) => state.addToast);
   const thumbnailsVisible = useUIStore((state) => state.thumbnailsVisible);
@@ -37,11 +38,23 @@ const PDFPreviewHeader: React.FC<Props> = ({ pdfZoom, setPdfZoom }) => {
   const zoomLevels = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
   const currentZoomIndex = zoomLevels.indexOf(pdfZoom);
 
+  /** Read latest active doc straight from the store (non-reactive). */
+  const getActiveSnapshot = () => {
+    const s = useEditorStore.getState();
+    return s.activeFile ? (s.documents[s.activeFile] ?? null) : null;
+  };
+
   const rerenderCurrent = async () => {
-    const { editor: { currentFile, content } } = useEditorStore.getState();
-    if (!currentFile) return;
+    const active = getActiveSnapshot();
+    if (!active) return;
     // Always use renderTypst with current editor content for live preview
-    await renderTypst(content, 'pdf', currentFile);
+    await renderTypst(active.content, 'pdf', active.path);
+  };
+
+  /** Mark the active file as re-rendering. No-op if no file is open. */
+  const markActiveCompiling = () => {
+    const active = getActiveSnapshot();
+    if (active) setCompileStatus(active.path, { status: 'running' });
   };
 
   const handleThemeSelect = async (value: string) => {
@@ -54,7 +67,7 @@ const PDFPreviewHeader: React.FC<Props> = ({ pdfZoom, setPdfZoom }) => {
         fonts: { ...lastCustomPreferences.fonts },
       };
       try {
-        setCompileStatus({ status: 'running' });
+        markActiveCompiling();
         setPreferences(snapshot);
         await persistPreferences(snapshot);
         await rerenderCurrent();
@@ -70,7 +83,7 @@ const PDFPreviewHeader: React.FC<Props> = ({ pdfZoom, setPdfZoom }) => {
     const customPreset = customPresets[value];
     if (customPreset) {
       try {
-        setCompileStatus({ status: 'running' });
+        markActiveCompiling();
         setPreferences(customPreset.preferences);
         await persistPreferences(customPreset.preferences);
         await rerenderCurrent();
@@ -85,7 +98,7 @@ const PDFPreviewHeader: React.FC<Props> = ({ pdfZoom, setPdfZoom }) => {
     const preset = themePresets[value];
     if (preset) {
       try {
-        setCompileStatus({ status: 'running' });
+        markActiveCompiling();
         setPreferences(preset.preferences);
         await persistPreferences(preset.preferences);
         await rerenderCurrent();
@@ -170,7 +183,7 @@ const PDFPreviewHeader: React.FC<Props> = ({ pdfZoom, setPdfZoom }) => {
               const newSize = Math.max(8, prefs.font_size - 0.5);
               const updated = { ...prefs, font_size: newSize };
               try {
-                setCompileStatus({ status: 'running' });
+                markActiveCompiling();
                 setThemeSelection('custom');
                 setPreferences(updated);
                 await persistPreferences(updated);
@@ -190,7 +203,7 @@ const PDFPreviewHeader: React.FC<Props> = ({ pdfZoom, setPdfZoom }) => {
               const newSize = Math.min(18, prefs.font_size + 0.5);
               const updated = { ...prefs, font_size: newSize };
               try {
-                setCompileStatus({ status: 'running' });
+                markActiveCompiling();
                 setThemeSelection('custom');
                 setPreferences(updated);
                 await persistPreferences(updated);

@@ -1,12 +1,17 @@
 import React from 'react';
 import { useEditorStore } from '../stores/editorStore';
+import { useActiveDocument } from '../hooks/useActiveDocument';
 import { usePreferencesStore } from '../stores/preferencesStore';
 import './StatusBar.css';
 
 const StatusBar: React.FC = () => {
-  const { editor, scrollLocked } = useEditorStore();
+  const scrollLocked = useEditorStore((s) => s.scrollLocked);
   const preferences = usePreferencesStore((state) => state.preferences);
-  const { currentFile, modified, compileStatus, content } = editor;
+  const activeDocument = useActiveDocument();
+  const currentFile = activeDocument?.path ?? null;
+  const modified = activeDocument?.modified ?? false;
+  const compileStatus = activeDocument?.compileStatus ?? { status: 'idle' as const };
+  const content = activeDocument?.content ?? '';
 
   // Calculate word and character counts
   const wordCount = content ? content.trim().split(/\s+/).filter(w => w.length > 0).length : 0;

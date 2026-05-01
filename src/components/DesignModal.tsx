@@ -37,7 +37,7 @@ const DESIGN_TABS: { id: TabSection; label: string; icon: string }[] = [
 const DesignModal: React.FC = () => {
   const { preferences, setPreferences, themeSelection, setThemeSelection, customPresets, saveCustomPreset, deleteCustomPreset, renameCustomPreset, autoApply, setAutoApply } = usePreferencesStore();
   const { designModalOpen, setDesignModalOpen, designModalActiveTab, setDesignModalActiveTab, addToast } = useUIStore();
-  const currentFile = useEditorStore(s => s.editor.currentFile);
+  const currentFile = useEditorStore(s => s.activeFile);
   const setCompileStatus = useEditorStore(s => s.setCompileStatus);
   const [local, setLocal] = useState<Preferences>(preferences);
   const [dirty, setDirty] = useState(false);
@@ -153,10 +153,11 @@ const DesignModal: React.FC = () => {
 
   // Unified re-render that supports the in-memory sample document (which has no on-disk path)
   const rerenderCurrent = async () => {
-    const { editor: { currentFile, content } } = useEditorStore.getState();
-    if (!currentFile) return;
+    const s = useEditorStore.getState();
+    const active = s.activeFile ? s.documents[s.activeFile] : null;
+    if (!active) return;
     // Always use renderTypst for live preview with current file context
-    await renderTypst(content, 'pdf', currentFile);
+    await renderTypst(active.content, 'pdf', active.path);
   };
 
   const scheduleApply = (next: Preferences) => {
@@ -171,7 +172,7 @@ const DesignModal: React.FC = () => {
           return;
         }
         designLogger.debug('apply-fire', { seq, toc: next.toc, cover: next.cover_page });
-        setCompileStatus({ status: 'running' });
+        if (currentFile) setCompileStatus(currentFile, { status: 'running' });
         setPreferences(next);            // update in-memory store
         await persistPreferences(next);  // persist to backend _prefs.json
         debugPaths().then(info => designLogger.debug('auto', info)).catch(()=>{});
@@ -199,7 +200,7 @@ const DesignModal: React.FC = () => {
       designLogger.debug('immediate-structure-apply', { seq, toc: next.toc, cover: next.cover_page });
       (async () => {
         try {
-          setCompileStatus({ status: 'running' });
+          if (currentFile) setCompileStatus(currentFile, { status: 'running' });
           setPreferences(next);
           await persistPreferences(next);
           debugPaths().then(info => designLogger.debug('immediate-structure-meta', info)).catch(()=>{});
@@ -253,7 +254,7 @@ const DesignModal: React.FC = () => {
 
   const handleSave = async () => {
     try {
-      setCompileStatus({ status: 'running' });
+      if (currentFile) setCompileStatus(currentFile, { status: 'running' });
       setPreferences(local);             // update store
       await persistPreferences(local);    // API handles backend field mapping
       debugPaths().then(info => designLogger.debug('save', info)).catch(()=>{});
@@ -298,7 +299,7 @@ const DesignModal: React.FC = () => {
 
       if (autoApply) {
         try {
-          setCompileStatus({ status: 'running' });
+          if (currentFile) setCompileStatus(currentFile, { status: 'running' });
           setPreferences(merged);
           await persistPreferences(merged);
           debugPaths().then(info => designLogger.debug('reset', info)).catch(()=>{});

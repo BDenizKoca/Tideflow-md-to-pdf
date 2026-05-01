@@ -8,14 +8,16 @@ import { EditorView, basicSetup } from 'codemirror';
 import { markdown } from '@codemirror/lang-markdown';
 import { keymap } from '@codemirror/view';
 import { search, searchKeymap, closeSearchPanel, openSearchPanel } from '@codemirror/search';
-import { StateField, Annotation, Prec, Compartment } from '@codemirror/state';
+import { EditorState, StateField, Annotation, Prec, Compartment } from '@codemirror/state';
 import { syntaxHighlighting, HighlightStyle } from '@codemirror/language';
 import { tags } from '@lezer/highlight';
 import { TIMING } from '../constants/timing';
 import { cmd } from '../components/commands';
 import { scrubRawTypstAnchors } from '../utils/scrubAnchors';
 import { getScrollElement, type ScrollElementWithHandler } from '../types/codemirror';
+import { useEditorStore } from '../stores/editorStore';
 import type { EditorStateRefs } from './useEditorState';
+import type { EditorState as CMEditorState } from '@codemirror/state';
 import { logger } from '../utils/logger';
 
 const useCodeMirrorSetupLogger = logger.createScoped('useCodeMirrorSetup');
@@ -118,13 +120,59 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
     typingDetectionTimeoutRef,
     scrollElRef,
     isUserTypingRef,
+    swapDocumentRef,
   } = editorStateRefs;
 
   const renderDebounceRef = useRef(renderDebounceMs);
+  const contentRef = useRef(content);
+  const setContentRef = useRef(setContent);
+  const setModifiedRef = useRef(setModified);
+  const setIsTypingRef = useRef(setIsTyping);
+  const handleSaveRef = useRef(handleSave);
+  const handleRenderRef = useRef(handleRender);
+  const handleAutoRenderRef = useRef(handleAutoRender);
+  const setupScrollListenerRef = useRef(setupScrollListener);
+  const setEditorReadyRef = useRef(setEditorReady);
 
   useEffect(() => {
     renderDebounceRef.current = renderDebounceMs;
   }, [renderDebounceMs]);
+
+  useEffect(() => {
+    contentRef.current = content;
+  }, [content]);
+
+  useEffect(() => {
+    setContentRef.current = setContent;
+  }, [setContent]);
+
+  useEffect(() => {
+    setModifiedRef.current = setModified;
+  }, [setModified]);
+
+  useEffect(() => {
+    setIsTypingRef.current = setIsTyping;
+  }, [setIsTyping]);
+
+  useEffect(() => {
+    handleSaveRef.current = handleSave;
+  }, [handleSave]);
+
+  useEffect(() => {
+    handleRenderRef.current = handleRender;
+  }, [handleRender]);
+
+  useEffect(() => {
+    handleAutoRenderRef.current = handleAutoRender;
+  }, [handleAutoRender]);
+
+  useEffect(() => {
+    setupScrollListenerRef.current = setupScrollListener;
+  }, [setupScrollListener]);
+
+  useEffect(() => {
+    setEditorReadyRef.current = setEditorReady;
+  }, [setEditorReady]);
 
   // Track if we've initialized the editor
   const initializedRef = useRef(false);
@@ -171,9 +219,10 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
       { tag: tags.punctuation, class: 'cm-punctuation' },
     ]);
 
-    const view = new EditorView({
-      doc: content,
-      extensions: [
+    // Build the extensions array once and reuse it both for initial creation
+    // and for fresh EditorState instances created on file switch (so we wipe
+    // undo history without losing the editor configuration).
+    const extensions = [
         // ====================================================================
         // Core Extensions
         // ====================================================================
@@ -316,12 +365,12 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
         Prec.high(keymap.of([
           {
             key: "Ctrl-s",
-            run: () => { handleSave(); return true; },
+            run: () => { handleSaveRef.current(); return true; },
             preventDefault: true
           },
           {
             key: "Ctrl-r",
-            run: () => { handleRender(); return true; },
+            run: () => { handleRenderRef.current(); return true; },
             preventDefault: true
           },
           {
@@ -457,10 +506,14 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
         // ====================================================================
         EditorView.updateListener.of(update => {
           if (update.docChanged) {
-            // Check if this is a programmatic update (e.g., file loading)
-            const isProgrammatic = update.transactions.some(
-              tr => tr.annotation(programmaticUpdateAnnotation)
-            );
+            // Treat as programmatic if either:
+            //  - a transaction is annotated as programmatic (legacy callers
+            //    that still use dispatch + programmaticUpdateAnnotation), or
+            //  - the update came from view.setState (no transactions array
+            //    entries) — that's our file-switch swap.
+            const isProgrammatic =
+              update.transactions.length === 0 ||
+              update.transactions.some(tr => tr.annotation(programmaticUpdateAnnotation));
 
             // Skip marking as modified if this is a programmatic update
             if (isProgrammatic) {
@@ -468,7 +521,7 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
               update.view.requestMeasure({
                 read: () => update.state.doc.toString(),
                 write: (newContent) => {
-                  setContent(newContent);
+                  setContentRef.current(newContent);
                 }
               });
               return;
@@ -476,14 +529,14 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
 
             // This is a user edit - mark as typing and modified
             isUserTypingRef.current = true;
-            setIsTyping(true);
+            setIsTypingRef.current(true);
 
             // Use requestMeasure for state updates
             update.view.requestMeasure({
               read: () => update.state.doc.toString(),
               write: (newContent) => {
-                setContent(newContent);
-                setModified(true);
+                setContentRef.current(newContent);
+                setModifiedRef.current(true);
               }
             });
 
@@ -497,7 +550,7 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
 
             // Typing detection timeout (longer to avoid inter-keystroke sync)
             typingDetectionTimeoutRef.current = setTimeout(() => {
-              setIsTyping(false);
+              setIsTypingRef.current(false);
             }, TIMING.TYPING_IDLE_THRESHOLD_MS);
 
             // Smart trailing-only debounced render: one render after the last change
@@ -505,42 +558,75 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
             const abortController = new AbortController();
             contentChangeAbortRef.current = abortController;
             contentChangeTimeoutRef.current = setTimeout(() => {
-              handleAutoRender(newContent, abortController.signal);
+              handleAutoRenderRef.current(newContent, abortController.signal);
               isUserTypingRef.current = false;
             }, renderDebounceRef.current);
           }
         }), // Close the updateListener.of() call
-      ],
+    ];
+
+    const view = new EditorView({
+      // Use the live ref so we pick up whatever content was loaded by the
+      // file-switch effect, even if it landed before this effect ran.
+      // (Initial render before any file load is fine — empty doc; the
+      // file-switch effect dispatches the real content shortly after.)
+      state: EditorState.create({
+        doc: contentRef.current,
+        extensions,
+      }),
       parent: editorRef.current!
     });
 
     editorViewRef.current = view;
 
-    // If content prop has a value, ensure editor is initialized with it
-    // This handles race conditions where content updates after mount
-    if (content && content !== view.state.doc.toString()) {
-      if (process.env.NODE_ENV !== 'production') {
-        useCodeMirrorSetupLogger.info('Content mismatch after creation, updating. Content length:', content.length);
+    // Expose a function that callers (file-switch effect) use to swap the
+    // displayed document. We save the outgoing file's full EditorState into
+    // its FileState (preserving cursor / selection / undo history) and load
+    // the incoming file's stored EditorState — or a fresh one from its
+    // content if it's never been activated before. Each file therefore
+    // keeps its own isolated history; Ctrl+Z on file B can't revert an
+    // edit made on file A.
+    swapDocumentRef.current = (prevPath, nextPath) => {
+      const store = useEditorStore.getState();
+
+      if (prevPath) {
+        // Persist the outgoing file's full editor state. This is a
+        // non-serializable snapshot (lives only in memory) but it's a
+        // first-class store value so unrelated effects don't lose track
+        // of it.
+        store.setDocumentEditorState(prevPath, view.state);
       }
-      // Use annotation to mark as programmatic update
-      view.dispatch({
-        changes: {
-          from: 0,
-          to: view.state.doc.length,
-          insert: content
-        },
-        annotations: programmaticUpdateAnnotation.of(true)
-      });
-    }
+
+      if (!nextPath) {
+        // No active file (e.g. Close All). Render an empty editor so the
+        // viewport is clean.
+        view.setState(EditorState.create({ doc: '', extensions, selection: { anchor: 0 } }));
+        return;
+      }
+
+      const nextDoc = store.documents[nextPath];
+      if (!nextDoc) return; // unknown path — leave editor unchanged
+
+      const restored = nextDoc.editorState as CMEditorState | null;
+      if (restored) {
+        view.setState(restored);
+      } else {
+        view.setState(EditorState.create({
+          doc: nextDoc.content,
+          extensions,
+          selection: { anchor: 0 },
+        }));
+      }
+    };
 
     // Signal that editor is ready
-    setEditorReady(true);
+    setEditorReadyRef.current(true);
 
     // Add scroll listener to compute active anchor based on viewport
     const scrollEl = getScrollElement(view);
     if (scrollEl) {
       scrollElRef.current = scrollEl;
-      const cleanup = setupScrollListener();
+      const cleanup = setupScrollListenerRef.current();
       if (cleanup) {
         (scrollEl as ScrollElementWithHandler)._tideflowScrollHandler = cleanup;
       }
@@ -573,10 +659,15 @@ export function useCodeMirrorSetup(params: UseCodeMirrorSetupParams) {
 
       // Reset initialization flag so editor can be recreated on remount
       initializedRef.current = false;
+      swapDocumentRef.current = null;
     };
-  // Run only once when component mounts - component is now persistent
-  // Dependencies intentionally minimal: refs are stable, other values initialized once
-  // Adding deps would cause editor recreation on every preference change (undesirable)
+  // Run only once when component mounts - component is now persistent.
+  // Live refs keep callbacks fresh without recreating the editor instance.
+  // `content` was previously in this dep array, which made the effect re-run
+  // on every tab switch (setContent fires) and tear down + recreate CodeMirror
+  // — defeating the persistent-component design. We read content from
+  // contentRef.current instead.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 }
 

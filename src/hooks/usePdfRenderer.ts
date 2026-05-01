@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { renderPdfPages } from '../utils/pdfRenderer';
 import { extractOffsetsFromPdfText } from '../utils/offsets';
 import { ANCHOR } from '../constants/timing';
@@ -73,6 +73,11 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
   // instances and duplicated timers; call fallbacks if not provided
   const registerPendingAnchor = args.registerPendingAnchor;
   const consumePendingAnchor = args.consumePendingAnchor;
+  const activeAnchorIdRef = useRef(args.activeAnchorId ?? null);
+
+  useEffect(() => {
+    activeAnchorIdRef.current = args.activeAnchorId ?? null;
+  }, [args.activeAnchorId]);
 
   useEffect(() => {
     const localCancel = cancelRenderRef.current;
@@ -112,7 +117,7 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
       // CRITICAL: Only reset initial scroll flag on TRUE startup (no activeAnchorId yet)
       // Don't reset when user has already positioned themselves - this prevents
       // jump-to-top when images are added mid-session
-      if (!args.activeAnchorId) {
+      if (!activeAnchorIdRef.current) {
         initialForcedScrollDoneRef.current = false;
       }
       try {
@@ -150,7 +155,7 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
                       if (extracted.size > 0) {
                         const prev = anchorOffsetsRef.current.size;
                         anchorOffsetsRef.current = extracted;
-                        if (prev === 0 && extracted.size > 0 && !initialForcedScrollDoneRef.current && syncModeRef.current !== 'locked-to-pdf' && !args.activeAnchorId) {
+                        if (prev === 0 && extracted.size > 0 && !initialForcedScrollDoneRef.current && syncModeRef.current !== 'locked-to-pdf' && !activeAnchorIdRef.current) {
                           // Smart fallback: anchor at SMART_FALLBACK_POSITION into document
                           const targetIndex = Math.floor(map.anchors.length * ANCHOR.SMART_FALLBACK_POSITION);
                           const anchorId = map.anchors[targetIndex]?.id ?? map.anchors[0]?.id ?? null;
@@ -187,7 +192,7 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
                 // the end of this function will perform the actual scroll
                 // once rendering completes; if the user is typing we keep
                 // a timer that will fire when typing stops.
-                if (prev === 0 && extracted.size > 0 && !initialForcedScrollDoneRef.current && syncModeRef.current !== 'locked-to-pdf' && !args.activeAnchorId) {
+                if (prev === 0 && extracted.size > 0 && !initialForcedScrollDoneRef.current && syncModeRef.current !== 'locked-to-pdf' && !activeAnchorIdRef.current) {
                   // Smart fallback: anchor 20-30% into document
                   const targetIndex = Math.floor(map.anchors.length * 0.25);
                   const anchorId = map.anchors[targetIndex]?.id ?? map.anchors[0]?.id ?? null;
@@ -233,7 +238,7 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
                   });
                   // Register pending anchor ONLY on true initial startup (no activeAnchorId yet AND no initial scroll done)
                   // Once initial scroll is done, normal sync handles all position updates
-                  if (!args.activeAnchorId && !initialForcedScrollDoneRef.current) {
+                  if (!activeAnchorIdRef.current && !initialForcedScrollDoneRef.current) {
                     // True startup: pick a smart initial anchor
                     const anchors = sourceMapRef.current?.anchors ?? [];
                     let anchorId: string | null = null;
@@ -249,7 +254,7 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
                     if (anchorId) {
                       pdfRendererLogger.debug('registering pending anchor', {
                         anchorId,
-                        activeAnchorId: args.activeAnchorId,
+                        activeAnchorId: activeAnchorIdRef.current,
                         anchorCount: anchors.length,
                         targetIndex,
                         reason: 'true startup - smart fallback at 25% into doc'
@@ -259,7 +264,7 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
                     }
                   } else {
                     pdfRendererLogger.debug('skipping pending anchor - user has position', {
-                      activeAnchorId: args.activeAnchorId
+                      activeAnchorId: activeAnchorIdRef.current
                     });
                   }
                 } else {
@@ -271,7 +276,7 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
                   });
                   // ONLY register pending anchor on true startup (no activeAnchorId AND no initial scroll done)
                   // Once initial scroll is done, normal sync handles all position updates
-                  if (!args.activeAnchorId && !initialForcedScrollDoneRef.current) {
+                  if (!activeAnchorIdRef.current && !initialForcedScrollDoneRef.current) {
                     // Smart fallback: anchor at SMART_FALLBACK_POSITION into document
                     const anchors = sourceMapRef.current?.anchors ?? [];
                     const targetIndex = Math.floor(anchors.length * ANCHOR.SMART_FALLBACK_POSITION);
@@ -279,7 +284,7 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
                     if (anchorId) {
                       pdfRendererLogger.debug('registering pending anchor (typing)', {
                         anchorId,
-                        activeAnchorId: args.activeAnchorId,
+                        activeAnchorId: activeAnchorIdRef.current,
                         reason: 'true startup - no activeAnchorId'
                       });
                       if (registerPendingAnchor) registerPendingAnchor(anchorId);
@@ -287,7 +292,7 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
                     }
                   } else {
                     pdfRendererLogger.debug('skipping pending anchor - user has position (typing)', {
-                      activeAnchorId: args.activeAnchorId
+                      activeAnchorId: activeAnchorIdRef.current
                     });
                   }
                 }
@@ -329,6 +334,21 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
     compileStatus.status,
     compileStatus.pdf_path,
     pdfZoom,
+    anchorOffsetsRef,
+    cancelRenderRef,
+    containerRef,
+    initialForcedScrollDoneRef,
+    isTypingRef,
+    pdfMetricsRef,
+    pendingFallbackRef,
+    pendingFallbackTimerRef,
+    pendingForcedAnchorRef,
+    pendingForcedTimerRef,
+    programmaticScrollRef,
+    savedScrollPositionRef,
+    sourceMapRef,
+    syncModeRef,
+    userInteractedRef,
     // Stable callbacks (already memoized)
     recomputeAnchorOffsets,
     scrollToAnchor,
@@ -338,6 +358,5 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
     registerPendingAnchor,
     // Optional mount signal for forcing re-render
     args.mountSignal,
-    // NOTE: Refs are accessed via .current and are stable - they don't need to be in deps
   ]);
 }

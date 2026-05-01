@@ -41,7 +41,6 @@ export function useEditorSync(params: UseEditorSyncParams) {
     isTypingStoreRef,
     anchorUpdateFromEditorRef,
     scrollIdleTimeoutRef,
-    initialSourceMapSet,
   } = editorStateRefs;
 
   const computeAnchorFromViewport = useCallback((userInitiated = false) => {
@@ -158,14 +157,15 @@ export function useEditorSync(params: UseEditorSyncParams) {
     anchorUpdateFromEditorRef,
   ]);
 
-  // Sync sourceMapRef and trigger initial anchor compute when sourceMap is set
+  // Sync sourceMapRef and recompute the active anchor whenever the source
+  // map changes (initial render, content edit, tab switch — all good
+  // moments to re-anchor).
   useEffect(() => {
     sourceMapRef.current = sourceMap;
-    if (sourceMap && !initialSourceMapSet.current) {
-      initialSourceMapSet.current = true;
+    if (sourceMap) {
       computeAnchorFromViewport(false);
     }
-  }, [sourceMap, computeAnchorFromViewport, sourceMapRef, initialSourceMapSet]);
+  }, [sourceMap, computeAnchorFromViewport, sourceMapRef]);
 
   // Setup scroll listener with debounce
   const setupScrollListener = useCallback(() => {

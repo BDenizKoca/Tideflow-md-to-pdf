@@ -58,9 +58,8 @@ export function useAppInitialization() {
 
         if (isFirstTime) {
           // Load instructions document on first run instead of sample
-          editorStore.setCurrentFile('instructions.md');
-          editorStore.addOpenFile('instructions.md');
-          editorStore.setContent(INSTRUCTIONS_DOC);
+          editorStore.openDocument('instructions.md', INSTRUCTIONS_DOC);
+          editorStore.setActiveDocument('instructions.md');
           uiStore.setInitialSampleInjected(true);
           sampleInjected = true;
           initLogger.debug('loaded instructions on first run');
@@ -77,25 +76,29 @@ export function useAppInitialization() {
             for (const f of restored) {
               try {
                 const content = await readMarkdownFile(f);
-                editorStore.addOpenFile(f);
-                if (f === session.currentFile) {
-                  editorStore.setCurrentFile(f);
-                  editorStore.setContent(content);
-                }
+                editorStore.openDocument(f, content);
               } catch (e) {
                 initLogger.error(`Failed to restore file: ${f}`, e);
                 // Continue with other files instead of stopping
               }
             }
 
-            if (
+            // Pick which file to focus. Prefer the saved active file if it
+            // was successfully restored; otherwise the last one in tab
+            // order; otherwise fall through to instructions.
+            const restoredSet = new Set(useEditorStore.getState().openFiles);
+            if (session.currentFile && restoredSet.has(session.currentFile)) {
+              editorStore.setActiveDocument(session.currentFile);
+            } else if (
               session.currentFile === 'instructions.md' ||
               session.currentFile === 'sample.md' ||
-              (restored.length === 0 && !editorStore.editor.currentFile)
+              restoredSet.size === 0
             ) {
-              editorStore.setCurrentFile('instructions.md');
-              editorStore.addOpenFile('instructions.md');
-              editorStore.setContent(INSTRUCTIONS_DOC);
+              editorStore.openDocument('instructions.md', INSTRUCTIONS_DOC);
+              editorStore.setActiveDocument('instructions.md');
+            } else {
+              const last = useEditorStore.getState().openFiles.at(-1);
+              if (last) editorStore.setActiveDocument(last);
             }
 
             if (typeof session.previewVisible === 'boolean') {
@@ -109,10 +112,9 @@ export function useAppInitialization() {
           }
         }
 
-        if (!editorStore.editor.currentFile && !sampleInjected) {
-          editorStore.setCurrentFile('instructions.md');
-          editorStore.addOpenFile('instructions.md');
-          editorStore.setContent(INSTRUCTIONS_DOC);
+        if (!useEditorStore.getState().activeFile && !sampleInjected) {
+          editorStore.openDocument('instructions.md', INSTRUCTIONS_DOC);
+          editorStore.setActiveDocument('instructions.md');
           uiStore.setInitialSampleInjected(true);
           sampleInjected = true;
         }
@@ -120,8 +122,8 @@ export function useAppInitialization() {
         // Register file change listener
         try {
           const unlistenFiles = await listenForFileChanges((filePath) => {
-            const { editor: currentEditor } = useEditorStore.getState();
-            if (filePath === currentEditor.currentFile) {
+            const { activeFile } = useEditorStore.getState();
+            if (filePath === activeFile) {
               // Placeholder for future reload logic.
             }
           });
@@ -130,23 +132,30 @@ export function useAppInitialization() {
           initLogger.warn('Failed to register file-change listener', e);
         }
 
-        // Register compiled event listener
+        // Register compiled event listener.
+        // The backend's `compiled` event doesn't carry a file path — it's a
+        // side-channel notification that the most recent render finished.
+        // We attribute it to whichever file is active when it fires; if the
+        // user has switched tabs in the meantime the result was for the
+        // previous file, but since that file's content is what got rendered
+        // there's no real harm — it just means the wrong document briefly
+        // sees an extra setSourceMap. The primary render path goes through
+        // renderTypst() which threads the path explicitly.
         const unlistenCompiled = await listen<BackendRenderedDocument>('compiled', (evt) => {
           const { pdf_path, source_map } = evt.payload;
-          const editorState = useEditorStore.getState();
-          editorState.setCompileStatus({ status: 'ok', pdf_path, source_map });
-          editorState.setSourceMap(source_map);
-          editorState.setCompiledAt(Date.now());
-          if (!editorState.activeAnchorId && source_map.anchors.length > 0) {
-            editorState.setActiveAnchorId(source_map.anchors[0].id);
+          const s = useEditorStore.getState();
+          const path = s.activeFile;
+          if (!path) return;
+          s.setCompileStatus(path, { status: 'ok', pdf_path, source_map });
+          s.setSourceMap(path, source_map);
+          s.setCompiledAt(Date.now());
+          const activeDoc = s.documents[path];
+          if (activeDoc && !activeDoc.activeAnchorId && source_map.anchors.length > 0) {
+            s.setActiveAnchor(path, source_map.anchors[0].id);
           }
           // Trigger a final sync pass in the preview once the backend has
-          // delivered the compiled PDF and source map. This helps ensure
-          // the preview performs a one-shot final render+refresh on app
-          // startup rather than waiting for a subsequent document switch.
+          // delivered the compiled PDF and source map.
           try {
-            // Delay a touch so the preview has a chance to mount and
-            // wire listeners before the final sync event is consumed.
             setTimeout(() => {
               try { window.dispatchEvent(new CustomEvent('pdf-preview-final-sync')); } catch { /* ignore */ }
             }, TIMING.FINAL_SYNC_DELAY_MS);
@@ -168,12 +177,15 @@ export function useAppInitialization() {
             // The useContentManagement hook will show a gentle warning toast
             initLogger.warn('Missing citation key in document');
           } else {
-            // For other errors, show full error state
+            // For other errors, show full error state on the active file
             initLogger.error('Compile error', errorMsg);
-            const editorState = useEditorStore.getState();
+            const s = useEditorStore.getState();
             const uiState = useUIStore.getState();
-            editorState.setCompileStatus({ status: 'error', message: 'Compile failed', details: errorMsg });
-            editorState.setSourceMap(null);
+            const path = s.activeFile;
+            if (path) {
+              s.setCompileStatus(path, { status: 'error', message: 'Compile failed', details: errorMsg });
+              s.setSourceMap(path, null);
+            }
             uiState.addToast({ type: 'error', message: 'Failed to compile document' });
           }
         });

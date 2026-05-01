@@ -7,35 +7,48 @@ import './TabBar.css';
 import { INSTRUCTIONS_DOC } from '../instructionsDoc';
 
 const TabBar: React.FC = () => {
-  const {
-    editor: { openFiles, currentFile, modified },
-    setCurrentFile,
-    setContent,
-    addOpenFile,
-    removeOpenFile,
-  } = useEditorStore();
+  const openFiles = useEditorStore((s) => s.openFiles);
+  const activeFile = useEditorStore((s) => s.activeFile);
+  // Track modified-ness of the active file for the visual dot.
+  const activeModified = useEditorStore((s) =>
+    s.activeFile ? (s.documents[s.activeFile]?.modified ?? false) : false,
+  );
+  const openDocument = useEditorStore((s) => s.openDocument);
+  const setActiveDocument = useEditorStore((s) => s.setActiveDocument);
+  const closeDocument = useEditorStore((s) => s.closeDocument);
   const addRecentFile = useUIStore((state) => state.addRecentFile);
   const designModalOpen = useUIStore((state) => state.designModalOpen);
   const settingsModalOpen = useUIStore((state) => state.settingsModalOpen);
 
   const handleTabClick = useCallback(async (filePath: string) => {
-    if (currentFile === filePath) return;
+    if (activeFile === filePath) return;
 
     try {
+      // If the document is already open in our store, just switch to it —
+      // its content/edits/scroll are preserved per-file. Reading from disk
+      // on every tab click would discard any unsaved edits.
+      const documents = useEditorStore.getState().documents;
+      if (documents[filePath]) {
+        setActiveDocument(filePath);
+        return;
+      }
+
+      // First-time open via tab click (rare — usually files are added via
+      // Open File or session restore before they appear as tabs). Fall
+      // through to the read-from-disk path.
       if (filePath === 'instructions.md') {
-        // Use embedded instructions content
-        setCurrentFile(filePath);
-        setContent(INSTRUCTIONS_DOC);
+        openDocument(filePath, INSTRUCTIONS_DOC);
+        setActiveDocument(filePath);
       } else {
         const content = await readMarkdownFile(filePath);
-        setCurrentFile(filePath);
-        setContent(content);
+        openDocument(filePath, content);
+        setActiveDocument(filePath);
         addRecentFile(filePath);
       }
     } catch (err) {
       handleError(err, { operation: 'switch to file', component: 'TabBar' });
     }
-  }, [currentFile, addRecentFile, setContent, setCurrentFile]);
+  }, [activeFile, addRecentFile, openDocument, setActiveDocument]);
 
   // Explicitly (re)open the instructions document
   const handleOpenInstructions = async () => {
@@ -43,9 +56,8 @@ const TabBar: React.FC = () => {
       console.debug('[TabBar] Opening instructions...');
     }
     const instructionsName = 'instructions.md';
-    addOpenFile(instructionsName);
-    setCurrentFile(instructionsName);
-    setContent(INSTRUCTIONS_DOC);
+    openDocument(instructionsName, INSTRUCTIONS_DOC);
+    setActiveDocument(instructionsName);
     if (process.env.NODE_ENV !== 'production') {
       console.debug('[TabBar] Instructions opened, content length:', INSTRUCTIONS_DOC.length);
     }
@@ -53,7 +65,7 @@ const TabBar: React.FC = () => {
 
   const handleCloseTab = (e: React.MouseEvent, filePath: string) => {
     e.stopPropagation();
-    removeOpenFile(filePath);
+    closeDocument(filePath);
   };
 
   const openFilesRef = useRef(openFiles);
@@ -115,7 +127,7 @@ const TabBar: React.FC = () => {
         {openFiles.map((file: string) => (
           <div
             key={file}
-            className={`tab ${currentFile === file ? 'active' : ''} ${modified && currentFile === file ? 'modified' : ''}`}
+            className={`tab ${activeFile === file ? 'active' : ''} ${activeModified && activeFile === file ? 'modified' : ''}`}
             onClick={() => handleTabClick(file)}
           >
             <span className="tab-name">{getFileName(file)}</span>

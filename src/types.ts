@@ -67,12 +67,34 @@ export interface CompileStatus {
 
 export type ImageAlignment = 'left' | 'center' | 'right';
 
-export interface EditorState {
-  currentFile: string | null;
-  openFiles: string[];  // List of open file paths
+/**
+ * Everything that's per-file. The store keeps one of these per open file,
+ * keyed by absolute path. When the active file changes, components read a
+ * different FileState — no manual reset of global state required.
+ *
+ * Non-serializable fields (editorState) live in memory only. The session
+ * persists only the list of open paths + the active path; per-file editor
+ * history, scroll positions, etc. are intentionally not persisted across
+ * restarts.
+ */
+export interface FileState {
+  path: string;
+  // Document content + dirty flag
   content: string;
   modified: boolean;
+  // Render output
   compileStatus: CompileStatus;
+  sourceMap: SourceMap | null;
+  // Sync state — which anchor we're viewing
+  activeAnchorId: string | null;
+  // Saved scroll positions, restored on tab switch
+  editorScrollPos: number | null;
+  pdfScrollPos: number | null;
+  // CodeMirror state for this file (in-memory, non-serializable). Holds the
+  // doc, selection, undo history, etc. EditorView.setState swaps this in on
+  // tab change, giving each file its own isolated history. Typed as
+  // `unknown` here so types.ts doesn't have to import @codemirror/state.
+  editorState: unknown;
 }
 
 export type SyncMode = 'auto' | 'two-way' | 'locked-to-pdf' | 'locked-to-editor';

@@ -7,7 +7,7 @@ import {
 import type { ImperativePanelHandle } from 'react-resizable-panels';
 import { useEditorStore } from './stores/editorStore';
 import { useUIStore } from './stores/uiStore';
-import { loadSession, saveSession } from './utils/session';
+import { saveSession } from './utils/session';
 import { logger } from './utils/logger';
 import './App.css';
 import { INSTRUCTIONS_DOC } from './instructionsDoc';
@@ -29,7 +29,6 @@ const appLogger = logger.createScoped('App');
 function App() {
   const [loading, setLoading] = useState(true);
   const { previewVisible, setPreviewVisible } = useUIStore();
-  const editor = useEditorStore((state) => state.editor);
   const isTyping = useEditorStore((state) => state.isTyping);
   const previewPanelRef = useRef<ImperativePanelHandle>(null);
   const isDraggingRef = useRef(false);
@@ -58,19 +57,15 @@ function App() {
   }, [previewVisible]);
 
   // Autosave session when key state changes
-  const openFiles = useEditorStore((state) => state.editor.openFiles);
-  const currentFile = useEditorStore((state) => state.editor.currentFile);
+  const openFiles = useEditorStore((state) => state.openFiles);
+  const currentFile = useEditorStore((state) => state.activeFile);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       try {
-        const currentSession = loadSession();
-        saveSession({
-          openFiles,
-          currentFile,
-          previewVisible,
-          fullscreen: currentSession?.fullscreen ?? false,
-        });
+        // saveSession merges with the existing stored session, so fields we
+        // don't pass (e.g. fullscreen, maximized) are preserved automatically.
+        saveSession({ openFiles, currentFile, previewVisible });
       } catch (error) {
         appLogger.warn('Failed to save session', error);
       }
@@ -79,15 +74,16 @@ function App() {
     return () => clearTimeout(timeoutId);
   }, [openFiles, currentFile, previewVisible]);
 
-  // Load instructions.md content
+  // Late-load instructions.md if the placeholder is still showing.
+  // (Belt-and-braces: useAppInitialization seeds the real content on first
+  // run, but if some path managed to leave the placeholder in place we
+  // replace it here.)
   useEffect(() => {
-    const loadInstructions = async () => {
-      const editorState = useEditorStore.getState();
-      if (currentFile === 'instructions.md' && editorState.editor.content === '# Loading instructions...') {
-        editorState.setContent(INSTRUCTIONS_DOC);
-      }
-    };
-    loadInstructions();
+    const s = useEditorStore.getState();
+    const doc = currentFile ? s.documents[currentFile] : null;
+    if (currentFile === 'instructions.md' && doc?.content === '# Loading instructions...') {
+      s.updateDocumentContent(currentFile, INSTRUCTIONS_DOC);
+    }
   }, [currentFile]);
 
   if (loading) {
@@ -104,13 +100,13 @@ function App() {
       <Toolbar />
       <TabBar />
       <div className="address-bar">
-        <span className="current-file-path">{editor.currentFile || 'No file open'}</span>
+        <span className="current-file-path">{currentFile || 'No file open'}</span>
         {isTyping && <span className="typing-indicator">⌨️ Typing</span>}
       </div>
       <div className="main-content">
         <PanelGroup direction="horizontal" style={{ height: '100%', overflow: 'hidden' }}>
           <Panel defaultSize={50} minSize={25}>
-            <Editor key={editor.currentFile || 'no-file'} />
+            <Editor />
           </Panel>
           <PanelResizeHandle
             className="resize-handle"
@@ -129,7 +125,7 @@ function App() {
             }}
           >
             <PDFErrorBoundary>
-              <PDFPreview key={editor.currentFile || 'no-file'} />
+              <PDFPreview />
             </PDFErrorBoundary>
           </Panel>
         </PanelGroup>

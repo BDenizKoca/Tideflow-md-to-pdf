@@ -1,118 +1,100 @@
 /**
- * Hook to handle content management: auto-render, typing detection, and debouncing.
- * Manages the render queue and auto-save logic.
+ * Auto-render management. Owns the debounced render queue that fires when
+ * the user types: kicks off a Typst compile, threads the result back to
+ * the right document, and folds intermediate updates into a single trailing
+ * render.
+ *
+ * Per-document state (compileStatus, sourceMap) is updated keyed by path,
+ * read fresh from the store at each call boundary — no stale closures.
  */
 
 import { useCallback, useRef } from 'react';
 import { renderTypst, cleanupTempPdfs } from '../api';
-import type { SourceMap, SyncMode } from '../types';
 import type { EditorStateRefs } from './useEditorState';
 import { logger } from '../utils/logger';
+import { useEditorStore } from '../stores/editorStore';
 import { useUIStore } from '../stores/uiStore';
 
-// Create scoped logger
 const useContentManagementLogger = logger.createScoped('useContentManagement');
 
-/**
- * Check if error is a missing citation key error and extract the key
- */
+/** Match the backend's "key `foo` does not exist in the bibliography" error
+ *  and return the offending key, or null if the message is some other error. */
 function parseCitationError(errorMsg: string): string | null {
-  // Match pattern: "error: key `something` does not exist in the bibliography"
   const match = errorMsg.match(/key `([^`]+)` does not exist in the bibliography/i);
   return match ? match[1] : null;
 }
 
-interface CompileStatus {
-  status: 'running' | 'ok' | 'error';
-  pdf_path?: string;
-  source_map?: SourceMap;
-  message?: string;
-  details?: string;
-}
-
 interface UseContentManagementParams {
   editorStateRefs: EditorStateRefs;
-  currentFile: string | null;
-  sourceMap: SourceMap | null;
-  setCompileStatus: (status: CompileStatus) => void;
-  setSourceMap: (map: SourceMap | null) => void;
-  setSyncMode: (mode: SyncMode) => void;
 }
 
 export function useContentManagement(params: UseContentManagementParams) {
-  const {
-    editorStateRefs,
-    currentFile,
-    sourceMap,
-    setCompileStatus,
-    setSourceMap,
-    setSyncMode,
-  } = params;
-
-  const {
-    autoRenderInFlightRef,
-    pendingRenderRef,
-  } = editorStateRefs;
+  const { editorStateRefs } = params;
+  const { autoRenderInFlightRef, pendingRenderRef } = editorStateRefs;
 
   const addToast = useUIStore((state) => state.addToast);
 
   // Debounce citation warnings to prevent spam while typing
   const lastCitationWarningRef = useRef<{ key: string; timestamp: number } | null>(null);
 
-  // Auto-render function (always full content)
+  // Auto-render. Stable identity — reads everything it needs from the store
+  // at call time, so callbacks captured by CodeMirror don't go stale on tab
+  // switch.
   const handleAutoRender = useCallback(async (content: string, signal?: AbortSignal) => {
+    if (signal?.aborted) return;
+
+    if (autoRenderInFlightRef.current) {
+      // A render is already in flight. Remember the latest content; we'll
+      // re-fire once the current render completes.
+      pendingRenderRef.current = content;
+      return;
+    }
+
+    // Snapshot which file this render is for. If the user switches tabs
+    // mid-render, our state writes go to *this* document, not the new
+    // active one. The renderTypst call also passes this path so the
+    // backend resolves images relative to the right file.
+    const path = useEditorStore.getState().activeFile;
+    if (!path) return;
+
+    autoRenderInFlightRef.current = true;
+    const wasSourceMapNull = !useEditorStore.getState().documents[path]?.sourceMap;
+    useEditorStore.getState().setCompileStatus(path, { status: 'running' });
+
     try {
-      // Check if operation was cancelled before starting
-      if (signal?.aborted) {
-        return;
-      }
+      const document = await renderTypst(content, 'pdf', path);
 
-      if (autoRenderInFlightRef.current) {
-        // A render is already in progress; remember the latest content to render afterwards.
-        pendingRenderRef.current = content;
-        return;
-      }
-      autoRenderInFlightRef.current = true;
-      const wasSourceMapNull = !sourceMap;
-      setCompileStatus({ status: 'running' });
+      if (signal?.aborted) return;
 
-      const document = await renderTypst(content, 'pdf', currentFile);
-
-      // Check if operation was cancelled after async operation
-      if (signal?.aborted) {
-        return;
-      }
-
-      setSourceMap(document.sourceMap);
-      setCompileStatus({
+      const s = useEditorStore.getState();
+      s.setSourceMap(path, document.sourceMap);
+      s.setCompileStatus(path, {
         status: 'ok',
         pdf_path: document.pdfPath,
         source_map: document.sourceMap,
       });
-      // On first render that sets sourceMap, enable auto-sync so PDF follows editor
+      // First successful render of this file enables auto-sync so the PDF
+      // follows the editor cursor by default.
       if (wasSourceMapNull) {
-        setSyncMode('auto');
+        s.setSyncMode('auto');
       }
 
-      // Clean up old temp PDFs after successful render
+      // Tidy up old temp PDFs (best-effort)
       try {
-        await cleanupTempPdfs(10); // Keep last 10 temp PDFs
+        await cleanupTempPdfs(10);
       } catch (err) {
-        // Don't fail the render if cleanup fails
         useContentManagementLogger.warn('Failed to cleanup temp PDFs:', err);
       }
     } catch (err) {
-      // Don't update state if operation was cancelled
-      if (signal?.aborted) {
-        return;
-      }
+      if (signal?.aborted) return;
 
       const errorMsg = String(err);
       const missingCitationKey = parseCitationError(errorMsg);
 
-      // If it's a missing citation error, show a non-intrusive warning
       if (missingCitationKey) {
-        // Debounce warnings: only show if different key or enough time passed (3 seconds)
+        // Citation errors are non-fatal — keep the last successful render
+        // visible and surface a debounced toast so the user sees what's
+        // missing without blocking writing.
         const now = Date.now();
         const lastWarning = lastCitationWarningRef.current;
         const shouldShowWarning =
@@ -129,41 +111,29 @@ export function useContentManagement(params: UseContentManagementParams) {
           });
         }
 
-        // Don't block the preview - keep showing the last successful render
-        // Just log the warning
         useContentManagementLogger.warn(`Missing citation key: ${missingCitationKey}`);
       } else {
-        // For other errors, show full error state
-        setCompileStatus({
+        // Hard error — surface to the user via compileStatus.
+        const s = useEditorStore.getState();
+        s.setCompileStatus(path, {
           status: 'error',
           message: 'Auto-render failed',
-          details: errorMsg
+          details: errorMsg,
         });
-        setSourceMap(null);
+        s.setSourceMap(path, null);
       }
     } finally {
       autoRenderInFlightRef.current = false;
-      // If there is a pending update queued during render, render once more with latest snapshot
+      // If new content arrived while we were rendering, fire the most
+      // recent snapshot. The recursive call hits the in-flight guard
+      // above and re-enters cleanly.
       const pending = pendingRenderRef.current;
       pendingRenderRef.current = null;
       if (pending && !signal?.aborted) {
-        // Fire-and-forget; guard will re-enter to in-flight again
         handleAutoRender(pending, signal);
       }
     }
-  }, [
-    currentFile,
-    setCompileStatus,
-    setSourceMap,
-    sourceMap,
-    setSyncMode,
-    autoRenderInFlightRef,
-    pendingRenderRef,
-    addToast,
-  ]);
+  }, [autoRenderInFlightRef, pendingRenderRef, addToast]);
 
-  return {
-    handleAutoRender,
-  };
+  return { handleAutoRender };
 }
-

@@ -1,5 +1,12 @@
-import React, { useState, useRef } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import { useEditorStore } from '../stores/editorStore';
+import {
+  useActiveAnchorId,
+  useActiveContent,
+  useActiveFile,
+  useActiveModified,
+  useActiveSourceMap,
+} from '../hooks/useActiveDocument';
 import { useUIStore } from '../stores/uiStore';
 import { usePreferencesStore } from '../stores/preferencesStore';
 import './Editor.css';
@@ -18,35 +25,66 @@ import { useContentManagement } from '../hooks/useContentManagement';
 import { useFileOperations } from '../hooks/useFileOperations';
 import { useCodeMirrorSetup } from '../hooks/useCodeMirrorSetup';
 import { useAnchorManagement } from '../hooks/useAnchorManagement';
-import { useEditorLifecycle } from '../hooks/useEditorLifecycle';
 import { showOpenDialog, readMarkdownFile } from '../api';
 import { INSTRUCTIONS_DOC } from '../instructionsDoc';
 import { handleError } from '../utils/errorHandler';
 import { listen } from '@tauri-apps/api/event';
 
 const Editor: React.FC = () => {
-  // Store state
+  // Store state — UI
   const addToast = useUIStore((state) => state.addToast);
   const setPreviewVisible = useUIStore((s) => s.setPreviewVisible);
   const addRecentFile = useUIStore((s) => s.addRecentFile);
-  const {
-    editor: { currentFile, content, modified, openFiles },
-    setContent,
-    setModified,
-    setCompileStatus,
-    sourceMap,
-    setSourceMap,
-    activeAnchorId,
-    setActiveAnchorId,
-    syncMode,
-    setSyncMode,
-    isTyping,
-    setIsTyping,
-    setEditorScrollPosition,
-    getEditorScrollPosition,
-    setCurrentFile,
-    addOpenFile,
-  } = useEditorStore();
+
+  // Active-document state via per-slice selectors so we only re-render on
+  // the slices we actually consume.
+  const currentFile = useActiveFile();
+  const content = useActiveContent();
+  const modified = useActiveModified();
+  const sourceMap = useActiveSourceMap();
+  const activeAnchorId = useActiveAnchorId();
+
+  // App-wide editor state (not per-file)
+  const openFiles = useEditorStore((s) => s.openFiles);
+  const syncMode = useEditorStore((s) => s.syncMode);
+  const setSyncMode = useEditorStore((s) => s.setSyncMode);
+  const isTyping = useEditorStore((s) => s.isTyping);
+  const setIsTyping = useEditorStore((s) => s.setIsTyping);
+
+  // Per-document setters from the new API. Each takes a path. Sub-hooks
+  // (CodeMirror setup, sync hooks, anchor management) still expect plain
+  // setters that act on "the current file" — we wrap them to thread the
+  // active path through. The wrappers are stable because they read
+  // `activeFile` from the store at call time.
+  const updateDocumentContent = useEditorStore((s) => s.updateDocumentContent);
+  const markDocumentModified = useEditorStore((s) => s.markDocumentModified);
+  const setActiveAnchorFor = useEditorStore((s) => s.setActiveAnchor);
+  const setDocumentEditorScroll = useEditorStore((s) => s.setDocumentEditorScroll);
+  const openDocument = useEditorStore((s) => s.openDocument);
+  const setActiveDocument = useEditorStore((s) => s.setActiveDocument);
+
+  // Wrappers that route to the active file at call time. `useEditorStore.getState()`
+  // reads the latest store synchronously — no closure-staleness even when
+  // these are called from CodeMirror callbacks created at mount time.
+  const setContent = useCallback((next: string) => {
+    const path = useEditorStore.getState().activeFile;
+    if (path) updateDocumentContent(path, next);
+  }, [updateDocumentContent]);
+
+  const setModified = useCallback((next: boolean) => {
+    const path = useEditorStore.getState().activeFile;
+    if (path) markDocumentModified(path, next);
+  }, [markDocumentModified]);
+
+  const setActiveAnchorId = useCallback((id: string | null) => {
+    const path = useEditorStore.getState().activeFile;
+    if (path) setActiveAnchorFor(path, id);
+  }, [setActiveAnchorFor]);
+
+  const setEditorScrollPosition = useCallback((file: string, position: number) => {
+    setDocumentEditorScroll(file, position);
+  }, [setDocumentEditorScroll]);
+
   const preferences = usePreferencesStore((state) => state.preferences);
 
   // Local state
@@ -77,35 +115,24 @@ const Editor: React.FC = () => {
   // Use content management hook - auto-render
   const { handleAutoRender } = useContentManagement({
     editorStateRefs,
-    currentFile,
-    sourceMap,
-    setCompileStatus,
-    setSourceMap,
-    setSyncMode,
   });
 
   // Use file operations hook - save/render/file switching
   const { handleSave: handleSaveBase, handleRender } = useFileOperations({
     editorStateRefs,
-    currentFile,
+    activeFile: currentFile,
     content,
     modified,
-    sourceMap,
     editorReady,
-    setModified,
-    setCompileStatus,
-    setSourceMap,
-    setEditorScrollPosition,
-    getEditorScrollPosition,
     handleAutoRender,
     computeAnchorFromViewport,
   });
 
   // Wrap handleSave to pass setIsSaving and addToast
-  const handleSave = () => handleSaveBase(setIsSaving, addToast);
+  const handleSave = useCallback(() => handleSaveBase(setIsSaving, addToast), [handleSaveBase, addToast]);
 
   // Wrap handleRender to pass setPreviewVisible
-  const handleRenderWithPreview = () => handleRender(setPreviewVisible);
+  const handleRenderWithPreview = useCallback(() => handleRender(setPreviewVisible), [handleRender, setPreviewVisible]);
 
   // Use CodeMirror setup hook - editor initialization
   useCodeMirrorSetup({
@@ -128,12 +155,6 @@ const Editor: React.FC = () => {
     sourceMap,
     activeAnchorId,
     setActiveAnchorId,
-  });
-
-  // Use editor lifecycle hook - generation tracking
-  useEditorLifecycle({
-    editorStateRefs,
-    openFiles,
   });
 
   // Image handlers (must come before unified drop handler)
@@ -176,8 +197,8 @@ const Editor: React.FC = () => {
     let unlisten: (() => void) | undefined;
 
     const setupListener = async () => {
-
       unlisten = await listen<{ paths: string[]; position: { x: number; y: number } } | string[]>('tauri://drag-drop', async (event) => {
+
         // Handle both payload formats: object with paths property, or array directly
         const payload = event.payload;
         const paths = (payload && typeof payload === 'object' && 'paths' in payload)
@@ -201,19 +222,12 @@ const Editor: React.FC = () => {
           // Check if file was dropped on the editor text area
           const droppedOnEditor = position && editorStateRefs.editorViewRef.current?.dom && (() => {
             const editorRect = editorStateRefs.editorViewRef.current.dom.getBoundingClientRect();
-            const isInBounds = position.x >= editorRect.left && 
-                   position.x <= editorRect.right && 
-                   position.y >= editorRect.top && 
+            const isInBounds = position.x >= editorRect.left &&
+                   position.x <= editorRect.right &&
+                   position.y >= editorRect.top &&
                    position.y <= editorRect.bottom;
-            if (process.env.NODE_ENV !== 'production') {
-              console.debug('[Editor] Drop position check:', { position, editorRect, isInBounds });
-            }
             return isInBounds;
           })();
-
-          if (process.env.NODE_ENV !== 'production') {
-            console.debug('[Editor] Dropped on editor:', droppedOnEditor);
-          }
 
           // Check if it's a markdown file
           if (filePath.endsWith('.md') || filePath.endsWith('.markdown')) {
@@ -231,9 +245,8 @@ const Editor: React.FC = () => {
               // Otherwise, open as new tab
               else {
                 const content = await readMarkdownFile(filePath);
-                addOpenFile(filePath);
-                setCurrentFile(filePath);
-                setContent(content);
+                openDocument(filePath, content);
+                setActiveDocument(filePath);
                 addRecentFile(filePath);
                 addToast({ message: `Opened file: ${filePath.split(/[\\/]/).pop()}`, type: 'success' });
               }
@@ -290,14 +303,13 @@ const Editor: React.FC = () => {
       }
     };
   }, [
-    addOpenFile, 
-    setCurrentFile, 
-    setContent, 
-    addRecentFile, 
-    addToast, 
-    promptImageProps, 
-    editorStateRefs.editorViewRef, 
-    preferences.default_image_width, 
+    openDocument,
+    setActiveDocument,
+    addRecentFile,
+    addToast,
+    promptImageProps,
+    editorStateRefs.editorViewRef,
+    preferences.default_image_width,
     preferences.default_image_alignment
   ]);
 
@@ -484,9 +496,8 @@ const Editor: React.FC = () => {
       if (result) {
         const filePath = result;
         const fileContent = await readMarkdownFile(filePath);
-        addOpenFile(filePath);
-        setCurrentFile(filePath);
-        setContent(fileContent);
+        openDocument(filePath, fileContent);
+        setActiveDocument(filePath);
         addRecentFile(filePath);
       }
     } catch (err) {
@@ -497,9 +508,8 @@ const Editor: React.FC = () => {
   // Handle opening instructions from the no-file screen
   const handleOpenInstructions = () => {
     const instructionsName = 'instructions.md';
-    addOpenFile(instructionsName);
-    setCurrentFile(instructionsName);
-    setContent(INSTRUCTIONS_DOC);
+    openDocument(instructionsName, INSTRUCTIONS_DOC);
+    setActiveDocument(instructionsName);
   };
 
   return (
@@ -509,9 +519,9 @@ const Editor: React.FC = () => {
         className="editor-container"
         onPaste={handlePaste}
       >
-        {/* Always render editor toolbar and content, but hide when no file */}
-        <div className={`editor-content-wrapper ${currentFile ? '' : 'hidden'}`}>
-          <EditorToolbar
+      {/* Always render editor toolbar and content, but hide when no file */}
+      <div className={`editor-content-wrapper ${currentFile ? '' : 'hidden'}`}>
+        <EditorToolbar
           currentFile={currentFile || ''}
           preferences={preferences}
           selectedFont={selectedFont}
@@ -581,7 +591,7 @@ const Editor: React.FC = () => {
           setImagePlusPath(choice.data.path);
         }}
       />
-    </div>
+      </div>
     </ErrorBoundary>
   );
 };

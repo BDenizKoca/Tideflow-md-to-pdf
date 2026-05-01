@@ -1,5 +1,11 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useEditorStore } from '../stores/editorStore';
+import {
+  useActiveAnchorId,
+  useActiveCompileStatus,
+  useActiveFile,
+  useActiveSourceMap,
+} from '../hooks/useActiveDocument';
 import { useUIStore } from '../stores/uiStore';
 import { usePreferencesStore } from '../stores/preferencesStore';
 import './PDFPreview.css';
@@ -24,9 +30,24 @@ import {
 initializePdfWorker();
 
 const PDFPreview: React.FC = () => {
-  // Store state
-  const { editor, sourceMap, activeAnchorId, setActiveAnchorId, syncMode, setSyncMode, isTyping } = useEditorStore();
-  const { compileStatus } = editor;
+  // Active document state via per-slice selectors
+  const activeFile = useActiveFile();
+  const sourceMap = useActiveSourceMap();
+  const activeAnchorId = useActiveAnchorId();
+  const compileStatus = useActiveCompileStatus();
+
+  // App-wide editor state
+  const syncMode = useEditorStore((s) => s.syncMode);
+  const setSyncMode = useEditorStore((s) => s.setSyncMode);
+  const isTyping = useEditorStore((s) => s.isTyping);
+
+  // Anchor-id setter is keyed by path; wrap to thread the active file.
+  const setActiveAnchorFor = useEditorStore((s) => s.setActiveAnchor);
+  const setActiveAnchorId = useCallback((id: string | null) => {
+    const path = useEditorStore.getState().activeFile;
+    if (path) setActiveAnchorFor(path, id);
+  }, [setActiveAnchorFor]);
+
   const { pdfZoom, setPdfZoom, thumbnailsVisible } = useUIStore();
   const preferences = usePreferencesStore((state) => state.preferences);
 
@@ -74,6 +95,51 @@ const PDFPreview: React.FC = () => {
   // Legacy refs no longer used (kept in scrollState for backward compat)
   // startupOneShotAppliedRef, finalRefreshDoneRef
 
+  // Reset transient per-session refs when the active file changes. These
+  // flags (initial-scroll-done, user-interacted, manually-positioned) only
+  // describe what's happened in the current viewing session — they're
+  // intentionally not stored per-file in the document map.
+  //
+  // When activeFile becomes null (Close All) we also wipe the React state
+  // backing the preview UI. usePdfRenderer's effect already clears the
+  // canvas container on the same dep change, but the thumbnails sidebar
+  // lives in component state and would otherwise keep showing the last
+  // file's pages.
+  useEffect(() => {
+    pendingFallbackRef.current = null;
+    pendingForcedAnchorRef.current = null;
+    savedScrollPositionRef.current = null;
+    initialForcedScrollDoneRef.current = false;
+    userInteractedRef.current = false;
+    userManuallyPositionedPdfRef.current = false;
+
+    if (pendingFallbackTimerRef.current !== null) {
+      window.clearInterval(pendingFallbackTimerRef.current);
+      pendingFallbackTimerRef.current = null;
+    }
+    if (pendingForcedTimerRef.current !== null) {
+      window.clearInterval(pendingForcedTimerRef.current);
+      pendingForcedTimerRef.current = null;
+    }
+    if (pendingForcedOneShotRef.current !== null) {
+      window.clearTimeout(pendingForcedOneShotRef.current);
+      pendingForcedOneShotRef.current = null;
+    }
+
+    if (activeFile === null) {
+      setThumbnails(new Map());
+      setTotalPages(0);
+      setCurrentPage(1);
+      setPdfError(null);
+      setRendering(false);
+    }
+  }, [
+    activeFile,
+    initialForcedScrollDoneRef,
+    userInteractedRef,
+    userManuallyPositionedPdfRef,
+  ]);
+
   // Temporary ref for registerPendingAnchor to avoid circular dependency
   const registerPendingAnchorRef = useRef<((anchorId: string) => void) | null>(null);
 
@@ -91,7 +157,7 @@ const PDFPreview: React.FC = () => {
     activeAnchorRef,
     userInteractedRef,
     initialForcedScrollDoneRef,
-  }), []); // Empty deps - all values are refs which are stable
+  }), [syncModeRef, activeAnchorRef, userInteractedRef, initialForcedScrollDoneRef]);
 
   // Use offset manager hook
   const offsetManager = useOffsetManager({
@@ -295,7 +361,7 @@ const PDFPreview: React.FC = () => {
 
   // PDF renderer hook
   usePdfRenderer({
-    currentFile: editor.currentFile,
+    currentFile: activeFile,
     compileStatus,
     pdfZoom,
     containerRef,
