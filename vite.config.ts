@@ -1,44 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-function manualChunks(id: string): string | undefined {
-  const normalizedId = id.replaceAll('\\', '/');
-
-  if (!normalizedId.includes('/node_modules/')) {
-    return undefined;
-  }
-
-  if (normalizedId.includes('/react-resizable-panels/') || normalizedId.includes('/zustand/')) {
-    return 'ui-vendor';
-  }
-
-  if (normalizedId.includes('/react/') || normalizedId.includes('/react-dom/')) {
-    return 'react-vendor';
-  }
-
-  if (normalizedId.includes('/@tauri-apps/')) {
-    return 'tauri-vendor';
-  }
-
-  if (normalizedId.includes('/pdfjs-dist/')) {
-    return 'pdfjs';
-  }
-
-  if (normalizedId.includes('/@lezer/') || normalizedId.includes('/@codemirror/lang-') || normalizedId.includes('/@codemirror/language')) {
-    return 'codemirror-language';
-  }
-
-  if (normalizedId.includes('/@codemirror/search/') || normalizedId.includes('/@codemirror/autocomplete/')) {
-    return 'codemirror-search';
-  }
-
-  if (normalizedId.includes('/codemirror/') || normalizedId.includes('/@codemirror/')) {
-    return 'codemirror-core';
-  }
-
-  return undefined;
-}
-
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -62,10 +24,5 @@ export default defineConfig({
     target: ["es2022", "chrome120"],
     minify: !process.env.TAURI_DEBUG ? "esbuild" : false,
     sourcemap: !!process.env.TAURI_DEBUG,
-    rollupOptions: {
-      output: {
-        manualChunks,
-      },
-    },
   },
 })
