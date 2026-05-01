@@ -1,6 +1,44 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+function manualChunks(id: string): string | undefined {
+  const normalizedId = id.replaceAll('\\', '/');
+
+  if (!normalizedId.includes('/node_modules/')) {
+    return undefined;
+  }
+
+  if (normalizedId.includes('/react-resizable-panels/') || normalizedId.includes('/zustand/')) {
+    return 'ui-vendor';
+  }
+
+  if (normalizedId.includes('/react/') || normalizedId.includes('/react-dom/')) {
+    return 'react-vendor';
+  }
+
+  if (normalizedId.includes('/@tauri-apps/')) {
+    return 'tauri-vendor';
+  }
+
+  if (normalizedId.includes('/pdfjs-dist/')) {
+    return 'pdfjs';
+  }
+
+  if (normalizedId.includes('/@lezer/') || normalizedId.includes('/@codemirror/lang-') || normalizedId.includes('/@codemirror/language')) {
+    return 'codemirror-language';
+  }
+
+  if (normalizedId.includes('/@codemirror/search/') || normalizedId.includes('/@codemirror/autocomplete/')) {
+    return 'codemirror-search';
+  }
+
+  if (normalizedId.includes('/codemirror/') || normalizedId.includes('/@codemirror/')) {
+    return 'codemirror-core';
+  }
+
+  return undefined;
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -26,25 +64,7 @@ export default defineConfig({
     sourcemap: !!process.env.TAURI_DEBUG,
     rollupOptions: {
       output: {
-        manualChunks: {
-          // React and related libraries
-          'react-vendor': ['react', 'react-dom'],
-          // PDF.js worker is already separate, main lib goes here
-          'pdfjs': ['pdfjs-dist'],
-          // CodeMirror and related
-          'codemirror': [
-            'codemirror',
-            '@codemirror/lang-markdown',
-            '@codemirror/search',
-            '@codemirror/view',
-            '@codemirror/state',
-            '@codemirror/commands',
-          ],
-          // UI libraries
-          'ui-vendor': ['react-resizable-panels', 'zustand'],
-          // Tauri plugins
-          'tauri-vendor': ['@tauri-apps/api', '@tauri-apps/plugin-dialog'],
-        },
+        manualChunks,
       },
     },
   },

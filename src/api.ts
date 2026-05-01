@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
-import { open } from '@tauri-apps/plugin-dialog';
+import { open, save } from '@tauri-apps/plugin-dialog';
 import type {
   BackendRenderedDocument,
   FileEntry,
@@ -26,8 +26,6 @@ export async function writeMarkdownFile(path: string, content: string): Promise<
 
 export async function exportCleanMarkdown(content: string, suggestedName?: string): Promise<string | null> {
   // Export scrubbed markdown (no Typst wrappers) to a new file
-  const { save } = await import('@tauri-apps/plugin-dialog');
-
   const filePath = await save({
     defaultPath: suggestedName,
     filters: [{ name: 'Markdown Files', extensions: ['md'] }]

@@ -15,11 +15,14 @@ export function scrubRawTypstAnchors(markdown: string): string {
   // We remove them entirely. Keep surrounding newlines tidy by collapsing
   // multiple consecutive newlines into a single newline after removal.
 
-  // Remove inline raw-typst comments
-  const withoutComments = markdown.replace(/<!--\s*raw-typst[\s\S]*?-->/gi, '');
+  // Remove standalone raw-typst comment lines first so they do not leave empty gaps.
+  const withoutStandaloneComments = markdown.replace(/^[ \t]*<!--\s*raw-typst[\s\S]*?-->[ \t]*(?:\r?\n)?/gim, '');
+
+  // Remove any remaining inline raw-typst comments.
+  const withoutComments = withoutStandaloneComments.replace(/<!--\s*raw-typst[\s\S]*?-->/gi, '');
 
   // Collapse more than 2 consecutive newlines into just 2 (preserve paragraph spacing)
   const collapsed = withoutComments.replace(/\n{3,}/g, '\n\n');
 
-  return collapsed;
+  return collapsed.trimEnd();
 }

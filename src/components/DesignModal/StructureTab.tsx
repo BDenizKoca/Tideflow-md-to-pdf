@@ -1,4 +1,5 @@
 import React from 'react';
+import { deleteFile } from '../../api';
 import type { TabProps } from './types';
 import { logger as designLogger } from '../../utils/logger';
 
@@ -93,11 +94,9 @@ const StructureTab: React.FC<StructureTabProps> = ({ local, mutate, handleBrowse
                     const newValue = e.target.value;
                     // If clearing the field, delete the old image
                     if (!newValue && local.cover_image) {
-                      import('../../api').then(({ deleteFile }) => {
-                        deleteFile(local.cover_image).catch(err =>
-                          designLogger.warn('Failed to delete cover image', err)
-                        );
-                      });
+                      deleteFile(local.cover_image).catch(err =>
+                        designLogger.warn('Failed to delete cover image', err)
+                      );
                     }
                     mutate({ cover_image: newValue });
                   }}
@@ -112,11 +111,9 @@ const StructureTab: React.FC<StructureTabProps> = ({ local, mutate, handleBrowse
                   <button
                     type="button"
                     onClick={() => {
-                      import('../../api').then(({ deleteFile }) => {
-                        deleteFile(local.cover_image).catch(err =>
-                          designLogger.warn('Failed to delete cover image', err)
-                        );
-                      });
+                      deleteFile(local.cover_image).catch(err =>
+                        designLogger.warn('Failed to delete cover image', err)
+                      );
                       mutate({ cover_image: '' });
                     }}
                     title="Clear cover image"

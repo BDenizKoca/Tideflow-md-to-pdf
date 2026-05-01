@@ -4,7 +4,7 @@
  */
 
 import * as pdfjsLib from 'pdfjs-dist';
-import PdfJsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?worker';
+import pdfJsWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { logger } from '../../utils/logger';
 
 const workerLogger = logger.createScoped('PDFWorker');
@@ -25,14 +25,9 @@ interface PdfJsLibWithWorker {
 export function initializePdfWorker(): void {
   try {
     const lib = pdfjsLib as unknown as PdfJsLibWithWorker;
-    if (lib.GlobalWorkerOptions && !lib.GlobalWorkerOptions.workerPort) {
-      try {
-        // Worker constructor requires dynamic instantiation
-        lib.GlobalWorkerOptions.workerPort = new (PdfJsWorker as unknown as new () => Worker)();
-        workerLogger.debug('pdf.js workerPort initialized');
-      } catch (inner) {
-        workerLogger.warn('Worker construction failed, continuing with fake worker', inner);
-      }
+    if (lib.GlobalWorkerOptions && !lib.GlobalWorkerOptions.workerPort && !lib.GlobalWorkerOptions.workerSrc) {
+      lib.GlobalWorkerOptions.workerSrc = pdfJsWorkerUrl;
+      workerLogger.debug('pdf.js workerSrc initialized');
     }
   } catch (outer) {
     workerLogger.warn('Worker initialization outer failure; continuing without worker', outer);
