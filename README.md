@@ -6,6 +6,8 @@
 **Fast, offline-first Markdown → PDF desktop app powered by Typst**
 Write on the left, get a beautifully typeset PDF on the right – instantly.
 
+English | [中文](./README-zh.md)
+
 [![CI](https://github.com/BDenizKoca/Tideflow-md-to-pdf/actions/workflows/ci.yml/badge.svg)](https://github.com/BDenizKoca/Tideflow-md-to-pdf/actions/workflows/ci.yml)
 [![Release](https://github.com/BDenizKoca/Tideflow-md-to-pdf/actions/workflows/release.yml/badge.svg)](https://github.com/BDenizKoca/Tideflow-md-to-pdf/actions/workflows/release.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
