@@ -23,6 +23,8 @@ const Toolbar: React.FC = () => {
   const {
   previewVisible,
   setPreviewVisible,
+  markdownPreviewVisible,
+  setMarkdownPreviewVisible,
   designModalOpen,
     addToast,
     recentFiles,
@@ -30,7 +32,7 @@ const Toolbar: React.FC = () => {
     clearRecentFiles,
     setSettingsModalOpen,
     setSettingsModalActiveTab,
-    
+
   } = useUIStore();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [recentDropdownOpen, setRecentDropdownOpen] = useState(false);
@@ -197,6 +199,10 @@ const Toolbar: React.FC = () => {
 
   const handleTogglePreview = () => {
     setPreviewVisible(!previewVisible);
+  };
+
+  const handleToggleMarkdownPreview = () => {
+    setMarkdownPreviewVisible(!markdownPreviewVisible);
   };
 
   const handleExportPDF = async () => {
@@ -374,11 +380,18 @@ const Toolbar: React.FC = () => {
         {/* View Controls */}
         <div className="toolbar-section">
           <button
+            onClick={handleToggleMarkdownPreview}
+            className={markdownPreviewVisible ? 'active' : 'inactive'}
+            title={markdownPreviewVisible ? 'Hide Live Markdown Preview' : 'Show Live Markdown Preview'}
+          >
+            {markdownPreviewVisible ? '📝 MD' : '🗒 MD'}
+          </button>
+          <button
             onClick={handleTogglePreview}
             className={previewVisible ? 'active' : 'inactive'}
-            title={previewVisible ? 'Hide Preview (Ctrl+\\)' : 'Show Preview (Ctrl+\')'}
+            title={previewVisible ? 'Hide PDF Preview (Ctrl+\\)' : 'Show PDF Preview (Ctrl+\')'}
           >
-            {previewVisible ? '👁️ Preview' : '👁️‍🗨️ Preview'}
+            {previewVisible ? '👁️ PDF' : '👁️‍🗨️ PDF'}
           </button>
           <button
             type="button"

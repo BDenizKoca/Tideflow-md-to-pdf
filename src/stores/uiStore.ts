@@ -13,6 +13,10 @@ interface UIStoreState {
   previewVisible: boolean;
   setPreviewVisible: (visible: boolean) => void;
 
+  // Live Markdown preview (middle panel) state
+  markdownPreviewVisible: boolean;
+  setMarkdownPreviewVisible: (visible: boolean) => void;
+
   // PDF controls
   pdfZoom: number;
   setPdfZoom: (zoom: number) => void;
@@ -52,6 +56,10 @@ export const useUIStore = create<UIStoreState>((set) => ({
   // Preview state
   previewVisible: true,
   setPreviewVisible: (visible: boolean) => set({ previewVisible: visible }),
+
+  // Live Markdown preview (middle panel) state
+  markdownPreviewVisible: true,
+  setMarkdownPreviewVisible: (visible: boolean) => set({ markdownPreviewVisible: visible }),
 
   // PDF controls
   pdfZoom: 1.0,

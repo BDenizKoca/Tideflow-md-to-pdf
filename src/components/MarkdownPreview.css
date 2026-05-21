@@ -1,0 +1,256 @@
+/* ============================================================================
+   Markdown live preview (middle panel)
+   ============================================================================ */
+
+.md-preview {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  background-color: var(--preview-bg);
+  border-left: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.md-preview-header {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: var(--border-width) solid var(--border-color);
+  background: var(--bg-gradient-light);
+  min-height: 44px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.md-preview-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  text-align: center;
+  padding: 2rem;
+  gap: 0.5rem;
+}
+
+.md-preview-empty p {
+  margin: 0;
+}
+
+.md-preview-empty-sub {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.md-preview-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.5rem 2rem;
+  color: var(--text-primary);
+  background: var(--paper-bg, var(--preview-bg));
+  line-height: 1.65;
+  font-size: 0.95rem;
+}
+
+.md-preview-content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.md-preview-content::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-bg);
+  border-radius: 5px;
+}
+
+.md-preview-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, var(--text-tertiary), var(--text-secondary));
+  border-radius: 5px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.md-preview-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, var(--accent-color), var(--accent-color-strong));
+}
+
+/* Markdown body styling */
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  margin-top: 1.6em;
+  margin-bottom: 0.6em;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-primary);
+}
+
+.markdown-body h1:first-child,
+.markdown-body h2:first-child {
+  margin-top: 0;
+}
+
+.markdown-body h1 {
+  font-size: 1.9rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+.markdown-body h2 {
+  font-size: 1.55rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.25em;
+}
+
+.markdown-body h3 { font-size: 1.3rem; }
+.markdown-body h4 { font-size: 1.1rem; }
+.markdown-body h5 { font-size: 1rem; }
+.markdown-body h6 { font-size: 0.92rem; color: var(--text-secondary); }
+
+.markdown-body p {
+  margin: 0 0 1em 0;
+}
+
+.markdown-body a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+.markdown-body a:hover {
+  color: var(--link-hover-color);
+  text-decoration: underline;
+}
+
+.markdown-body strong {
+  font-weight: 700;
+}
+
+.markdown-body em {
+  font-style: italic;
+}
+
+.markdown-body del {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  margin: 0 0 1em 0;
+  padding-left: 1.6em;
+}
+
+.markdown-body li {
+  margin: 0.25em 0;
+}
+
+.markdown-body li > p {
+  margin: 0.25em 0;
+}
+
+.markdown-body ul li input[type="checkbox"] {
+  margin-right: 0.4em;
+  vertical-align: middle;
+}
+
+.markdown-body blockquote {
+  margin: 0 0 1em 0;
+  padding: 0.5em 1em;
+  border-left: 4px solid var(--accent-color, var(--border-color));
+  background: var(--surface-subtle, transparent);
+  color: var(--text-secondary);
+}
+
+.markdown-body blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 1.5em 0;
+}
+
+.markdown-body code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+  font-size: 0.88em;
+  padding: 0.15em 0.4em;
+  background: var(--surface-subtle, rgba(127, 127, 127, 0.12));
+  border-radius: var(--border-radius-sm, 3px);
+}
+
+.markdown-body pre {
+  background: var(--surface-subtle, rgba(127, 127, 127, 0.12));
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius, 6px);
+  padding: 0.9em 1em;
+  overflow-x: auto;
+  margin: 0 0 1em 0;
+  font-size: 0.88em;
+  line-height: 1.5;
+}
+
+.markdown-body pre code {
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  font-size: inherit;
+}
+
+.markdown-body table {
+  border-collapse: collapse;
+  margin: 0 0 1em 0;
+  width: auto;
+  max-width: 100%;
+  font-size: 0.9em;
+}
+
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid var(--border-color);
+  padding: 0.4em 0.75em;
+  text-align: left;
+}
+
+.markdown-body th {
+  background: var(--surface-subtle, rgba(127, 127, 127, 0.08));
+  font-weight: 600;
+}
+
+.markdown-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--border-radius-sm, 3px);
+}
+
+.md-preview-error {
+  color: var(--error-color);
+  background: var(--error-bg);
+  border: 1px solid var(--error-color-hover);
+  padding: 0.75em 1em;
+  border-radius: var(--border-radius, 6px);
+  white-space: pre-wrap;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+  font-size: 0.85em;
+}
+
+/* KaTeX overrides for dark themes — KaTeX uses its own colors but we want
+   it to inherit the editor's text color in display blocks. */
+.markdown-body .katex {
+  font-size: 1.05em;
+  color: var(--text-primary);
+}
+
+.markdown-body .katex-display {
+  margin: 1em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}

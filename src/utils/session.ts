@@ -9,6 +9,7 @@ export interface TideflowSessionData {
   openFiles: string[];
   currentFile: string | null;
   previewVisible: boolean;
+  markdownPreviewVisible?: boolean;
   fullscreen?: boolean;
   maximized?: boolean;
   sampleDocContent: string | null;
@@ -53,6 +54,7 @@ export function saveSession(partial: Partial<TideflowSessionData>) {
       openFiles: [],
       currentFile: null,
       previewVisible: true,
+      markdownPreviewVisible: true,
       fullscreen: false,
       maximized: true,
       sampleDocContent: null,

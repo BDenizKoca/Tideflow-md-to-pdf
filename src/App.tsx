@@ -17,6 +17,7 @@ import { useWindowManagement } from './hooks/useWindowManagement';
 // Import components
 import TabBar from './components/TabBar';
 import Editor from './components/Editor';
+import MarkdownPreview from './components/MarkdownPreview';
 import PDFPreview from './components/PDFPreview';
 import PDFErrorBoundary from './components/PDFErrorBoundary';
 import Toolbar from './components/Toolbar';
@@ -28,10 +29,17 @@ const appLogger = logger.createScoped('App');
 
 function App() {
   const [loading, setLoading] = useState(true);
-  const { previewVisible, setPreviewVisible } = useUIStore();
+  const {
+    previewVisible,
+    setPreviewVisible,
+    markdownPreviewVisible,
+    setMarkdownPreviewVisible,
+  } = useUIStore();
   const isTyping = useEditorStore((state) => state.isTyping);
   const previewPanelRef = useRef<ImperativePanelHandle>(null);
+  const markdownPanelRef = useRef<ImperativePanelHandle>(null);
   const isDraggingRef = useRef(false);
+  const isMarkdownDraggingRef = useRef(false);
 
   // Initialize app with extracted hook
   useAppInitialization();
@@ -48,13 +56,31 @@ function App() {
       if (panel.isCollapsed()) {
         panel.expand();
       }
-      panel.resize(50); // Always reset to 50% when shown
+      // Share the right half with whichever other previews are visible.
+      panel.resize(markdownPreviewVisible ? 34 : 50);
     } else {
       if (!panel.isCollapsed()) {
         panel.collapse();
       }
     }
-  }, [previewVisible]);
+  }, [previewVisible, markdownPreviewVisible]);
+
+  // Effect to control live Markdown preview (middle) panel visibility and size
+  useEffect(() => {
+    const panel = markdownPanelRef.current;
+    if (!panel) return;
+
+    if (markdownPreviewVisible) {
+      if (panel.isCollapsed()) {
+        panel.expand();
+      }
+      panel.resize(previewVisible ? 33 : 50);
+    } else {
+      if (!panel.isCollapsed()) {
+        panel.collapse();
+      }
+    }
+  }, [markdownPreviewVisible, previewVisible]);
 
   // Autosave session when key state changes
   const openFiles = useEditorStore((state) => state.openFiles);
@@ -65,14 +91,14 @@ function App() {
       try {
         // saveSession merges with the existing stored session, so fields we
         // don't pass (e.g. fullscreen, maximized) are preserved automatically.
-        saveSession({ openFiles, currentFile, previewVisible });
+        saveSession({ openFiles, currentFile, previewVisible, markdownPreviewVisible });
       } catch (error) {
         appLogger.warn('Failed to save session', error);
       }
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [openFiles, currentFile, previewVisible]);
+  }, [openFiles, currentFile, previewVisible, markdownPreviewVisible]);
 
   // Late-load instructions.md if the placeholder is still showing.
   // (Belt-and-braces: useAppInitialization seeds the real content on first
@@ -105,8 +131,26 @@ function App() {
       </div>
       <div className="main-content">
         <PanelGroup direction="horizontal" style={{ height: '100%', overflow: 'hidden' }}>
-          <Panel defaultSize={50} minSize={25}>
+          <Panel defaultSize={34} minSize={20}>
             <Editor />
+          </Panel>
+          <PanelResizeHandle
+            className="resize-handle"
+            onDragging={(isDragging) => (isMarkdownDraggingRef.current = isDragging)}
+          />
+          <Panel
+            ref={markdownPanelRef}
+            collapsible
+            defaultSize={33}
+            minSize={15}
+            onCollapse={() => {
+              // Sync state if user manually collapses panel by dragging
+              if (isMarkdownDraggingRef.current && markdownPreviewVisible) {
+                setMarkdownPreviewVisible(false);
+              }
+            }}
+          >
+            <MarkdownPreview />
           </Panel>
           <PanelResizeHandle
             className="resize-handle"
@@ -115,7 +159,7 @@ function App() {
           <Panel
             ref={previewPanelRef}
             collapsible
-            defaultSize={50}
+            defaultSize={33}
             minSize={20}
             onCollapse={() => {
               // Sync state if user manually collapses panel by dragging

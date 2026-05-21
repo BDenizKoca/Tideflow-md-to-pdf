@@ -121,6 +121,10 @@ export function useAppInitialization() {
               uiStore.setPreviewVisible(session.previewVisible);
             }
 
+            if (typeof session.markdownPreviewVisible === 'boolean') {
+              uiStore.setMarkdownPreviewVisible(session.markdownPreviewVisible);
+            }
+
             uiStore.setInitialSampleInjected(true);
             sampleInjected = true;
           } catch (e) {
