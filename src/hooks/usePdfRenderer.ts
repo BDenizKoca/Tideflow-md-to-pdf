@@ -96,7 +96,7 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
       }
       if (!containerRef.current) return;
 
-      // CRITICAL: Capture scroll position IMMEDIATELY before any async work
+      // Read the scroll offset before any await, or it reflects a later state.
       // Must happen synchronously in this effect to avoid race conditions
       const currentScrollTop = containerRef.current.scrollTop;
       const currentScrollLeft = containerRef.current.scrollLeft;
@@ -114,7 +114,7 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
       setRendering(true);
       setPdfError(null);
       localCancel.canceled = false;
-      // CRITICAL: Only reset initial scroll flag on TRUE startup (no activeAnchorId yet)
+      // Only on true startup: resetting mid-session would yank the reader to the top.
       // Don't reset when user has already positioned themselves - this prevents
       // jump-to-top when images are added mid-session
       if (!activeAnchorIdRef.current) {

@@ -241,7 +241,9 @@ pub async fn render_markdown(app_handle: &AppHandle, file_path: &str) -> Result<
         assets_root_ref,
     );
     fs::write(build_dir.join("content.preview.md"), &md_content_preview)?;
-    // Also write debug copies into workspace for developer inspection
+    // Dev-only copies for inspecting what the preprocessor produced. Gated on
+    // debug builds: a packaged app must not write into its working directory.
+    #[cfg(debug_assertions)]
     if let Ok(cwd) = std::env::current_dir() {
         let dbg_dir = cwd.join("src-tauri").join("gen_debug");
         let _ = std::fs::create_dir_all(&dbg_dir);

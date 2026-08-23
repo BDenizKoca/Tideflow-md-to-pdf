@@ -176,7 +176,7 @@ export function useEditorToPdfSync(params: UseEditorToPdfSyncParams): void {
         return;
       }
 
-      // CRITICAL: Don't scroll PDF if user is currently typing OR just stopped typing recently
+      // Scrolling while the reader types (or just stopped) fights their cursor.
       // AND anchor hasn't changed. This prevents the "jump to top" issue.
       const anchorChanged = targetAnchor !== lastScrolledToAnchorRef.current;
 

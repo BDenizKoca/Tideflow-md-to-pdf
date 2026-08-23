@@ -2,6 +2,10 @@
  * Utility functions for PDF thumbnail generation
  */
 
+import { logger } from '../../utils/logger';
+
+const thumbnailLogger = logger.createScoped('thumbnails');
+
 /**
  * Generate thumbnail images from PDF canvases
  * Returns a cleanup function to cancel pending retry timers
@@ -13,15 +17,11 @@ export function generateThumbnailsFromCanvases(
 ): (() => void) | void {
   const canvases = container.querySelectorAll('canvas.pdfjs-page-canvas');
 
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('[PDFPreview] Generating thumbnails, found canvases:', canvases.length);
-  }
+  thumbnailLogger.debug('generating thumbnails', { canvases: canvases.length });
 
   if (canvases.length === 0 && retryOnEmpty) {
-    // Retry if canvases not ready yet
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('[PDFPreview] No canvases found, retrying in 500ms...');
-    }
+    // Canvases are appended imperatively after render; retry once.
+    thumbnailLogger.debug('no canvases yet, retrying');
     const timerId = setTimeout(() => generateThumbnailsFromCanvases(container, onThumbnailsGenerated, false), 500);
     // Return cleanup function
     return () => clearTimeout(timerId);
@@ -40,12 +40,11 @@ export function generateThumbnailsFromCanvases(
     const sourceHeight = sourceCanvas.height;
     const aspectRatio = sourceHeight / sourceWidth;
 
-    if (process.env.NODE_ENV !== 'production' && index === 0) {
-      console.log('[PDFPreview] Canvas dimensions:', {
+    if (index === 0) {
+      thumbnailLogger.debug('source canvas', {
         width: sourceWidth,
         height: sourceHeight,
-        aspectRatio: aspectRatio.toFixed(3),
-        expectedA4: '1.414'
+        aspectRatio: aspectRatio.toFixed(3)
       });
     }
 
@@ -66,9 +65,7 @@ export function generateThumbnailsFromCanvases(
     }
   });
 
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('[PDFPreview] Generated thumbnails:', newThumbnails.size);
-  }
+  thumbnailLogger.debug('generated thumbnails', { count: newThumbnails.size });
 
   if (newThumbnails.size > 0) {
     onThumbnailsGenerated(newThumbnails, totalPages);

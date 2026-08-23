@@ -422,11 +422,6 @@ const PDFPreview: React.FC = () => {
     return () => cancelAnimationFrame(rafId);
   }, [consumePendingAnchor, anchorOffsetsRef, containerRef]);
 
-  // ✅ ALL OLD HOOKS REPLACED WITH 2 NEW SIMPLIFIED HOOKS ABOVE ✅
-  // Removed: usePdfSync, useAnchorSync, useDocumentLifecycle, useFinalSync, usePreviewEvents
-  // Total removed: ~800 lines of complex sync logic
-  // Replaced with: useEditorToPdfSync + usePdfToEditorSync (~400 lines)
-
   // Track current page and generate thumbnails
   useEffect(() => {
     const container = containerRef.current;

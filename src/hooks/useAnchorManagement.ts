@@ -67,7 +67,7 @@ export function useAnchorManagement(params: UseAnchorManagementParams) {
     }
     if (isTypingStoreRef.current) return;
 
-    // CRITICAL: Prevent scrolls for a period after typing stops to avoid jumps
+    // Hold off briefly after typing stops, otherwise the pane jumps.
     const now = Date.now();
     const timeSinceTypingStopped = now - lastTypingStoppedRef.current;
     if (timeSinceTypingStopped < 1500) {

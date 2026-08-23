@@ -19,6 +19,10 @@ pub enum LogLevel {
 }
 
 /// Log a debug message (only in debug builds)
+///
+/// The release arm still references the arguments. Without it the macro expands
+/// to nothing, and every value bound solely to be logged - `if let Err(e) = ..`
+/// and friends - becomes an unused-variable warning in release builds only.
 #[macro_export]
 macro_rules! log_debug {
     ($component:expr, $($arg:tt)*) => {
@@ -26,6 +30,11 @@ macro_rules! log_debug {
         {
             let timestamp = chrono::Local::now().format("%Y-%m-%d %H:%M:%S%.3f");
             println!("[{}] [{}] [DEBUG] {}", timestamp, $component, format!($($arg)*));
+        }
+        #[cfg(not(debug_assertions))]
+        {
+            let _ = $component;
+            let _ = format_args!($($arg)*);
         }
     };
 }

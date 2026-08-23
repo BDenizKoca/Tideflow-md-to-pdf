@@ -150,7 +150,7 @@ export function usePdfToEditorSync(params: UsePdfToEditorSyncParams): void {
 
     // Handle scroll event (debounced)
     const handleScroll = () => {
-      // CRITICAL: Save scroll position immediately on every scroll
+      // Every scroll, so a re-render mid-scroll still has a fresh position.
       // This ensures we have the latest position before any re-render
       const hasHorizontalOverflow = (el.scrollWidth - el.clientWidth) > 1;
       savedScrollPositionRef.current = {
@@ -194,7 +194,7 @@ export function usePdfToEditorSync(params: UsePdfToEditorSyncParams): void {
       // Ignore if still rendering
       if (renderingRef.current) return;
 
-      // CRITICAL: Don't process PDF scroll events when user is typing
+      // Typing drives its own scrolling; reacting to it would fight the editor.
       // This prevents feedback loops in two-way mode
       if (isTypingRef.current) {
         if (process.env.NODE_ENV !== 'production') {
