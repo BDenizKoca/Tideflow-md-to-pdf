@@ -9,6 +9,33 @@ export interface PageMetric { page: number; height: number; scale: number }
 export interface SavedScrollPosition { top: number; left: number }
 
 /**
+ * Device pixels we're willing to hold across every page canvas at once, roughly
+ * 256MB of RGBA. Every page is rasterised up front (there is no virtualisation),
+ * so long documents have to trade sharpness for memory.
+ */
+const CANVAS_PIXEL_BUDGET = 64_000_000;
+
+/** Ceiling for one page, well under the browser's per-canvas area limit. */
+const MAX_PAGE_PIXELS = 16_777_216;
+
+/**
+ * Device pixels to render per CSS pixel. At 1 the compositor upscales the
+ * canvas on HiDPI and fractionally-scaled displays, which is why the preview
+ * looks blurry while the exported PDF is sharp. Never returns less than 1.
+ */
+export function getOutputScale(cssWidth: number, cssHeight: number, pageCount: number): number {
+  const pageArea = cssWidth * cssHeight;
+  if (pageArea <= 0) return 1;
+
+  const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
+  // Past 3x the extra sharpness is imperceptible but the cost is not.
+  const wanted = Math.min(Math.max(dpr, 1), 3);
+  const perPageCap = Math.min(MAX_PAGE_PIXELS, CANVAS_PIXEL_BUDGET / Math.max(pageCount, 1));
+
+  return Math.max(Math.min(wanted, Math.sqrt(perPageCap / pageArea)), 1);
+}
+
+/**
  * Render PDF pages into the provided container and return the pdf doc and
  * collected page metrics. Renders pages in parallel and supports early
  * cancellation via the cancel token.
@@ -47,10 +74,18 @@ export async function renderPdfPages(
       canvas.className = 'pdfjs-page-canvas';
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
+      // Backing store in device pixels, CSS box in layout pixels, so scroll
+      // offsets and click-to-sync keep working in the units they expect.
+      const outputScale = getOutputScale(viewport.width, viewport.height, doc.numPages);
+      canvas.width = Math.floor(viewport.width * outputScale);
+      canvas.height = Math.floor(viewport.height * outputScale);
+      canvas.style.width = `${Math.floor(viewport.width)}px`;
+      canvas.style.height = `${Math.floor(viewport.height)}px`;
       tmpWrap.appendChild(canvas);
-      await page.render({ canvasContext: ctx, viewport }).promise;
+      const transform = outputScale === 1
+        ? undefined
+        : [outputScale, 0, 0, outputScale, 0, 0];
+      await page.render({ canvasContext: ctx, viewport, transform }).promise;
     })();
     pagePromises.push(p);
   }
@@ -68,8 +103,8 @@ export async function renderPdfPages(
       return { doc, metrics };
     }
 
-    // CRITICAL: Preserve scroll position before clearing container
-    // Prefer saved position from before render started, fall back to current
+    // Captured before the render started, if we have it; the live value is a
+    // fallback, and by now the container is about to be emptied.
     const scrollTop = savedScrollPosition?.top ?? container.scrollTop;
     const scrollLeft = savedScrollPosition?.left ?? container.scrollLeft;
 
@@ -81,8 +116,8 @@ export async function renderPdfPages(
       willRestore: scrollTop > 0
     });
 
-    // CRITICAL: Hide container during DOM manipulation to prevent visual flash
-    // Only hide if we're going to restore a non-zero position
+    // Hide during the swap so the reader never sees the pre-restore position.
+    // Only worth it when there is actually a position to restore.
     const shouldHide = scrollTop > 0;
     if (shouldHide) {
       container.classList.add('restoring-scroll');
@@ -104,9 +139,8 @@ export async function renderPdfPages(
     const targetLeftImmediate = horizontalOverflow ? scrollLeft : 0;
     container.scrollLeft = targetLeftImmediate;
 
-    // CRITICAL: Restore scroll position after re-rendering
-    // This prevents the "jump to top" issue during re-renders
-    // Use requestAnimationFrame to ensure content is laid out first
+    // Restore after a frame, once the new canvases have been laid out —
+    // otherwise the pane jumps to the top on every re-render.
     requestAnimationFrame(() => {
       if (container.isConnected) {
         const beforeTop = container.scrollTop;

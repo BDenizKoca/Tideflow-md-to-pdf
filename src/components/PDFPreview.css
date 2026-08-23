@@ -36,13 +36,17 @@
     background: var(--paper-bg);
   }
 
-  /* Ensure canvases display properly */
+  /* Ensure canvases display properly.
+     !important overrides the inline width/height the renderer sets for HiDPI
+     canvases, so pages scale to the printed sheet instead of keeping their
+     on-screen pixel size. */
   .pdfjs-page-canvas {
     display: block;
     page-break-after: always;
     page-break-inside: avoid;
+    width: auto !important;
     max-width: 100%;
-    height: auto;
+    height: auto !important;
   }
 
   /* Remove last page break */
