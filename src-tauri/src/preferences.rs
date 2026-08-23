@@ -111,6 +111,11 @@ pub struct Preferences {
     #[serde(default = "default_paragraph_spacing")]
     pub paragraph_spacing: String,
     
+    /// Treat every single newline in the markdown as a line break, instead of
+    /// folding it into a space the way standard Markdown does
+    #[serde(default)]
+    pub hard_linebreaks: bool,
+
     /// Enable page numbers in footer
     #[serde(default)]
     pub page_numbers: bool,
@@ -252,6 +257,7 @@ impl Default for Preferences {
             accent_color: "#1e40af".to_string(),
             line_height: 1.5,
             paragraph_spacing: "0.65em".to_string(),
+            hard_linebreaks: false,
             page_numbers: false,
             header_title: false,
             header_text: String::new(),

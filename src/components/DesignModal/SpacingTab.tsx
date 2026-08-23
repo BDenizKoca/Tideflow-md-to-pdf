@@ -50,6 +50,18 @@ const SpacingTab: React.FC<TabProps> = ({ local, mutate }) => {
         <label className="checkbox-label">
           <input
             type="checkbox"
+            checked={local.hard_linebreaks ?? false}
+            onChange={e => mutate({ hard_linebreaks: e.target.checked })}
+          />
+          <span>Hard Line Breaks</span>
+        </label>
+        <div className="helper-text">
+          Keep every line break in the source instead of merging lines into one
+          paragraph. Code blocks and math are left untouched.
+        </div>
+        <label className="checkbox-label">
+          <input
+            type="checkbox"
             checked={local.page_numbers}
             onChange={e => mutate({ page_numbers: e.target.checked })}
           />

@@ -40,6 +40,7 @@ export interface Preferences {
   accent_color: string;
   line_height: number;
   paragraph_spacing: string;
+  hard_linebreaks?: boolean; // Treat every single newline as a line break
   page_numbers: boolean;
   header_title: boolean;
   header_text: string;

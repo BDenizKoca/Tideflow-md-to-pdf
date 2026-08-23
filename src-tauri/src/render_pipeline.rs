@@ -4,6 +4,7 @@
 //! compilation that was previously duplicated 3x across render_markdown, export_markdown,
 //! and render_typst functions.
 
+use crate::preprocessor::PreprocessOptions;
 use crate::utils;
 use anyhow::{anyhow, Result};
 use serde_json::Value as JsonValue;
@@ -28,6 +29,37 @@ pub struct RenderConfig<'a> {
 #[allow(dead_code)]
 pub struct PrefsSetupResult {
     pub prefs_json: JsonValue,
+}
+
+/// Read the preprocessing switches out of the user's saved preferences.
+///
+/// Preferences are read as raw JSON rather than through `Preferences` so that a
+/// file written by an older version (missing newer keys) still renders.
+pub fn preprocess_options(app_handle: &AppHandle) -> PreprocessOptions {
+    let prefs = utils::get_content_dir(app_handle)
+        .ok()
+        .map(|dir| dir.join("prefs.json"))
+        .filter(|path| path.exists())
+        .and_then(|path| fs::read_to_string(path).ok())
+        .and_then(|text| serde_json::from_str::<JsonValue>(&text).ok());
+
+    let Some(prefs) = prefs else {
+        return PreprocessOptions::default();
+    };
+
+    PreprocessOptions {
+        // Citations may only be converted when a bibliography is configured;
+        // without one Typst fails the whole render.
+        has_bibliography: prefs
+            .get("bibliography_path")
+            .and_then(|v| v.as_str())
+            .map(|p| !p.trim().is_empty())
+            .unwrap_or(false),
+        hard_linebreaks: prefs
+            .get("hard_linebreaks")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false),
+    }
 }
 
 /// Collect Typst package roots that ship with the app or were copied into the user profile.

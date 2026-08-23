@@ -25,9 +25,20 @@ pub use types::{
 pub use types::{anchors_to_lookup, AnchorEntry, EditorPosition};
 
 use anyhow::Result;
-use normalize::{ensure_blank_lines_before_tables, split_frontmatter};
+use normalize::{apply_hard_linebreaks, ensure_blank_lines_before_tables, split_frontmatter};
 use anchors::inject_anchors;
 use regex::Regex;
+
+/// Document-level switches that change how markdown is transformed before it
+/// reaches Typst. Built from the user's preferences at render time.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct PreprocessOptions {
+    /// Convert `[@key]` citations to `#cite()` calls. Only safe when a
+    /// bibliography is configured; otherwise Typst errors on the citation.
+    pub has_bibliography: bool,
+    /// Treat every single newline as a line break instead of a space.
+    pub hard_linebreaks: bool,
+}
 
 /// Convert Pandoc-style citations to Typst format.
 ///
@@ -93,30 +104,33 @@ fn convert_citations(markdown: &str) -> String {
 ///
 /// This is the main entry point for the preprocessor. It:
 /// 1. Preserves YAML frontmatter if present
-/// 2. Converts Pandoc-style citations to Typst format (only if has_bibliography is true)
-/// 3. Normalizes markdown (ensures blank lines before tables)
+/// 2. Converts Pandoc-style citations to Typst format (only if a bibliography is configured)
+/// 3. Normalizes markdown (ensures blank lines before tables, optional hard line breaks)
 /// 4. Injects anchor labels for scroll synchronization
 /// 5. Generates heading labels for internal links
 ///
 /// # Arguments
 ///
 /// * `markdown` - The raw markdown content
-/// * `has_bibliography` - If true, converts [@key] citations to #cite() calls. If false, leaves citations as plain text to prevent crashes.
+/// * `options` - Document-level preprocessing switches taken from preferences
 ///
 /// # Example
 ///
 /// ```ignore
-/// let output = preprocess_markdown("# Hello\n\nWorld", true)?;
+/// let output = preprocess_markdown("# Hello\n\nWorld", PreprocessOptions::default())?;
 /// // output.markdown contains anchors like <!--raw-typst #label("hello") -->
 /// // output.anchors contains metadata for each anchor
 /// ```
-pub fn preprocess_markdown(markdown: &str, has_bibliography: bool) -> Result<PreprocessorOutput> {
+pub fn preprocess_markdown(
+    markdown: &str,
+    options: PreprocessOptions,
+) -> Result<PreprocessorOutput> {
     // Skip YAML frontmatter if present
     let (frontmatter, content) = split_frontmatter(markdown);
 
     // Convert Pandoc citations to Typst format ONLY if bibliography is loaded
     // This prevents "document does not contain a bibliography" errors
-    let with_citations = if has_bibliography {
+    let with_citations = if options.has_bibliography {
         convert_citations(content)
     } else {
         content.to_string()
@@ -124,6 +138,13 @@ pub fn preprocess_markdown(markdown: &str, has_bibliography: bool) -> Result<Pre
 
     // Normalize markdown: ensure blank line before tables
     let normalized = ensure_blank_lines_before_tables(&with_citations);
+    // Optional: make every single newline a real line break. Applied before
+    // anchor injection so the injected offsets match the final markdown.
+    let normalized = if options.hard_linebreaks {
+        apply_hard_linebreaks(&normalized)
+    } else {
+        normalized
+    };
     let mut result = inject_anchors(&normalized)?;
     
     // Prepend frontmatter back if it existed
@@ -147,10 +168,14 @@ pub fn preprocess_markdown(markdown: &str, has_bibliography: bool) -> Result<Pre
 mod tests {
     use super::*;
 
+    fn with_bib() -> PreprocessOptions {
+        PreprocessOptions { has_bibliography: true, ..Default::default() }
+    }
+
     #[test]
     fn test_preprocess_basic() {
         let md = "# Hello\n\nParagraph here.";
-        let result = preprocess_markdown(md, false).unwrap();
+        let result = preprocess_markdown(md, PreprocessOptions::default()).unwrap();
 
         assert!(result.markdown.contains("tf-doc-start"));
         assert!(result.markdown.contains("#label(\"hello\")"));
@@ -160,7 +185,7 @@ mod tests {
     #[test]
     fn test_preprocess_with_frontmatter() {
         let md = "---\ntitle: Test\n---\n\n# Hello";
-        let result = preprocess_markdown(md, false).unwrap();
+        let result = preprocess_markdown(md, PreprocessOptions::default()).unwrap();
 
         assert!(result.markdown.starts_with("---\ntitle: Test\n---"));
         assert!(result.markdown.contains("#label(\"hello\")"));
@@ -169,7 +194,7 @@ mod tests {
     #[test]
     fn test_duplicate_headings() {
         let md = "# Intro\n\n# Intro\n\n# Intro";
-        let result = preprocess_markdown(md, false).unwrap();
+        let result = preprocess_markdown(md, PreprocessOptions::default()).unwrap();
 
         assert!(result.markdown.contains("#label(\"intro\")"));
         assert!(result.markdown.contains("#label(\"intro-1\")"));
@@ -180,18 +205,18 @@ mod tests {
     fn test_citation_conversion() {
         // Simple citation - WITH bibliography
         let md = "According to Einstein [@einstein1905], ...";
-        let result = preprocess_markdown(md, true).unwrap();
+        let result = preprocess_markdown(md, with_bib()).unwrap();
         assert!(result.markdown.contains("#cite(<einstein1905>)"));
         assert!(!result.markdown.contains("[@einstein1905]"));
 
         // Multiple citations - WITH bibliography
         let md2 = "Multiple sources [@knuth1984; @lamport1986] show...";
-        let result2 = preprocess_markdown(md2, true).unwrap();
+        let result2 = preprocess_markdown(md2, with_bib()).unwrap();
         assert!(result2.markdown.contains("#cite(<knuth1984>) #cite(<lamport1986>)"));
 
         // Citation with page number - WITH bibliography
         let md3 = "See [@einstein1905, p. 42] for details.";
-        let result3 = preprocess_markdown(md3, true).unwrap();
+        let result3 = preprocess_markdown(md3, with_bib()).unwrap();
         assert!(result3.markdown.contains("#cite(<einstein1905>, supplement: [p. 42])"));
     }
 
@@ -199,12 +224,32 @@ mod tests {
     fn test_citation_no_conversion_without_bibliography() {
         // Without bibliography, citations should remain as plain text to prevent crashes
         let md = "According to Einstein [@einstein1905], multiple sources [@knuth1984; @lamport1986] show...";
-        let result = preprocess_markdown(md, false).unwrap();
+        let result = preprocess_markdown(md, PreprocessOptions::default()).unwrap();
 
         // Citations should NOT be converted
         assert!(!result.markdown.contains("#cite("));
         // Original citations should be preserved
         assert!(result.markdown.contains("[@einstein1905]"));
         assert!(result.markdown.contains("[@knuth1984; @lamport1986]"));
+    }
+
+    #[test]
+    fn test_hard_linebreaks_option() {
+        let md = "# Title\n\nline one\nline two";
+
+        let off = preprocess_markdown(md, PreprocessOptions::default()).unwrap();
+        assert!(off.markdown.contains("line one\nline two"));
+
+        let on = preprocess_markdown(
+            md,
+            PreprocessOptions { hard_linebreaks: true, ..Default::default() },
+        )
+        .unwrap();
+        assert!(on.markdown.contains("line one  \nline two"));
+
+        // Anchors must keep pointing at the same editor lines.
+        let off_lines: Vec<usize> = off.anchors.iter().map(|a| a.line).collect();
+        let on_lines: Vec<usize> = on.anchors.iter().map(|a| a.line).collect();
+        assert_eq!(off_lines, on_lines);
     }
 }

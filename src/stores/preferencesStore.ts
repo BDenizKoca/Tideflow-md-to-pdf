@@ -60,6 +60,7 @@ export const defaultPreferences: Preferences = {
   accent_color: '#1e40af',
   line_height: 1.5,
   paragraph_spacing: '0.65em',
+  hard_linebreaks: false,
   page_numbers: false,
   header_title: false,
   header_text: '',

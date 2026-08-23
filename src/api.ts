@@ -230,6 +230,7 @@ interface BackendPreferences {
   accent_color: string;
   line_height: number;
   paragraph_spacing: string;
+  hard_linebreaks?: boolean;
   page_numbers: boolean;
   header_title: boolean;
   header_text: string;
@@ -271,6 +272,7 @@ export async function getPreferences(): Promise<Preferences> {
     accent_color: raw.accent_color ?? '#1e40af',
     line_height: raw.line_height ?? 1.5,
     paragraph_spacing: raw.paragraph_spacing ?? '0.65em',
+    hard_linebreaks: raw.hard_linebreaks ?? false,
     page_numbers: raw.page_numbers ?? false,
     header_title: raw.header_title ?? false,
     header_text: raw.header_text ?? '',
@@ -314,6 +316,7 @@ export async function setPreferences(preferences: Preferences): Promise<void> {
     accent_color: preferences.accent_color,
     line_height: preferences.line_height,
     paragraph_spacing: preferences.paragraph_spacing,
+    hard_linebreaks: preferences.hard_linebreaks,
     page_numbers: preferences.page_numbers,
     header_title: preferences.header_title,
     header_text: preferences.header_text,
