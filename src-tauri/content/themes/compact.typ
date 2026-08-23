@@ -80,7 +80,7 @@
   set enum(indent: 8pt, body-indent: 4pt)
 
   // Links bold
-  show link: it => text(weight: 700, underline: true)[#it]
+  show link: it => underline(text(weight: 700)[#it])
 
   // Strong extra bold
   show strong: it => text(weight: 900)[#it]
