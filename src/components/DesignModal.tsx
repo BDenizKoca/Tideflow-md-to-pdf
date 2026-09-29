@@ -1,8 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { open } from '@tauri-apps/plugin-dialog';
 import { useEditorStore } from '../stores/editorStore';
 import { useUIStore } from '../stores/uiStore';
 import { usePreferencesStore, defaultPreferences } from '../stores/preferencesStore';
-import { setPreferences as persistPreferences, renderTypst, debugPaths } from '../api';
+import {
+  clearBibliography,
+  debugPaths,
+  deleteFile,
+  importBibliographyFromPath,
+  importImageFromPath,
+  renderTypst,
+  setPreferences as persistPreferences,
+} from '../api';
 import type { Preferences } from '../types';
 import { themePresets } from '../themes'; // Import themes
 import { logger } from '../utils/logger';
@@ -50,7 +59,6 @@ const DesignModal: React.FC = () => {
 
   const handleBrowseCoverImage = async () => {
     try {
-      const { open } = await import('@tauri-apps/plugin-dialog');
       const result = await open({
         multiple: false,
         filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'svg'] }]
@@ -60,7 +68,6 @@ const DesignModal: React.FC = () => {
         // Delete old cover image if it exists
         if (local.cover_image) {
           try {
-            const { deleteFile } = await import('../api');
             await deleteFile(local.cover_image);
           } catch (err) {
             designLogger.warn('Failed to delete old cover image', err);
@@ -68,7 +75,6 @@ const DesignModal: React.FC = () => {
         }
 
         // Import the image to assets directory and get relative path
-        const { importImageFromPath } = await import('../api');
         const relativePath = await importImageFromPath(filePath);
         mutate({ cover_image: relativePath });
       }
@@ -79,7 +85,6 @@ const DesignModal: React.FC = () => {
 
   const handleBrowseBibliography = async () => {
     try {
-      const { open } = await import('@tauri-apps/plugin-dialog');
       const result = await open({
         multiple: false,
         filters: [
@@ -89,7 +94,6 @@ const DesignModal: React.FC = () => {
       });
       const filePath = Array.isArray(result) ? result?.[0] : result;
       if (filePath) {
-        const { importBibliographyFromPath } = await import('../api');
         const filename = await importBibliographyFromPath(filePath);
         mutate({ bibliography_path: filename });
       }
@@ -101,7 +105,6 @@ const DesignModal: React.FC = () => {
   const handleClearBibliography = async () => {
     try {
       // Clear the .bib file from .build directory
-      const { clearBibliography } = await import('../api');
       await clearBibliography();
       // Then clear the preference
       mutate({ bibliography_path: '' });

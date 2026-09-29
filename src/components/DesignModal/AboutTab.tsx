@@ -10,13 +10,11 @@ const AboutTab: React.FC = () => {
 
   return (
     <div className="tab-panel about-tab">
-      <h3>You are using the Tideflow free version</h3>
+      <h3>About Tideflow</h3>
 
       <p className="about-description">
-        This version includes every feature you need for a powerful and focused writing experience.
+        Tideflow includes everything you need for a focused writing experience.
       </p>
-
-
 
       <p className="about-description">
         Some of the core features include:
@@ -64,7 +62,7 @@ const AboutTab: React.FC = () => {
             Get Tideflow Pro ($10)
           </button>
           <button
-            onClick={handleExternalLink('https://bdenizkoca.studio/projects/tideflow/')}
+            onClick={handleExternalLink('https://bdenizkocastudio.netlify.app/projects/tideflow/')}
             className="btn-secondary"
           >
             See all Pro details
@@ -75,7 +73,7 @@ const AboutTab: React.FC = () => {
       <div className="about-section">
         <h4>Support the Project</h4>
         <p>
-          If you enjoy the free version and just want to say thanks, you can support my work through GitHub Sponsors. This not only helps the development of Tideflow but helps me in all my future creative endeavours.
+          If you enjoy using Tideflow and want to say thanks, you can support my work through GitHub Sponsors. This not only helps the development of Tideflow but helps me in all my future creative endeavours.
         </p>
         <div className="about-actions">
           <button

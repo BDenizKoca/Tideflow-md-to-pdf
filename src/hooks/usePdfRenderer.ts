@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 import { renderPdfPages } from '../utils/pdfRenderer';
 import { extractOffsetsFromPdfText } from '../utils/offsets';
 import { ANCHOR } from '../constants/timing';
@@ -126,7 +127,6 @@ export function usePdfRenderer(args: UsePdfRendererArgs) {
         const pdfPath = compileStatus.pdf_path ?? '';
 
         // Use Tauri's read_binary_file command to get the PDF as bytes
-        const { invoke } = await import('@tauri-apps/api/core');
         const pdfBytes = await invoke<number[]>('read_binary_file', { path: pdfPath });
         
         // Convert to Uint8Array for PDF.js

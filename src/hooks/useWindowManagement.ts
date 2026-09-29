@@ -120,15 +120,13 @@ export function useWindowManagement(setLoading: (loading: boolean) => void) {
             // Try Tauri window API if available
             (async () => {
               try {
-                const mod = await import('@tauri-apps/api/window');
-                const modTyped = mod as { getCurrentWindow?: () => unknown; getCurrent?: () => unknown; appWindow?: unknown };
-                const win = modTyped.getCurrentWindow?.() || modTyped.getCurrent?.() || modTyped.appWindow;
-                if (win && typeof (win as { setFullscreen?: unknown }).setFullscreen === 'function') {
-                  try { await (win as { setFullscreen: (f: boolean) => Promise<void> }).setFullscreen(want); } catch (e) { windowMgmtLogger.debug('setFullscreen failed', e); }
+                const win = getCurrentWindow();
+                if (win && typeof win.setFullscreen === 'function') {
+                  try { await win.setFullscreen(want); } catch (e) { windowMgmtLogger.debug('setFullscreen failed', e); }
                   return;
                 }
               } catch (e) {
-                void e; // dynamic import failed; fall through to DOM API
+                void e; // fall through to DOM API
               }
               // Fallback: use DOM Fullscreen API on the document element
               try {
