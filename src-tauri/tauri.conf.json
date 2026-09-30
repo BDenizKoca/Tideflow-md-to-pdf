@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Tideflow",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "identifier": "com.tideflow.app",
   "build": {
     "frontendDist": "../dist",
@@ -47,6 +47,8 @@
       "icons/64x64.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
+      "icons/256x256.png",
+      "icons/512x512.png",
       "icons/icon.png",
       "icons/icon.icns",
       "icons/icon.ico"
@@ -57,6 +59,13 @@
       "styles/*",
       "bin/typst/**/*"
     ],
+    "linux": {
+      "appimage": {
+        "files": {
+          ".DirIcon": "icons/512x512.png"
+        }
+      }
+    },
     "copyright": "© 2025 Burak Deniz Koca"
   }
 }
