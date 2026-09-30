@@ -175,7 +175,10 @@ pub fn typst_command<S: AsRef<std::ffi::OsStr>>(exe: S) -> Command {
     }
     #[cfg(not(target_os = "windows"))]
     {
-        Command::new(exe)
+        let mut cmd = Command::new(exe);
+        cmd.env("RUST_MIN_STACK", "8388608");
+        cmd.env("RUST_BACKTRACE", "1");
+        cmd
     }
 }
 

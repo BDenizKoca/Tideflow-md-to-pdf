@@ -65,7 +65,8 @@ jobs:
             libssl-dev \
             libgtk-3-dev \
             libayatana-appindicator3-dev \
-            librsvg2-dev
+            librsvg2-dev \
+            zsync
 
       - name: Install frontend dependencies
         run: npm ci
@@ -113,6 +114,8 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LDAI_UPDATE_INFORMATION: "gh-releases-zsync|BDenizKoca|Tideflow-md-to-pdf|latest|*amd64.AppImage.zsync"
+          UPDATE_INFORMATION: "gh-releases-zsync|BDenizKoca|Tideflow-md-to-pdf|latest|*amd64.AppImage.zsync"
         with:
           tagName: ${{ github.ref_name }} # Use the tag name as release name
           releaseName: 'Tideflow ${{ github.ref_name }}'
@@ -121,6 +124,19 @@ jobs:
           includeRelease: true
           includeUpdaterJson: false
           args: ${{ matrix.args }}
+
+      - name: Upload zsync file (Linux only)
+        if: matrix.platform == 'ubuntu-22.04'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ZSYNC_FILE=$(find src-tauri/target/release/bundle -name "*.zsync" -type f 2>/dev/null | head -n 1)
+          if [ -n "$ZSYNC_FILE" ] && [ -f "$ZSYNC_FILE" ]; then
+            echo "Found zsync file: $ZSYNC_FILE, uploading to release ${{ github.ref_name }}..."
+            gh release upload "${{ github.ref_name }}" "$ZSYNC_FILE" --clobber || true
+          else
+            echo "No zsync file found to upload."
+          fi
 
       - name: List produced bundles (Linux/macOS)
         if: runner.os != 'Windows'
