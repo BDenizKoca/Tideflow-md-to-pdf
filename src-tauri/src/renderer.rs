@@ -5,7 +5,7 @@ use crate::preprocessor::{
 };
 use crate::render_pipeline::{self, RenderConfig};
 use crate::utils;
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, Result};
 use serde::Serialize;
 use std::collections::HashMap;
 use std::fs;
@@ -255,8 +255,7 @@ pub async fn render_markdown(app_handle: &AppHandle, file_path: &str) -> Result<
     render_pipeline::setup_template(&config, "markdown")?;
 
     // 4) Get bundled Typst binary path
-    let typst_path = utils::get_typst_path(app_handle)
-        .context("Typst binary not found. Please install Typst system-wide or download and place in bin/typst/<platform>/ directory.")?;
+    let typst_path = utils::get_typst_path(app_handle)?;
 
     // Compile preview PDF
     // For preview, temporarily install the preview content into content.md so the
@@ -344,8 +343,7 @@ pub async fn export_markdown(app_handle: &AppHandle, file_path: &str) -> Result<
     render_pipeline::setup_template(&config, "markdown-export")?;
 
     // Get bundled Typst binary path
-    let typst_path = utils::get_typst_path(app_handle)
-        .context("Typst binary not found. Please install Typst system-wide or download and place in bin/typst/<platform>/ directory.")?;
+    let typst_path = utils::get_typst_path(app_handle)?;
 
     // Compile to final PDF next to source file
     let final_pdf = Path::new(file_path).with_extension("pdf");
@@ -376,8 +374,7 @@ pub async fn render_typst(
     let _lock = RENDER_MUTEX.lock().await;
 
     // Get path to Typst binary (fail fast if missing)
-    let typst_path = utils::get_typst_path(app_handle)
-        .context("Typst binary not found. Please install Typst system-wide or download and place in bin/typst/<platform>/ directory.")?;
+    let typst_path = utils::get_typst_path(app_handle)?;
 
     // Create .build directory if it doesn't exist
     let content_dir = utils::get_content_dir(app_handle)?;

@@ -702,19 +702,34 @@
 }
 
 .error-message {
-  color: var(--error-color);
+  color: var(--text-secondary);
   overflow-y: auto;
-  align-items: flex-start;
   padding: 1.5rem;
+  gap: 0.25rem;
+}
+
+.error-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+  margin-bottom: 0.5rem;
 }
 
 .error-message h4 {
-  color: var(--error-color);
-  margin-top: 0;
+  color: var(--text-primary);
+  margin: 0;
   font-size: 1.1rem;
 }
 
+.error-summary {
+  margin: 0.5rem 0 0;
+  max-width: 32rem;
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+
 .error-details {
+  align-self: stretch;
+  text-align: left;
   margin-top: 1rem;
   padding: 1rem;
   background-color: var(--error-bg);
@@ -723,6 +738,7 @@
   font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
   font-size: 0.85rem;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
   overflow-x: auto;
   max-width: 100%;
   color: var(--error-color-strong);

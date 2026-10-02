@@ -6,7 +6,7 @@
 use crate::preprocessor::preprocess_markdown;
 use crate::render_pipeline::{self, RenderConfig};
 use crate::utils;
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, Result};
 use std::fs;
 use std::path::Path;
 use std::process::Stdio;
@@ -80,8 +80,7 @@ pub async fn export_as_image(
     render_pipeline::setup_template(&config, &format!("markdown-export-{}", format))?;
 
     // Get Typst binary path
-    let typst_path = utils::get_typst_path(app_handle)
-        .context("Typst binary not found. Please install Typst system-wide or download and place in bin/typst/<platform>/ directory.")?;
+    let typst_path = utils::get_typst_path(app_handle)?;
 
     // Compile to image format
     let output_path = Path::new(destination);
@@ -142,12 +141,11 @@ pub async fn export_as_image(
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         let stdout = String::from_utf8_lossy(&output.stdout);
-        return Err(anyhow!(
-            "Typst {} export failed.\nSTDOUT:\n{}\nSTDERR:\n{}",
-            format.to_uppercase(),
+        return Err(anyhow!(render_pipeline::describe_typst_failure(
+            &output.status,
             stdout.trim(),
             stderr.trim()
-        ));
+        )));
     }
 
     // For multi-page documents, Typst creates files like document-1.png, document-2.png, etc.

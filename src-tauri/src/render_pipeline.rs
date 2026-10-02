@@ -473,12 +473,11 @@ pub fn compile_typst(
         let stdout_str = String::from_utf8_lossy(&stdout);
         let stderr_str = String::from_utf8_lossy(&stderr);
 
-        return Err(anyhow!(
-            "Typst compile failed (status {}).\nSTDOUT:\n{}\nSTDERR:\n{}",
-            status,
+        return Err(anyhow!(describe_typst_failure(
+            &status,
             stdout_str.trim(),
             stderr_str.trim()
-        ));
+        )));
     }
     
     let output_path = config.build_dir.join(output_file);
@@ -490,4 +489,94 @@ pub fn compile_typst(
     }
     
     Ok(())
+}
+
+/// Build a user-facing message for a failed Typst run. Crashes (killed by a signal on Unix,
+/// or terminated by an unhandled NTSTATUS exception on Windows) get a plain-language explanation
+/// instead of the raw exit status, and empty stdout/stderr sections are omitted.
+pub(crate) fn describe_typst_failure(status: &std::process::ExitStatus, stdout: &str, stderr: &str) -> String {
+    #[cfg(unix)]
+    let crash: Option<(&str, String)> = {
+        use std::os::unix::process::ExitStatusExt;
+        status.signal().map(|sig| {
+            let reason = match sig {
+                4 => "illegal instruction",
+                6 => "aborted",
+                7 => "bus error",
+                9 => "killed",
+                11 => "segmentation fault",
+                _ => "terminated by the system",
+            };
+            (reason, format!("signal {sig}"))
+        })
+    };
+
+    #[cfg(windows)]
+    let crash: Option<(&str, String)> = status.code().and_then(|code| {
+        let code_u32 = code as u32;
+        // NTSTATUS exception codes in the 0xC0000000..=0xFFFFFFFF range indicate crashes/fatal errors
+        match code_u32 {
+            0xC0000005 => Some(("access violation", format!("0x{:08X}", code_u32))),
+            0xC000001D => Some(("illegal instruction", format!("0x{:08X}", code_u32))),
+            0xC00000FD => Some(("stack overflow", format!("0x{:08X}", code_u32))),
+            0xC0000409 => Some(("fail fast / aborted", format!("0x{:08X}", code_u32))),
+            0xC0000025 => Some(("noncontinuable exception", format!("0x{:08X}", code_u32))),
+            0xC0000094 => Some(("divide by zero", format!("0x{:08X}", code_u32))),
+            c if c >= 0xC0000000 => Some(("system exception", format!("0x{:08X}", code_u32))),
+            _ => None,
+        }
+    });
+
+    #[cfg(not(any(unix, windows)))]
+    let crash: Option<(&str, String)> = None;
+
+    let mut msg = match (crash, status.code()) {
+        (Some((reason, identifier)), _) => {
+            // First line is the summary, second the hint (the preview shows each as a paragraph).
+            format!(
+                "Typst crashed unexpectedly ({reason}, {identifier}). This is a problem with the Typst \
+                 program, not your document.\n\
+                 Try rendering again. If it keeps happening, install Typst system-wide or choose a \
+                 Typst binary in Settings › General › Typst Compiler."
+            )
+        }
+        (None, Some(code)) => format!("Typst compile failed (exit code {code})."),
+        (None, None) => "Typst compile failed.".to_string(),
+    };
+
+    if !stderr.is_empty() {
+        msg.push_str("\n\n");
+        msg.push_str(stderr);
+    }
+    if !stdout.is_empty() {
+        msg.push_str("\n\nOutput:\n");
+        msg.push_str(stdout);
+    }
+    msg
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[cfg(windows)]
+    fn test_describe_typst_failure_windows_crash() {
+        use std::os::windows::process::ExitStatusExt;
+        let status = std::process::ExitStatus::from_raw(0xC0000005);
+        let msg = describe_typst_failure(&status, "", "");
+        assert!(msg.contains("access violation"));
+        assert!(msg.contains("0xC0000005"));
+        assert!(msg.contains("Typst crashed unexpectedly"));
+    }
+
+    #[test]
+    #[cfg(windows)]
+    fn test_describe_typst_failure_windows_normal_error() {
+        use std::os::windows::process::ExitStatusExt;
+        let status = std::process::ExitStatus::from_raw(1);
+        let msg = describe_typst_failure(&status, "", "error: expected expression");
+        assert!(msg.contains("Typst compile failed (exit code 1)."));
+        assert!(msg.contains("error: expected expression"));
+    }
 }

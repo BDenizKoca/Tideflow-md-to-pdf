@@ -33,7 +33,8 @@ pub enum AppError {
     InvalidPath(String),
 
     /// Rendering and compilation errors
-    #[error("Typst binary not found. Please install Typst system-wide or ensure it's in bin/typst/<platform>/ directory")]
+    #[error("Typst could not be found. Tideflow normally ships with its own copy, so the installation may be incomplete.\n\
+             Try reinstalling Tideflow, install Typst system-wide, or choose a Typst binary in Settings › General › Typst Compiler.")]
     TypstNotFound,
 
     #[error("Typst compilation failed: {0}")]
@@ -102,7 +103,8 @@ impl AppError {
     pub fn to_frontend_message(&self) -> String {
         match self {
             AppError::TypstNotFound => {
-                "Typst binary not found. Please install Typst system-wide or check your installation.".to_string()
+                "Typst could not be found. Tideflow normally ships with its own copy, so the installation may be incomplete.\n\
+                 Try reinstalling Tideflow, install Typst system-wide, or choose a Typst binary in Settings › General › Typst Compiler.".to_string()
             }
             AppError::TypstCompilation(msg) => {
                 format!("Compilation error: {}", msg)

@@ -166,7 +166,9 @@ pub fn get_typst_path(app_handle: &AppHandle) -> Result<PathBuf> {
     }
 
     Err(anyhow!(
-        "Typst binary not found. Download Typst binary and place in appropriate platform directory, or install Typst system-wide. Looked for: {}",
+        "Typst could not be found. Tideflow normally ships with its own copy, so the installation may be incomplete.\n\
+         Try reinstalling Tideflow, install Typst system-wide, or choose a Typst binary in Settings › General › Typst Compiler.\n\n\
+         Looked in: {}",
         attempted_list
     ))
 }

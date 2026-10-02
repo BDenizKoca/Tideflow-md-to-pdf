@@ -22,18 +22,31 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   // no-document message div, the canvases survive the swap and overlay
   // the new content. Distinct keys force a clean unmount + remount.
   if (status === 'error') {
+    // Backend errors lead with a plain-language summary paragraph; anything after
+    // the first blank line is technical output (Typst diagnostics, searched paths).
+    const details = compileStatus.details?.trim() ?? '';
+    const breakAt = details.indexOf('\n\n');
+    const summary = breakAt === -1 ? details : details.slice(0, breakAt);
+    const technical = breakAt === -1 ? '' : details.slice(breakAt + 2).trim();
     content = (
       <div key="error" className="error-message">
-        <h4>Rendering Failed</h4>
-        <p>{compileStatus.message}</p>
-        {compileStatus.details && (
-          <pre className="error-details">{compileStatus.details}</pre>
+        <div className="error-icon" aria-hidden="true">⚠️</div>
+        <h4>Preview unavailable</h4>
+        {(summary || compileStatus.message || 'Rendering failed')
+          .split('\n')
+          .filter(line => line.trim().length > 0)
+          .map((line, i) => (
+            <p key={i} className="error-summary">{line}</p>
+          ))}
+        {technical && (
+          <pre className="error-details">{technical}</pre>
         )}
       </div>
     );
   } else if (pdfError) {
     content = (
       <div key="pdf-error" className="error-message">
+        <div className="error-icon" aria-hidden="true">⚠️</div>
         <h4>PDF Load Failed</h4>
         <pre className="error-details">{pdfError}</pre>
       </div>
