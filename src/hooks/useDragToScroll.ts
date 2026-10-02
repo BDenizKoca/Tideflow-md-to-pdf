@@ -16,23 +16,40 @@ export const useDragToScroll = <T extends HTMLElement>(
   const scrollLeft = useRef(0);
   const scrollTop = useRef(0);
   const hasMoved = useRef(false);
+  const canScrollX = useRef(false);
+  const canScrollY = useRef(false);
 
   useEffect(() => {
     const element = ref.current;
     if (!element || disabled) return;
 
+    // An axis only counts as scrollable if it overflows AND isn't clipped with
+    // overflow: hidden. (Hidden axes can still be moved via scrollLeft/scrollTop,
+    // which is what made the vertical thumbnails list slide sideways.)
+    const canScroll = (axis: 'x' | 'y') => {
+      const style = getComputedStyle(element);
+      const overflow = axis === 'x' ? style.overflowX : style.overflowY;
+      if (overflow === 'hidden' || overflow === 'clip') return false;
+      return axis === 'x'
+        ? element.scrollWidth > element.clientWidth
+        : element.scrollHeight > element.clientHeight;
+    };
+
     const handleMouseDown = (e: MouseEvent) => {
       // Only handle left mouse button
       if (e.button !== 0) return;
 
-            // Don't start drag on inputs or elements with data-no-drag
+      // Don't start drag on inputs or elements with data-no-drag
       const target = e.target as HTMLElement;
       if (target.closest('[data-no-drag="true"]')) {
         return;
       }
 
+      canScrollX.current = canScroll('x');
+      canScrollY.current = canScroll('y');
+
       // Only prevent default if element is horizontally scrollable
-      if (element.scrollWidth > element.clientWidth) {
+      if (canScrollX.current) {
         e.preventDefault();
       }
 
@@ -67,8 +84,8 @@ export const useDragToScroll = <T extends HTMLElement>(
       }
 
       if (hasMoved.current) {
-        element.scrollLeft = scrollLeft.current - deltaX;
-        element.scrollTop = scrollTop.current - deltaY;
+        if (canScrollX.current) element.scrollLeft = scrollLeft.current - deltaX;
+        if (canScrollY.current) element.scrollTop = scrollTop.current - deltaY;
       }
     };
 
@@ -112,8 +129,9 @@ export const useDragToScroll = <T extends HTMLElement>(
     };
 
     const handleWheel = (e: WheelEvent) => {
-      // For horizontal scroll containers, convert vertical wheel to horizontal scroll
-      if (element.scrollWidth > element.clientWidth) {
+      // For horizontal-only scroll containers, convert vertical wheel to horizontal scroll.
+      // Vertical containers keep native wheel behavior.
+      if (canScroll('x') && !canScroll('y') && !e.shiftKey && Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
         e.preventDefault();
         element.scrollLeft += e.deltaY;
       }
