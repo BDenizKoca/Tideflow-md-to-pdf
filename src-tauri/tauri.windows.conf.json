@@ -1,0 +1,10 @@
+{
+  "bundle": {
+    "resources": [
+      "content/**/*",
+      "templates/**/*",
+      "styles/*",
+      "bin/typst/windows/**/*"
+    ]
+  }
+}

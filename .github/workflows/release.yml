@@ -26,11 +26,15 @@ jobs:
             typst_dir: 'macos'
             typst_asset: 'typst-aarch64-apple-darwin.tar.xz'
             typst_sha256: '470aa49a2298d20b65c119a10e4ff8808550453e0cb4d85625b89caf0cedf048'
+          # Linux builds Typst from source (see "Build Typst (Linux)") instead of
+          # bundling the static musl release: linuxdeploy patches an rpath into
+          # every ELF in the AppImage, which corrupts static-pie binaries and
+          # makes them segfault.
           - platform: 'ubuntu-22.04' # Linux
             args: ''
-            typst_dir: 'linux'
-            typst_asset: 'typst-x86_64-unknown-linux-musl.tar.xz'
-            typst_sha256: 'a6044cbad2a954deb921167e257e120ac0a16b20339ec01121194ff9d394996d'
+            typst_dir: ''
+            typst_asset: ''
+            typst_sha256: ''
           - platform: 'windows-latest' # Windows
             args: ''
             typst_dir: ''
@@ -110,6 +114,44 @@ jobs:
           cp -a "$SRC_DIR"/. "$DEST"/
           chmod +x "$DEST/typst"
 
+      - name: Cache Typst build (Linux)
+        if: runner.os == 'Linux'
+        id: typst-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.typst-glibc
+          key: typst-glibc-vendored-openssl-${{ env.TYPST_VERSION }}-${{ matrix.platform }}
+
+      - name: Build Typst (Linux)
+        if: runner.os == 'Linux' && steps.typst-cache.outputs.cache-hit != 'true'
+        # vendor-openssl matches upstream release builds, so Typst does not depend
+        # on the host OpenSSL version.
+        run: cargo install typst-cli --locked --version "$TYPST_VERSION" --features vendor-openssl --root ~/.typst-glibc
+
+      - name: Bundle Typst (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          set -euo pipefail
+          DEST="src-tauri/bin/typst/linux"
+          rm -rf "$DEST"
+          mkdir -p "$DEST"
+          cp ~/.typst-glibc/bin/typst "$DEST/typst"
+          chmod +x "$DEST/typst"
+          for f in LICENSE NOTICE; do
+            curl -fsSL -o "$DEST/$f" "https://raw.githubusercontent.com/typst/typst/v${TYPST_VERSION}/$f"
+          done
+          file "$DEST/typst"
+          if ! file "$DEST/typst" | grep -q 'dynamically linked'; then
+            echo "Bundled Typst must be dynamically linked (linuxdeploy corrupts static-pie binaries)" >&2
+            exit 1
+          fi
+          ldd "$DEST/typst"
+          if ldd "$DEST/typst" | grep -qE "libssl|libcrypto"; then
+            echo "Bundled Typst must not link against the host OpenSSL" >&2
+            exit 1
+          fi
+          "$DEST/typst" --version
+
       - name: Build the app
         uses: tauri-apps/tauri-action@v0
         env:
@@ -124,6 +166,32 @@ jobs:
           includeRelease: true
           includeUpdaterJson: false
           args: ${{ matrix.args }}
+
+      - name: Verify bundled Typst runs from the AppImage (Linux only)
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          set -euo pipefail
+          APPIMAGE="$(realpath "$(find src-tauri/target/release/bundle/appimage -name '*.AppImage' -type f | head -n 1)")"
+          WORK="$(mktemp -d)"
+          cd "$WORK"
+          "$APPIMAGE" --appimage-extract >/dev/null
+          TYPST="$(find squashfs-root/usr/lib -path '*/bin/typst/linux/typst' -type f | head -n 1)"
+          printf '= Hello\n\nTideflow $x^2$\n' > smoke.typ
+          "$TYPST" --version
+          "$TYPST" compile smoke.typ smoke.pdf
+          test -s smoke.pdf
+
+      - name: Remove broken AppImage from the draft release (Linux only)
+        if: failure() && matrix.platform == 'ubuntu-22.04'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # The AppImage was already uploaded to the draft by tauri-action; if the
+          # check above failed, pull it so the draft can't be published with it.
+          TAG="${{ github.ref_name }}"
+          for asset in $(gh release view "$TAG" --json assets -q '.assets[].name' | grep -E '\.AppImage(\.zsync)?$' || true); do
+            gh release delete-asset "$TAG" "$asset" -y
+          done
 
       - name: Upload zsync file (Linux only)
         if: matrix.platform == 'ubuntu-22.04'
